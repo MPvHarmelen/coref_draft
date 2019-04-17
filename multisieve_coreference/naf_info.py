@@ -168,7 +168,8 @@ def get_mentions(nafobj):
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions
         logger.debug(
-            "Mentions before merging: {}".format(view_mentions(nafobj, mentions))
+            "Mentions before merging: {}".format(
+                view_mentions(nafobj, mentions))
         )
 
     mentions = merge_mentions(mentions)

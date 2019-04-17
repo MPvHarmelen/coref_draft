@@ -242,7 +242,9 @@ def create_mention(nafobj, constituentInfo, head, mid):
 
 def add_main_modifiers(nafobj, span, mention):
     '''
-    Function that creates list of all modifiers that are noun or adjective (possibly including head itself)
+    Function that creates list of all modifiers that are noun or adjective
+    (possibly including head itself)
+
     :param nafobj: input naf
     :param span: list of term ids
     :param mention: mention object
@@ -252,7 +254,7 @@ def add_main_modifiers(nafobj, span, mention):
     main_mods = []
     for tid in span:
         term = nafobj.get_term(tid)
-        if term.get_pos() in ['adj','noun']:
+        if term.get_pos() in ['adj', 'noun']:
             main_mods.append(tid)
 
     main_mods_offset = convert_term_ids_to_offsets(nafobj, main_mods)
@@ -261,7 +263,9 @@ def add_main_modifiers(nafobj, span, mention):
 
 def add_non_stopwords(nafobj, span, mention):
     '''
-    Function that verifies which terms in span are not stopwords and adds these to non-stop-word list
+    Function that verifies which terms in span are not stopwords and adds these
+    to non-stop-word list
+
     :param nafobj: input naf (for linguistic information)
     :param span: list of term ids
     :param mention: mention object
@@ -271,7 +275,8 @@ def add_non_stopwords(nafobj, span, mention):
 
     for tid in span:
         my_term = nafobj.get_term(tid)
-        if not my_term.get_type() == 'closed' and not my_term.get_lemma().lower() in stop_words:
+        if not my_term.get_type() == 'closed' and \
+           not my_term.get_lemma().lower() in stop_words:
             non_stop_terms.append(tid)
 
     non_stop_span = convert_term_ids_to_offsets(nafobj, non_stop_terms)
