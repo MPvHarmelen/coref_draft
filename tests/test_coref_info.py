@@ -106,6 +106,7 @@ def test_merge_keys_pointwise_random_dicts(indic, combinations):
         text(max_size=MAX_TEXT_SIZE),
         sets(text(max_size=MAX_TEXT_SIZE))
     ))
+@settings(suppress_health_check=[HealthCheck.too_slow])
 def test_merge_keys_pointwise_selectively_random_dicts(dic_and_sets):
     indic, key_sets = dic_and_sets
     orig_dic = {k: set(v) for k, v in indic.items()}    # deep copy
