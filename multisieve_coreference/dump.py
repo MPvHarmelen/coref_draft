@@ -1,7 +1,9 @@
 import logging
 
 from KafNafParserPy.span_data import Cspan, Ctarget
-from KafNafParserPy.coreference_data import  Ccoreference
+from KafNafParserPy.coreference_data import Ccoreference
+
+from .offset_info import get_offset_to_term_id_dict
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
@@ -94,16 +96,3 @@ def get_starting_count(nafobj):
         coref_counter += 1
 
     return coref_counter
-
-
-def get_offset_to_term_id_dict(nafobj):
-    token_id_dict = {}
-    for token in nafobj.get_tokens():
-        token_id_dict[token.get_id()] = token
-
-    dic = {}
-    for term in nafobj.get_terms():
-        tid = term.get_id()
-        for token in map(token_id_dict.get, term.get_span_ids()):
-            dic[int(token.get_offset())] = tid
-    return dic

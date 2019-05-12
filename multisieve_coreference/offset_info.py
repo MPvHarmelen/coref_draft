@@ -72,3 +72,16 @@ def get_offsets_from_span(nafobj, span):
         end_offset = max(end_offsets)
 
     return begin_offset, end_offset
+
+
+def get_offset_to_term_id_dict(nafobj):
+    token_id_dict = {}
+    for token in nafobj.get_tokens():
+        token_id_dict[token.get_id()] = token
+
+    dic = {}
+    for term in nafobj.get_terms():
+        tid = term.get_id()
+        for token in map(token_id_dict.get, term.get_span_ids()):
+            dic[int(token.get_offset())] = tid
+    return dic
