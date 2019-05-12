@@ -29,7 +29,7 @@ def initiate_stopword_list(lang='nl'):
     stopfile.close()
 
 
-class Cmention:
+class Mention:
     '''
     This class covers information about mentions that is relevant for
     coreference resolution.
@@ -180,64 +180,65 @@ class Cmention:
             end = full_content.index(self.span[-1], start)
             self.span = full_content[start:end + 1]
 
+    @classmethod
+    def from_naf(cls, nafobj, constituentInfo, head, mid):
+        '''
+        Create a mention object from naf information
 
-def create_mention(nafobj, constituentInfo, head, mid):
-    '''
-    Function that creates mention object from naf information
-    :param nafobj: the input naffile
-    :param constituentInfo: information about the constituent
-    :param head: the id of the constituent's head
-    :param mid: the mid (for creating a unique mention id
-    :return:
-    '''
+        :param nafobj:              the input naffile
+        :param constituentInfo:     information about the constituent
+        :param head:                the id of the constituent's head
+        :param mid:                 the mid (for creating a unique mention id
+        :return:                    a `Mention` object
+        '''
 
-    head_offset = None if head is None else get_offset(nafobj, head)
+        head_offset = None if head is None else get_offset(nafobj, head)
 
-    span = constituentInfo.span
-    offset_ids_span = convert_term_ids_to_offsets(nafobj, span)
-    mention = Cmention(mid, span=offset_ids_span, head_offset=head_offset)
-    mention.sentence_number = get_sentence_number(nafobj, head)
-    # add no stop words and main modifiers
-    add_non_stopwords(nafobj, span, mention)
-    add_main_modifiers(nafobj, span, mention)
-    # mwe info
-    full_head_tids = constituentInfo.multiword
-    mention.full_head = convert_term_ids_to_offsets(nafobj, full_head_tids)
-    # modifers and appositives:
-    relaxed_span = offset_ids_span
-    for mod_in_tids in constituentInfo.modifiers:
-        mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
-        mention.add_modifier(mod_span)
-        for mid in mod_span:
-            if mid > head_offset and mid in relaxed_span:
-                relaxed_span.remove(mid)
-    for app_in_tids in constituentInfo.appositives:
-        app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
-        mention.add_appositive(app_span)
-        for mid in app_span:
-            if mid > head_offset and mid in relaxed_span:
-                relaxed_span.remove(mid)
-    mention.relaxed_span = relaxed_span
+        span = constituentInfo.span
+        offset_ids_span = convert_term_ids_to_offsets(nafobj, span)
+        mention = cls(mid, span=offset_ids_span, head_offset=head_offset)
+        mention.sentence_number = get_sentence_number(nafobj, head)
+        # add no stop words and main modifiers
+        add_non_stopwords(nafobj, span, mention)
+        add_main_modifiers(nafobj, span, mention)
+        # mwe info
+        full_head_tids = constituentInfo.multiword
+        mention.full_head = convert_term_ids_to_offsets(nafobj, full_head_tids)
+        # modifers and appositives:
+        relaxed_span = offset_ids_span
+        for mod_in_tids in constituentInfo.modifiers:
+            mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
+            mention.add_modifier(mod_span)
+            for mid in mod_span:
+                if mid > head_offset and mid in relaxed_span:
+                    relaxed_span.remove(mid)
+        for app_in_tids in constituentInfo.appositives:
+            app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
+            mention.add_appositive(app_span)
+            for mid in app_span:
+                if mid > head_offset and mid in relaxed_span:
+                    relaxed_span.remove(mid)
+        mention.relaxed_span = relaxed_span
 
-    for pred_in_tids in constituentInfo.predicatives:
-        pred_span = convert_term_ids_to_offsets(nafobj, pred_in_tids)
-        mention.add_predicative(pred_span)
+        for pred_in_tids in constituentInfo.predicatives:
+            pred_span = convert_term_ids_to_offsets(nafobj, pred_in_tids)
+            mention.add_predicative(pred_span)
 
-    # set sequence of pos FIXME: if not needed till end; remove
-    # os_seq = get_pos_of_span(nafobj, span)
-    # mention.set_pos_seq(pos_seq)
-    # set pos of head
-    if head is not None:
-        head_pos = get_pos_of_term(nafobj, head)
-        mention.head_pos = head_pos
-        if head_pos in ['pron', 'noun', 'name']:
-            analyze_nominal_information(nafobj, head, mention)
+        # set sequence of pos FIXME: if not needed till end; remove
+        # os_seq = get_pos_of_span(nafobj, span)
+        # mention.set_pos_seq(pos_seq)
+        # set pos of head
+        if head is not None:
+            head_pos = get_pos_of_term(nafobj, head)
+            mention.head_pos = head_pos
+            if head_pos in ['pron', 'noun', 'name']:
+                analyze_nominal_information(nafobj, head, mention)
 
-    begin_offset, end_offset = get_offsets_from_span(nafobj, span)
-    mention.begin_offset = begin_offset
-    mention.end_offset = end_offset
+        begin_offset, end_offset = get_offsets_from_span(nafobj, span)
+        mention.begin_offset = begin_offset
+        mention.end_offset = end_offset
 
-    return mention
+        return mention
 
 
 def add_main_modifiers(nafobj, span, mention):

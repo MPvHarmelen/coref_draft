@@ -103,7 +103,7 @@ def included_in_direct_speech(quotations, mention, coref_info):
     '''
     Function that verifies whether mention is included in some quotation
     :param quotations:  list of quotation objects
-    :param mention:     one specific `Cmention`
+    :param mention:     one specific `Mention`
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     '''
@@ -188,7 +188,7 @@ def identify_some_structures(mentions, coref_info, get_structures):
     :param coref_info:     CoreferenceInformation with current coreference
                            classes
     :param get_structures: function that returns a list of spans given a
-                           `Cmention` object.
+                           `Mention` object.
     :return:               None (mentions and coref_classes are updated in
                            place)
     """

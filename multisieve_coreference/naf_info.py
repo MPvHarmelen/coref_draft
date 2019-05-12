@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict, OrderedDict
 
-from .mention_data import create_mention
+from .mention_data import Mention
 from .offset_info import (
     convert_term_ids_to_offsets,
     get_offsets_from_span,
@@ -151,13 +151,13 @@ def get_mentions(nafobj):
     mentions = OrderedDict()
     for head, constituentInfo in mention_constituents.items():
         mid = 'm' + str(len(mentions))
-        mention = create_mention(nafobj, constituentInfo, head, mid)
+        mention = Mention.from_naf(nafobj, constituentInfo, head, mid)
         mentions[mid] = mention
 
     entities = get_named_entities(nafobj)
     for entity, constituent in entities.items():
         mid = 'm' + str(len(mentions))
-        mention = create_mention(nafobj, constituent, entity, mid)
+        mention = Mention.from_naf(nafobj, constituent, entity, mid)
         mention.entity_type = constituent.etype
         mentions[mid] = mention
 
