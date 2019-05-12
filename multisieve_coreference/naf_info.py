@@ -78,7 +78,7 @@ def get_string_of_span(nafobj, span):
         my_term = nafobj.get_term(tid)
         for wid in my_term.get_span().get_span_ids():
             my_tok = nafobj.get_token(wid)
-            #add space between tokens
+            # add space between tokens
             if len(mstring) > 0 and int(my_tok.get_offset()) > latest_offset:
                 mstring += ' '
             mstring += my_tok.get_text()
@@ -144,7 +144,7 @@ def get_mentions(nafobj):
     '''
     Function that creates mention objects based on mentions retrieved from NAF
     :param nafobj: input naf
-    :return: list of Cmention objects
+    :return: list of Mention objects
     '''
 
     mention_constituents = get_mention_constituents(nafobj)
@@ -313,31 +313,57 @@ def identify_direct_links_to_sip(nafobj, quotation):
 
 
 def check_if_quotation_contains_dependent(quotation):
-    #FIXME: verify on larger set of development corpus whether this behavior is correct
+    # FIXME: verify on larger set of development corpus whether this behaviour
+    # is correct
+    bad_relations = [
+        'cmp/body',
+        'hd/predc',
+        'hd/obj1',
+        'hd/vc',
+        'hd/su',
+        'hd/pc'
+    ]
+    # expected_rels = [
+    #     'hd/app',
+    #     'tag/nucl',
+    #     '--/--',
+    #     'dp/dp',
+    #     '-- / --',
+    #     'nucl/sat'
+    # ]
     for tid in quotation.span:
         heads = csts.dep2heads.get(tid)
-        if not heads is None:
+        if heads is not None:
             headids = create_set_of_tids_from_tidfunction(heads)
-            span_with_quotes = quotation.span + [quotation.beginquote] + [quotation.endquote]
+            span_with_quotes = quotation.span + [
+                quotation.beginquote, quotation.endquote]
             if len(headids.difference(set(span_with_quotes))) > 0:
                 for headid in headids.difference(set(span_with_quotes)):
                     for headrel in heads:
                         if headrel[0] == headid:
-                            if headrel[1] in ['cmp/body','hd/predc','hd/obj1','hd/vc','hd/su','hd/pc']:
+                            if headrel[1] in bad_relations:
                                 return False
                             elif headrel[1] in ['crd/cnj']:
                                 motherheadrels = csts.dep2heads.get(headrel[0])
                                 if motherheadrels is not None:
                                     for mhid in motherheadrels:
-                                        if mhid[1] in ['cmp/body','hd/predc','hd/obj1','hd/vc','hd/su','hd/pc']:
+                                        if mhid[1] in bad_relations:
                                             return False
-                                  #  elif not mhid[1] in ['hd/app','tag/nucl','--/--','dp/dp','-- / --','nucl/sat']:
-                                  #      print(tid, headids.difference(set(span_with_quotes)), 'has outside head')
-                                  #      print(motherheadrels)
-                            #FIXME: debugs need to be checked out on bigger corpus; set up development mode
-                           # elif not headrel[1] in ['hd/app','tag/nucl','--/--','dp/dp','-- / --','nucl/sat']:
-                           #     print(tid, headids.difference(set(span_with_quotes)), 'has outside head')
-                           #     print(heads, quotation.span)
+                                        # elif not mhid[1] in expected_rels:
+                                        #     print(
+                                        #         tid,
+                                        #         headids.difference(
+                                        #             set(span_with_quotes)),
+                                        #         'has outside head')
+                                        #     print(motherheadrels)
+                            # FIXME: debugs need to be checked out on bigger
+                            # corpus; set up development mode
+                            # elif not headrel[1] in expected_rels:
+                            #     print(
+                            #         tid,
+                            #         headids.difference(set(span_with_quotes)),
+                            #         'has outside head')
+                            #     print(heads, quotation.span)
     return True
 
 
@@ -350,7 +376,7 @@ def get_sentences_of_quotation(nafobj, quotation):
         wid = term.get_span().get_span_ids()[0]
         token = nafobj.get_token(wid)
         sentence_nr = token.get_sent()
-        #storing them as integers; they need to be sorted later
+        # storing them as integers; they need to be sorted later
         sentences.add(int(sentence_nr))
     return sentences
 
@@ -366,6 +392,7 @@ def get_previous_and_next_sentence(sentences):
         following_sentence = 0
 
     return previous_sentence, following_sentence
+
 
 def retrieve_sentence_preceding_sip(nafobj, terms):
     source_head = None
@@ -398,7 +425,7 @@ def retrieve_quotation_following_sip(nafobj, terms):
 
 def identify_addressee_or_topic_relations(nafobj, tid, quotation):
 
-    #FIXME: language specific function
+    # FIXME: language specific function
     heads = csts.dep2heads.get(tid)
     if heads is not None:
         for headrel in heads:
@@ -421,7 +448,7 @@ def get_candidates_not_part_of_addressee_topic(candidate_names, quotation):
     remaining_candidates = []
     covered_tids = quotation.addressee + quotation.topic
     for tid in candidate_names:
-        if not tid in covered_tids:
+        if tid not in covered_tids:
             myconstituent = get_constituent(tid)
             remaining_candidates.append(myconstituent)
             covered_tids += myconstituent
@@ -455,6 +482,7 @@ def get_closest(candidates):
             selected_cand = cand
     return selected_cand
 
+
 def identify_primary_candidate(candidates):
 
     for cand in candidates:
@@ -464,31 +492,37 @@ def identify_primary_candidate(candidates):
                     if headrel[1] == 'hd/su':
                         return cand
 
-    #if no highest ranking found, return closest candidate
+    # if no highest ranking found, return closest candidate
     return get_closest(candidates)
 
 
 def find_name_or_pronoun(nafobj, preceding_terms, quotation):
 
-    #FIXME: not over paragraph borders; if nothing found, sentence after can also work
+    # FIXME: not over paragraph borders; if nothing found, sentence after can
+    #        also work
     candidate_names = []
     for tid in preceding_terms:
         term = nafobj.get_term(tid)
         if term.get_pos() == 'name' or term.get_pos() == 'pron':
-            if not identify_addressee_or_topic_relations(nafobj, tid, quotation):
+            if not identify_addressee_or_topic_relations(
+               nafobj, tid, quotation):
                 candidate_names.append(term.get_id())
 
-    #change make dictionary with head term to constituent
+    # change make dictionary with head term to constituent
     if len(candidate_names) > 0:
-        remaining_candidates = get_candidates_not_part_of_addressee_topic(candidate_names, quotation)
+        remaining_candidates = get_candidates_not_part_of_addressee_topic(
+            candidate_names, quotation)
         if len(remaining_candidates) > 0:
-            candidates = extract_full_names_or_prons(nafobj, remaining_candidates)
+            candidates = extract_full_names_or_prons(
+                nafobj, remaining_candidates)
             if len(candidates) == 1:
-                candidate_in_offsets = convert_term_ids_to_offsets(nafobj, candidates[0])
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidates[0])
                 quotation.source = candidate_in_offsets
             else:
                 candidate = identify_primary_candidate(candidates)
-                candidate_in_offsets = convert_term_ids_to_offsets(nafobj, candidate)
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidate)
                 quotation.source = candidate_in_offsets
 
 
@@ -540,7 +574,8 @@ def get_following_terms_in_sentence(last_sentence, quotation_span):
     return following_terms
 
 
-def identify_source_introducing_constructions(nafobj, quotation, sentence_to_term):
+def identify_source_introducing_constructions(
+        nafobj, quotation, sentence_to_term):
     '''
     Function that identifies structures that introduce sources of direct quotes
     :param nafobj: the input nafobj
@@ -550,27 +585,32 @@ def identify_source_introducing_constructions(nafobj, quotation, sentence_to_ter
 
     sentences = get_sentences_of_quotation(nafobj, quotation)
     prev_sent, follow_sent = get_previous_and_next_sentence(sentences)
-    #FIXME: find out using development data whether preceding and following sentence should be taken into account or not
-    #preceding_terms = sentence_to_term.get(str(prev_sent)) + sentence_to_term.get(str(prev_sent + 1))
+    # FIXME: find out using development data whether preceding and following
+    #        sentence should be taken into account or not
+    # preceding_terms = sentence_to_term.get(str(prev_sent)) + \
+    #     sentence_to_term.get(str(prev_sent + 1))
 
-    #start with 'aldus' construction; this is more robust
+    # start with 'aldus' construction; this is more robust
     following_sentence = sentence_to_term.get(str(follow_sent - 1))
     source_head = None
     if following_sentence is not None:
-        following_terms = get_following_terms_in_sentence(following_sentence,quotation.span)
-        source_head = retrieve_quotation_following_sip(nafobj,following_terms)
+        following_terms = get_following_terms_in_sentence(
+            following_sentence, quotation.span)
+        source_head = retrieve_quotation_following_sip(nafobj, following_terms)
 
     if source_head is None:
-        preceding_terms = get_preceding_terms_in_sentence(sentence_to_term.get(str(prev_sent + 1)),quotation.span)
+        preceding_terms = get_preceding_terms_in_sentence(
+            sentence_to_term.get(str(prev_sent + 1)), quotation.span)
         source_head = retrieve_sentence_preceding_sip(nafobj, preceding_terms)
 
     if source_head is not None:
         source_constituent = get_constituent(source_head)
-        source_in_offsets = convert_term_ids_to_offsets(nafobj, source_constituent)
+        source_in_offsets = convert_term_ids_to_offsets(
+            nafobj, source_constituent)
         quotation.source = source_in_offsets
     else:
         find_name_or_pronoun(nafobj, preceding_terms, quotation)
-    #3. check previous sentence for name or pronoun
+    # 3. check previous sentence for name or pronoun
 
 
 def get_sentence_to_terms(nafobj):
@@ -637,7 +677,8 @@ def identify_direct_quotations(nafobj, mentions):
 
 def link_span_ids_to_mentions(span, mentions):
     '''
-    Function that takes span as input and finds out whether this corresponds to a mention candidate and, if so, which one
+    Find out whether `span` corresponds to a mention candidate and, if so,
+    which one
     :param span: list of span ids
     :param mentions: object containing all candidate mentions
     :return:
@@ -648,15 +689,19 @@ def link_span_ids_to_mentions(span, mentions):
             return key
 
     for key, mention in mentions.items():
-        if set(span).issubset(set(mention.span)) or set(span).issuperset(mention.span):
+        if set(span).issubset(set(mention.span)) or set(span).issuperset(
+           mention.span):
             return key
 
-#    import traceback; print(traceback.extract_stack(limit=2)[-1][2] + " - span: " + str(span))
+    # import traceback
+    # print(traceback.extract_stack(limit=2)[-1][2] + " - span: " + str(span))
 
 
-def create_coref_quotation_from_quotation_naf(nafobj, nafquotation, mentions, quote_id):
+def create_coref_quotation_from_quotation_naf(
+        nafobj, nafquotation, mentions, quote_id):
     '''
-    Function that turns naf quotation object into quotation object to be passed on to multisieve
+    Function that turns naf quotation object into quotation object to be passed
+    on to multisieve
     :param nafobj: input naf
     :param nafquotation: quotation object with naf specific information
     :param quote_id: identifier for quotation
@@ -676,13 +721,16 @@ def create_coref_quotation_from_quotation_naf(nafobj, nafquotation, mentions, qu
     myQuote.end_offset = endoffset
 
     if len(nafquotation.source) > 0:
-        source_mention_id = link_span_ids_to_mentions(nafquotation.source, mentions)
+        source_mention_id = link_span_ids_to_mentions(
+            nafquotation.source, mentions)
         myQuote.source = source_mention_id
     if len(nafquotation.addressee) > 0:
-        addressee_mention_id = link_span_ids_to_mentions(nafquotation.addressee, mentions)
+        addressee_mention_id = link_span_ids_to_mentions(
+            nafquotation.addressee, mentions)
         myQuote.addressee = addressee_mention_id
     if len(nafquotation.topic) > 0:
-        topic_mention_id = link_span_ids_to_mentions(nafquotation.topic, mentions)
+        topic_mention_id = link_span_ids_to_mentions(
+            nafquotation.topic, mentions)
         myQuote.topic = topic_mention_id
 
     return myQuote
@@ -704,4 +752,3 @@ def get_offset2string_dicts(nafobj):
         offset2string[identifier] = surface_string
 
     return offset2string, offset2lemma
-
