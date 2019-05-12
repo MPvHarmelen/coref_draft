@@ -10,7 +10,7 @@ from . import constants as c
 from .coref_info import CoreferenceInformation
 from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
-from .mention_data import get_mentions
+from .mentions import get_mentions
 from .naf_info import (
     identify_direct_quotations,
     get_offset2string_dicts
