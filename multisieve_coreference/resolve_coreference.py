@@ -856,7 +856,7 @@ def main(argv=None):
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('-l', '--level', help="Logging level",
+    parser.add_argument('-l', '--level', help="Logging level", type=str.upper,
                         default='WARNING')
     parser.add_argument(
         '-s',
