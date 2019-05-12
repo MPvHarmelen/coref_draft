@@ -290,17 +290,9 @@ class Mention:
 
         self.appositives.append(app)
 
-    def add_predicative(self, pred):
-
-        self.predicatives.append(pred)
-
     def add_no_stopword(self, nsw):
 
         self.non_stopwords.append(nsw)
-
-    def add_main_modifier(self, mmod):
-
-        self.main_modifiers.append(mmod)
 
     def fill_gaps(self, full_content, allow_adding=lambda _: True):
         """
@@ -317,12 +309,12 @@ class Mention:
             self.span = full_content[start:end + 1]
 
     @classmethod
-    def from_naf(cls, nafobj, stopwords, constituentInfo, head, mid):
+    def from_naf(cls, nafobj, stopwords, constituent_info, head, mid):
         '''
         Create a mention object from naf information
 
         :param nafobj:              the input naffile
-        :param constituentInfo:     information about the constituent
+        :param constituent_info:    information about the constituent
         :param head:                the id of the constituent's head
         :param mid:                 the mid (for creating a unique mention id
         :return:                    a `Mention` object
@@ -330,29 +322,33 @@ class Mention:
 
         head_offset = None if head is None else get_offset(nafobj, head)
 
-        span_ids = constituentInfo.span
+        span_ids = constituent_info.span
         span_offsets = convert_term_ids_to_offsets(nafobj, span_ids)
-        mention = cls(mid, span=span_offsets, head_offset=head_offset)
-        mention.sentence_number = get_sentence_number(nafobj, head)
+        mention = cls(
+            mid,
+            span=span_offsets,
+            head_offset=head_offset,
+            non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
+            full_head=convert_term_ids_to_offsets(
+                nafobj, constituent_info.multiword),
+            sentence_number=get_sentence_number(nafobj, head),
+            main_modifiers=get_main_modifiers(nafobj, span_ids),
+            predicatives=[
+                convert_term_ids_to_offsets(nafobj, pred_ids)
+                for pred_ids in constituent_info.predicatives
+            ]
+        )
 
-        # add non-stopwords
-        add_non_stopwords(nafobj, stopwords, span_ids, mention)
-
-        # add main modifiers
-        add_main_modifiers(nafobj, span_ids, mention)
-
-        # mwe info
-        full_head_tids = constituentInfo.multiword
-        mention.full_head = convert_term_ids_to_offsets(nafobj, full_head_tids)
         # modifers and appositives:
         relaxed_span = span_offsets
-        for mod_in_tids in constituentInfo.modifiers:
+        for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             mention.add_modifier(mod_span)
             for mid in mod_span:
                 if mid > head_offset and mid in relaxed_span:
                     relaxed_span.remove(mid)
-        for app_in_tids in constituentInfo.appositives:
+
+        for app_in_tids in constituent_info.appositives:
             app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
             mention.add_appositive(app_span)
             for mid in app_span:
@@ -360,11 +356,7 @@ class Mention:
                     relaxed_span.remove(mid)
         mention.relaxed_span = relaxed_span
 
-        for pred_in_tids in constituentInfo.predicatives:
-            pred_span = convert_term_ids_to_offsets(nafobj, pred_in_tids)
-            mention.add_predicative(pred_span)
-
-        # set pos of head
+        # set POS of head
         if head is not None:
             head_pos = get_pos_of_term(nafobj, head)
             mention.head_pos = head_pos
@@ -378,15 +370,14 @@ class Mention:
         return mention
 
 
-def add_main_modifiers(nafobj, span, mention):
+def get_main_modifiers(nafobj, span):
     '''
     Function that creates list of all modifiers that are noun or adjective
     (possibly including head itself)
 
-    :param nafobj: input naf
-    :param span: list of term ids
-    :param mention: mention object
-    :return:
+    :param nafobj:  input naf
+    :param span:    list of term ids
+    :return:        list of offsets of main modifiers
     '''
 
     main_mods = []
@@ -395,11 +386,10 @@ def add_main_modifiers(nafobj, span, mention):
         if term.get_pos() in ['adj', 'noun']:
             main_mods.append(tid)
 
-    main_mods_offset = convert_term_ids_to_offsets(nafobj, main_mods)
-    mention.main_modifiers = main_mods_offset
+    return convert_term_ids_to_offsets(nafobj, main_mods)
 
 
-def add_non_stopwords(nafobj, stopwords, span, mention):
+def get_non_stopwords(nafobj, stopwords, span):
     '''
     Function that verifies which terms in span are not stopwords and adds these
     to non-stopword list
@@ -417,8 +407,7 @@ def add_non_stopwords(nafobj, stopwords, span, mention):
            not my_term.get_lemma().lower() in stopwords:
             non_stop_terms.append(tid)
 
-    non_stop_span = convert_term_ids_to_offsets(nafobj, non_stop_terms)
-    mention.non_stopwords = non_stop_span
+    return convert_term_ids_to_offsets(nafobj, non_stop_terms)
 
 
 def analyze_nominal_information(nafobj, term_id, mention):
