@@ -56,7 +56,7 @@ class Mention:
             modifiers=None,
             appositives=None,
             predicatives=None,
-            no_stop_words=None,
+            non_stop_words=None,
             main_modifiers=None,
             sentence_number='',
             ):
@@ -83,7 +83,7 @@ class Mention:
         :type modifiers:               list
         :type appositives:             list
         :type predicatives:            list
-        :type no_stop_words:           list
+        :type non_stop_words:           list
         :type main_modifiers:          list
         :type sentence_number:         str
         '''
@@ -100,7 +100,7 @@ class Mention:
         self.sentence_number = sentence_number
 
         self.relaxed_span = [] if relaxed_span is None else relaxed_span
-        self.no_stop_words = [] if no_stop_words is None else no_stop_words
+        self.non_stop_words = [] if non_stop_words is None else non_stop_words
 
         self.coreference_prohibited = [] if coreference_prohibited is None \
             else coreference_prohibited
@@ -138,7 +138,7 @@ class Mention:
             'modifiers={self.modifiers!r}, ' \
             'appositives={self.appositives!r}, ' \
             'predicatives={self.predicatives!r}, ' \
-            'no_stop_words={self.no_stop_words!r}, ' \
+            'non_stop_words={self.non_stop_words!r}, ' \
             'main_modifiers={self.main_modifiers!r}, ' \
             'sentence_number={self.sentence_number!r}, ' \
             ')'.format(self=self)
@@ -160,7 +160,7 @@ class Mention:
 
     def add_no_stop_word(self, nsw):
 
-        self.no_stop_words.append(nsw)
+        self.non_stop_words.append(nsw)
 
     def add_main_modifier(self, mmod):
 
@@ -281,7 +281,7 @@ def add_non_stopwords(nafobj, span, mention):
             non_stop_terms.append(tid)
 
     non_stop_span = convert_term_ids_to_offsets(nafobj, non_stop_terms)
-    mention.no_stop_words = non_stop_span
+    mention.non_stop_words = non_stop_span
 
 
 def analyze_nominal_information(nafobj, term_id, mention):

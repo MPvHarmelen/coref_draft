@@ -387,7 +387,7 @@ def find_strict_head_antecedents(mention, mentions, sieve):
     :return:         list of antecedent ids
     '''
     head_string = offset2string.get(mention.head_offset)
-    non_stop_words = get_string_from_offsets(mention.no_stop_words)
+    non_stop_words = get_string_from_offsets(mention.non_stop_words)
     main_mods = get_string_from_offsets(mention.main_modifiers)
     antecedents = []
     for mid, comp_mention in mentions.items():
@@ -511,7 +511,7 @@ def find_relaxed_head_antecedents(mention, mentions):
 
     boffset = mention.begin_offset
     full_head_string = get_string_from_offsets(mention.full_head)
-    non_stop_words = get_string_from_offsets(mention.no_stop_words)
+    non_stop_words = get_string_from_offsets(mention.non_stop_words)
     antecedents = []
 
     for mid, comp_mention in mentions.items():
