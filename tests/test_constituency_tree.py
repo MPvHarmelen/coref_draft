@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from multisieve_coreference.constituency_tree import ConstituencyTrees
+from multisieve_coreference.constituency_trees import ConstituencyTrees
 
 
 @pytest.fixture

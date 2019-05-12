@@ -1,6 +1,6 @@
 import logging
 
-from .constituency_tree import ConstituencyTrees
+from .constituency_trees import ConstituencyTrees
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
