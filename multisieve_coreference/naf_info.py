@@ -20,22 +20,6 @@ def get_pos_of_term(nafobj, tid):
     return term.get_pos()
 
 
-def get_string_of_term(nafobj, tid):
-
-    my_term = nafobj.get_term(tid)
-    termstring = ''
-    latest_offset = '-1'
-
-    for wid in my_term.get_span().get_span_ids():
-        my_tok = nafobj.get_token(wid)
-        # add space between tokens
-        if len(termstring) > 0 and int(my_tok.get_offset) > latest_offset:
-            termstring += ' '
-        termstring += my_tok.get_text()
-        latest_offset = int(my_tok.get_offset()) + int(my_tok.get_length())
-    return termstring
-
-
 def get_string_of_span(nafobj, span):
 
     mstring = ''
