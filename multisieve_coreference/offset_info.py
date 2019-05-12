@@ -52,24 +52,26 @@ def get_term_length(nafobj, term_id):
 def get_offsets_from_span(nafobj, span):
     '''
     Function that identifies begin and end offset for a span of terms
-    :param nafobj: input naf
-    :param span: list of term identifiers
-    :return:
+
+    :param nafobj:  input naf
+    :param span:    list of term identifiers
+    :return:        begin_offset, end_offset
     '''
 
-    offsets = []
+    begin_offsets = []
     end_offsets = []
     for termid in span:
         offset = get_offset(nafobj, termid)
         length = get_term_length(nafobj, termid)
-        offsets.append(offset)
+        begin_offsets.append(offset)
         end_offsets.append(offset+length)
 
-    begin_offset = 0
-    end_offset = 0
-    if len(offsets) > 0:
-        begin_offset = min(offsets)
-        end_offset = max(end_offsets)
+    # FIXME: Using 0 as default seems bug-prone.
+    #        Try what happens when returning None instead.
+
+    # `default` isn't yet an accepted keyword argument for min/max in Python 2
+    begin_offset = min(begin_offsets) if len(begin_offsets) else 0
+    end_offset = min(end_offsets) if len(end_offsets) else 0
 
     return begin_offset, end_offset
 
