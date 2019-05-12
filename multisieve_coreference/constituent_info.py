@@ -12,7 +12,15 @@ class Constituent:
     def __init__(self, head_id, span=None, multiword=None, modifiers=None,
                  appositives=None, predicatives=None, etype=''):
         '''
-        Constructor for the constituent object
+        Constructor for the Constituent object.
+
+        If None, the following arguments are automatically generated using
+        `head_id`:
+            - `span`
+            - `multiword`
+            - `modifiers`
+            - `appositives`
+            - `predicatives`
         '''
         self.head_id = head_id
         self.span = get_constituent(head_id) if span is None else span
@@ -57,9 +65,6 @@ class Constituent:
         '''
         Function that checks if mention is subject in a predicative structure
         and, if so, adds predicative info to constituent object
-        :param head_id: identifier of the head of the mention
-        :param myConstituent: constituent object
-        :return:
         '''
 
         for headID, headrel in csts.dep2heads.get(self.head_id, []):
