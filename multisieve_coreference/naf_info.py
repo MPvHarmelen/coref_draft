@@ -18,7 +18,7 @@ logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 def get_relevant_head_ids(nafobj):
     '''
-    Returns list of term ids that head potential mention
+    Get a list of term ids that head potential mentions
     :param nafobj: input nafobj
     :return: list of term ids (string)
     '''
@@ -27,16 +27,15 @@ def get_relevant_head_ids(nafobj):
     mention_heads = []
     for term in nafobj.get_terms():
         pos_tag = term.get_pos()
-        if pos_tag in nominal_pos:
-            mention_heads.append(term.get_id())
         # check if possessive pronoun
-        elif pos_tag == 'det' and 'VNW(bez' in term.get_morphofeat():
+        if pos_tag in nominal_pos or \
+           pos_tag == 'det' and 'VNW(bez' in term.get_morphofeat():
             mention_heads.append(term.get_id())
 
     return mention_heads
 
 
-def get_mention_spans(nafobj):
+def get_mention_constituents(nafobj):
     '''
     Function explores various layers of nafobj and retrieves all mentions
     possibly referring to an entity
@@ -125,20 +124,17 @@ def merge_mentions(mentions):
     final_mentions = {}
 
     # TODO: create merge function and merge identical candidates
+    # TODO: This code is O(m**2), but it shouldn't have to be, because we can
+    #       use the ordering of mentions that came from different sources.
 
     for m, val in mentions.items():
-        found = False
         for prevm, preval in final_mentions.items():
-            if val.head_offset == preval.head_offset:
+            if val.head_offset == preval.head_offset or \
+               set(val.span) == set(preval.span):
                 updated_mention = merge_two_mentions(val, preval)
                 final_mentions[prevm] = updated_mention
-                found = True
-            elif set(val.span) == set(preval.span):
-                # print('same_set')
-                updated_mention = merge_two_mentions(val, preval)
-                final_mentions[prevm] = updated_mention
-                found = True
-        if not found:
+                break
+        else:
             final_mentions[m] = val
 
     return final_mentions
@@ -151,9 +147,9 @@ def get_mentions(nafobj):
     :return: list of Cmention objects
     '''
 
-    mention_spans = get_mention_spans(nafobj)
+    mention_constituents = get_mention_constituents(nafobj)
     mentions = OrderedDict()
-    for head, constituentInfo in mention_spans.items():
+    for head, constituentInfo in mention_constituents.items():
         mid = 'm' + str(len(mentions))
         mention = create_mention(nafobj, constituentInfo, head, mid)
         mentions[mid] = mention
