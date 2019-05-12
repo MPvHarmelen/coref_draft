@@ -1,57 +1,17 @@
 import logging
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 
-from .mention_data import Mention
 from .offset_info import (
     convert_term_ids_to_offsets,
     get_offsets_from_span,
     get_offset
 )
 from .quotation import Cquotation
-from .constituent_info import get_named_entities, get_constituents
 from .quotation_naf import CquotationNaf
 from . import constituents as csts
 from .constituents import get_constituent
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
-
-
-def get_relevant_head_ids(nafobj):
-    '''
-    Get a list of term ids that head potential mentions
-    :param nafobj: input nafobj
-    :return: list of term ids (string)
-    '''
-
-    nominal_pos = ['noun', 'pron', 'name']
-    mention_heads = []
-    for term in nafobj.get_terms():
-        pos_tag = term.get_pos()
-        # check if possessive pronoun
-        if pos_tag in nominal_pos or \
-           pos_tag == 'det' and 'VNW(bez' in term.get_morphofeat():
-            mention_heads.append(term.get_id())
-
-    return mention_heads
-
-
-def get_mention_constituents(nafobj):
-    '''
-    Function explores various layers of nafobj and retrieves all mentions
-    possibly referring to an entity
-
-    :param nafobj:  input nafobj
-    :return:        dictionary of head term with as value constituent object
-    '''
-    mention_heads = get_relevant_head_ids(nafobj)
-    logger.debug("Mention candidate heads: {!r}".format(mention_heads))
-    mention_constituents = get_constituents(mention_heads)
-    if logger.getEffectiveLevel() <= logging.DEBUG:
-        import itertools as it
-        logger.debug("Mention candidate constituents: {}".format('\n'.join(
-            it.starmap('{}: {!r}'.format, mention_constituents.items())
-        )))
-    return mention_constituents
 
 
 def get_string_of_term(nafobj, tid):
@@ -84,93 +44,6 @@ def get_string_of_span(nafobj, span):
             mstring += my_tok.get_text()
             latest_offset = int(my_tok.get_offset()) + int(my_tok.get_length())
     return mstring
-
-
-def merge_two_mentions(mention1, mention2):
-    '''
-    Merge information from mention 1 into mention 2
-    :param mention1:
-    :param mention2:
-    :return: updated mention
-    '''
-    # FIXME; The comments here do not correspond to the code and therefore the
-    #        code may be horribly wrong.
-    if mention1.head_offset == mention2.head_offset:
-        if set(mention1.span) == set(mention2.span):
-            # if mention1 does not have entity type, take the one from entity 2
-            if mention2.entity_type is None:
-                mention2.entity_type = mention1.entity_type
-        else:
-            # if mention2 has no entity type, it's span is syntax based
-            # (rather than from the NERC module)
-            if mention1.entity_type is None:
-                mention2.span = mention1.span
-    else:
-        if mention1.entity_type is None:
-            mention2.head_offset = mention1.head_offset
-        else:
-            mention2.entity_type = mention1.entity_type
-
-    return mention2
-
-
-def merge_mentions(mentions):
-    '''
-    Function that merges information from entity mentions
-    :param mentions: dictionary mapping mention number to specific mention
-    :return: list of mentions where identical spans are merged
-    '''
-
-    final_mentions = {}
-
-    # TODO: create merge function and merge identical candidates
-    # TODO: This code is O(m**2), but it shouldn't have to be, because we can
-    #       use the ordering of mentions that came from different sources.
-
-    for m, val in mentions.items():
-        for prevm, preval in final_mentions.items():
-            if val.head_offset == preval.head_offset or \
-               set(val.span) == set(preval.span):
-                updated_mention = merge_two_mentions(val, preval)
-                final_mentions[prevm] = updated_mention
-                break
-        else:
-            final_mentions[m] = val
-
-    return final_mentions
-
-
-def get_mentions(nafobj):
-    '''
-    Function that creates mention objects based on mentions retrieved from NAF
-    :param nafobj: input naf
-    :return: list of Mention objects
-    '''
-
-    mention_constituents = get_mention_constituents(nafobj)
-    mentions = OrderedDict()
-    for head, constituentInfo in mention_constituents.items():
-        mid = 'm' + str(len(mentions))
-        mention = Mention.from_naf(nafobj, constituentInfo, head, mid)
-        mentions[mid] = mention
-
-    entities = get_named_entities(nafobj)
-    for entity, constituent in entities.items():
-        mid = 'm' + str(len(mentions))
-        mention = Mention.from_naf(nafobj, constituent, entity, mid)
-        mention.entity_type = constituent.etype
-        mentions[mid] = mention
-
-    if logger.getEffectiveLevel() <= logging.DEBUG:
-        from .util import view_mentions
-        logger.debug(
-            "Mentions before merging: {}".format(
-                view_mentions(nafobj, mentions))
-        )
-
-    mentions = merge_mentions(mentions)
-
-    return mentions
 
 
 def get_quotation_spans(nafobj):

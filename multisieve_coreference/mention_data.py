@@ -3,7 +3,11 @@ This module parses the term layer of a KAF/NAF object
 """
 from __future__ import print_function
 import os
+import logging
 
+from collections import OrderedDict
+
+from .constituent_info import get_named_entities, get_constituents
 from .offset_info import (
     convert_term_ids_to_offsets,
     get_offset,
@@ -11,22 +15,157 @@ from .offset_info import (
     get_pos_of_term,
 )
 
-stop_words = []
+
+logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def initiate_stopword_list(lang='nl'):
+def get_relevant_head_ids(nafobj):
+    '''
+    Get a list of term ids that head potential mentions
+    :param nafobj: input nafobj
+    :return: list of term ids (string)
+    '''
 
-    global stop_words
+    nominal_pos = ['noun', 'pron', 'name']
+    mention_heads = []
+    for term in nafobj.get_terms():
+        pos_tag = term.get_pos()
+        # check if possessive pronoun
+        if pos_tag in nominal_pos or \
+           pos_tag == 'det' and 'VNW(bez' in term.get_morphofeat():
+            mention_heads.append(term.get_id())
+
+    return mention_heads
+
+
+def get_mention_constituents(nafobj):
+    '''
+    Function explores various layers of nafobj and retrieves all mentions
+    possibly referring to an entity
+
+    :param nafobj:  input nafobj
+    :return:        dictionary of head term with as value constituent object
+    '''
+    mention_heads = get_relevant_head_ids(nafobj)
+    logger.debug("Mention candidate heads: {!r}".format(mention_heads))
+    mention_constituents = get_constituents(mention_heads)
+    if logger.getEffectiveLevel() <= logging.DEBUG:
+        import itertools as it
+        logger.debug("Mention candidate constituents: {}".format('\n'.join(
+            it.starmap('{}: {!r}'.format, mention_constituents.items())
+        )))
+    return mention_constituents
+
+
+def read_stopword_set(language):
+    """
+    Read a list of stopwords for the given language from the `resources`
+    directory that ships with this package.
+
+    :param lang:    language tag in accordance with [RFC5646][]
+    :return:        a list of stopwords
+
+    [RFC5646]: https://tools.ietf.org/html/rfc5646#section-2.2
+    """
+
     resources = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
         "resources"
     ))
 
-    stopfile = open(os.path.join(resources, lang, 'stop_words.txt'), 'r')
-    for line in stopfile:
-        stop_words.append(line.rstrip())
+    stopfilename = os.path.join(resources, language, 'stopwords.txt')
 
-    stopfile.close()
+    with open(stopfilename, 'r') as stopfile:
+        return {line.rstrip() for line in stopfile}
+
+
+def merge_two_mentions(mention1, mention2):
+    '''
+    Merge information from mention 1 into mention 2
+    :param mention1:
+    :param mention2:
+    :return: updated mention
+    '''
+    # FIXME; The comments here do not correspond to the code and therefore the
+    #        code may be horribly wrong.
+    if mention1.head_offset == mention2.head_offset:
+        if set(mention1.span) == set(mention2.span):
+            # if mention1 does not have entity type, take the one from entity 2
+            if mention2.entity_type is None:
+                mention2.entity_type = mention1.entity_type
+        else:
+            # if mention2 has no entity type, it's span is syntax based
+            # (rather than from the NERC module)
+            if mention1.entity_type is None:
+                mention2.span = mention1.span
+    else:
+        if mention1.entity_type is None:
+            mention2.head_offset = mention1.head_offset
+        else:
+            mention2.entity_type = mention1.entity_type
+
+    return mention2
+
+
+def merge_mentions(mentions):
+    '''
+    Function that merges information from entity mentions
+    :param mentions: dictionary mapping mention number to specific mention
+    :return: list of mentions where identical spans are merged
+    '''
+
+    final_mentions = {}
+
+    # TODO: create merge function and merge identical candidates
+    # TODO: This code is O(m**2), but it shouldn't have to be, because we can
+    #       use the ordering of mentions that came from different sources.
+
+    for m, val in mentions.items():
+        for prevm, preval in final_mentions.items():
+            if val.head_offset == preval.head_offset or \
+               set(val.span) == set(preval.span):
+                updated_mention = merge_two_mentions(val, preval)
+                final_mentions[prevm] = updated_mention
+                break
+        else:
+            final_mentions[m] = val
+
+    return final_mentions
+
+
+def get_mentions(nafobj, language):
+    '''
+    Function that creates mention objects based on mentions retrieved from NAF
+    :param nafobj: input naf
+    :return: list of Mention objects
+    '''
+
+    stopwords = read_stopword_set(language)
+
+    mention_constituents = get_mention_constituents(nafobj)
+    mentions = OrderedDict()
+    for head, constituent in mention_constituents.items():
+        mid = 'm' + str(len(mentions))
+        mention = Mention.from_naf(nafobj, stopwords, constituent, head, mid)
+        mentions[mid] = mention
+
+    entities = get_named_entities(nafobj)
+    for entity, constituent in entities.items():
+        mid = 'm' + str(len(mentions))
+        mention = Mention.from_naf(nafobj, stopwords, constituent, entity, mid)
+        mention.entity_type = constituent.etype
+        mentions[mid] = mention
+
+    if logger.getEffectiveLevel() <= logging.DEBUG:
+        from .util import view_mentions
+        logger.debug(
+            "Mentions before merging: {}".format(
+                view_mentions(nafobj, mentions))
+        )
+
+    mentions = merge_mentions(mentions)
+
+    return mentions
 
 
 class Mention:
@@ -56,7 +195,7 @@ class Mention:
             modifiers=None,
             appositives=None,
             predicatives=None,
-            non_stop_words=None,
+            non_stopwords=None,
             main_modifiers=None,
             sentence_number='',
             ):
@@ -83,7 +222,7 @@ class Mention:
         :type modifiers:               list
         :type appositives:             list
         :type predicatives:            list
-        :type non_stop_words:           list
+        :type non_stopwords:           list
         :type main_modifiers:          list
         :type sentence_number:         str
         '''
@@ -100,7 +239,7 @@ class Mention:
         self.sentence_number = sentence_number
 
         self.relaxed_span = [] if relaxed_span is None else relaxed_span
-        self.non_stop_words = [] if non_stop_words is None else non_stop_words
+        self.non_stopwords = [] if non_stopwords is None else non_stopwords
 
         self.coreference_prohibited = [] if coreference_prohibited is None \
             else coreference_prohibited
@@ -138,13 +277,10 @@ class Mention:
             'modifiers={self.modifiers!r}, ' \
             'appositives={self.appositives!r}, ' \
             'predicatives={self.predicatives!r}, ' \
-            'non_stop_words={self.non_stop_words!r}, ' \
+            'non_stopwords={self.non_stopwords!r}, ' \
             'main_modifiers={self.main_modifiers!r}, ' \
             'sentence_number={self.sentence_number!r}, ' \
             ')'.format(self=self)
-
-    def add_relaxed_span_offset(self, offset):
-        self.relaxed_span.append(offset)
 
     def add_modifier(self, mod):
 
@@ -158,9 +294,9 @@ class Mention:
 
         self.predicatives.append(pred)
 
-    def add_no_stop_word(self, nsw):
+    def add_no_stopword(self, nsw):
 
-        self.non_stop_words.append(nsw)
+        self.non_stopwords.append(nsw)
 
     def add_main_modifier(self, mmod):
 
@@ -181,7 +317,7 @@ class Mention:
             self.span = full_content[start:end + 1]
 
     @classmethod
-    def from_naf(cls, nafobj, constituentInfo, head, mid):
+    def from_naf(cls, nafobj, stopwords, constituentInfo, head, mid):
         '''
         Create a mention object from naf information
 
@@ -194,18 +330,22 @@ class Mention:
 
         head_offset = None if head is None else get_offset(nafobj, head)
 
-        span = constituentInfo.span
-        offset_ids_span = convert_term_ids_to_offsets(nafobj, span)
-        mention = cls(mid, span=offset_ids_span, head_offset=head_offset)
+        span_ids = constituentInfo.span
+        span_offsets = convert_term_ids_to_offsets(nafobj, span_ids)
+        mention = cls(mid, span=span_offsets, head_offset=head_offset)
         mention.sentence_number = get_sentence_number(nafobj, head)
-        # add no stop words and main modifiers
-        add_non_stopwords(nafobj, span, mention)
-        add_main_modifiers(nafobj, span, mention)
+
+        # add non-stopwords
+        add_non_stopwords(nafobj, stopwords, span_ids, mention)
+
+        # add main modifiers
+        add_main_modifiers(nafobj, span_ids, mention)
+
         # mwe info
         full_head_tids = constituentInfo.multiword
         mention.full_head = convert_term_ids_to_offsets(nafobj, full_head_tids)
         # modifers and appositives:
-        relaxed_span = offset_ids_span
+        relaxed_span = span_offsets
         for mod_in_tids in constituentInfo.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             mention.add_modifier(mod_span)
@@ -224,9 +364,6 @@ class Mention:
             pred_span = convert_term_ids_to_offsets(nafobj, pred_in_tids)
             mention.add_predicative(pred_span)
 
-        # set sequence of pos FIXME: if not needed till end; remove
-        # os_seq = get_pos_of_span(nafobj, span)
-        # mention.set_pos_seq(pos_seq)
         # set pos of head
         if head is not None:
             head_pos = get_pos_of_term(nafobj, head)
@@ -234,7 +371,7 @@ class Mention:
             if head_pos in ['pron', 'noun', 'name']:
                 analyze_nominal_information(nafobj, head, mention)
 
-        begin_offset, end_offset = get_offsets_from_span(nafobj, span)
+        begin_offset, end_offset = get_offsets_from_span(nafobj, span_ids)
         mention.begin_offset = begin_offset
         mention.end_offset = end_offset
 
@@ -262,10 +399,10 @@ def add_main_modifiers(nafobj, span, mention):
     mention.main_modifiers = main_mods_offset
 
 
-def add_non_stopwords(nafobj, span, mention):
+def add_non_stopwords(nafobj, stopwords, span, mention):
     '''
     Function that verifies which terms in span are not stopwords and adds these
-    to non-stop-word list
+    to non-stopword list
 
     :param nafobj: input naf (for linguistic information)
     :param span: list of term ids
@@ -277,11 +414,11 @@ def add_non_stopwords(nafobj, span, mention):
     for tid in span:
         my_term = nafobj.get_term(tid)
         if not my_term.get_type() == 'closed' and \
-           not my_term.get_lemma().lower() in stop_words:
+           not my_term.get_lemma().lower() in stopwords:
             non_stop_terms.append(tid)
 
     non_stop_span = convert_term_ids_to_offsets(nafobj, non_stop_terms)
-    mention.non_stop_words = non_stop_span
+    mention.non_stopwords = non_stop_span
 
 
 def analyze_nominal_information(nafobj, term_id, mention):

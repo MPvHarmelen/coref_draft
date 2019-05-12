@@ -8,11 +8,10 @@ from KafNafParserPy import KafNafParser, Clp
 
 from . import constants as c
 from .coref_info import CoreferenceInformation
-from .mention_data import initiate_stopword_list
 from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
+from .mention_data import get_mentions
 from .naf_info import (
-    get_mentions,
     identify_direct_quotations,
     get_offset2string_dicts
 )
@@ -387,7 +386,7 @@ def find_strict_head_antecedents(mention, mentions, sieve):
     :return:         list of antecedent ids
     '''
     head_string = offset2string.get(mention.head_offset)
-    non_stop_words = get_string_from_offsets(mention.non_stop_words)
+    non_stopwords = get_string_from_offsets(mention.non_stopwords)
     main_mods = get_string_from_offsets(mention.main_modifiers)
     antecedents = []
     for mid, comp_mention in mentions.items():
@@ -398,8 +397,8 @@ def find_strict_head_antecedents(mention, mentions, sieve):
                 match = True
                 full_span = get_string_from_offsets(comp_mention.span)
                 if sieve in ['5', '7']:
-                    for non_stop_word in non_stop_words:
-                        if non_stop_word not in full_span:
+                    for non_stopword in non_stopwords:
+                        if non_stopword not in full_span:
                             match = False
                 if sieve in ['5', '6']:
                     for mmod in main_mods:
@@ -511,7 +510,7 @@ def find_relaxed_head_antecedents(mention, mentions):
 
     boffset = mention.begin_offset
     full_head_string = get_string_from_offsets(mention.full_head)
-    non_stop_words = get_string_from_offsets(mention.non_stop_words)
+    non_stopwords = get_string_from_offsets(mention.non_stopwords)
     antecedents = []
 
     for mid, comp_mention in mentions.items():
@@ -526,8 +525,8 @@ def find_relaxed_head_antecedents(mention, mentions):
                     if word not in full_comp_head:
                         match = False
                 full_span = get_string_from_offsets(comp_mention.span)
-                for non_stop_word in non_stop_words:
-                    if non_stop_word not in full_span:
+                for non_stopword in non_stopwords:
+                    if non_stopword not in full_span:
                         match = False
                 if match:
                     antecedents.append(mid)
@@ -673,21 +672,19 @@ def initialize_global_dictionaries(nafobj):
     logger.debug("get_offset2string_dicts")
     offset2string, offset2lemma = get_offset2string_dicts(nafobj)
 
-    logger.debug("initiate_stopword_list")
-    initiate_stopword_list()
-
     logger.debug("create_headdep_dicts")
     create_headdep_dicts(nafobj)
 
 
 def resolve_coreference(nafin,
                         fill_gaps=c.FILL_GAPS_IN_OUTPUT,
-                        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT):
+                        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
+                        language=c.LANGUAGE):
 
     logger.info("Initializing...")
     initialize_global_dictionaries(nafin)
     logger.info("Finding mentions...")
-    mentions = get_mentions(nafin)
+    mentions = get_mentions(nafin, language)
     logger.info("Finding quotations...")
     quotations = identify_direct_quotations(nafin, mentions)
 
@@ -825,7 +822,8 @@ def resolve_coreference(nafin,
 def process_coreference(
         nafin,
         fill_gaps=c.FILL_GAPS_IN_OUTPUT,
-        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT):
+        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
+        language=c.LANGUAGE):
     """
     Process coreferences and add to the given NAF.
     Note that coreferences are added in place, and the NAF is returned for
@@ -834,7 +832,8 @@ def process_coreference(
     coref_classes, mentions = resolve_coreference(
         nafin,
         fill_gaps=fill_gaps,
-        include_singletons=include_singletons
+        include_singletons=include_singletons,
+        language=language
     )
     logger.info("Adding coreference information to NAF...")
     add_coreference_to_naf(nafin, coref_classes, mentions)
@@ -869,6 +868,13 @@ def main(argv=None):
         '--fill-gaps',
         help="Whether to fill gaps in mention spans",
         action='store_true',
+    )
+    parser.add_argument(
+        '--language',
+        help="RFC5646 language tag of language data to use. Currently only"
+        " reads a different set of stopwords. Defaults to {}".format(
+            c.LANGUAGE),
+        default=c.LANGUAGE
     )
     cmdl_args = vars(parser.parse_args(argv))
     logging.basicConfig(level=cmdl_args.pop('level'))
