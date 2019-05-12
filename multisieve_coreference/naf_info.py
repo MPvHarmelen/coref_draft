@@ -14,6 +14,12 @@ from .constituents import get_constituent
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
+def get_pos_of_term(nafobj, tid):
+
+    term = nafobj.get_term(tid)
+    return term.get_pos()
+
+
 def get_string_of_term(nafobj, tid):
 
     my_term = nafobj.get_term(tid)

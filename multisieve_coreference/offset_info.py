@@ -72,19 +72,3 @@ def get_offsets_from_span(nafobj, span):
         end_offset = max(end_offsets)
 
     return begin_offset, end_offset
-
-
-def get_pos_of_term(nafobj, tid):
-
-    term = nafobj.get_term(tid)
-    return term.get_pos()
-
-
-def get_pos_of_span(nafobj, span):
-
-    pos_seq = []
-    for tid in span:
-        tpos = get_pos_of_term(nafobj, tid)
-        pos_seq.append(tpos)
-
-    return pos_seq
