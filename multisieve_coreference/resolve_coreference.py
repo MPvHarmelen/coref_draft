@@ -11,29 +11,16 @@ from .coref_info import CoreferenceInformation
 from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
+
+from . import offset_info as offinfo
 from .offset_info import (
-    get_offset2string_dicts,
     get_all_offsets,
+    create_offset_dicts,
+    get_string_from_offsets
 )
 from .naf_info import identify_direct_quotations
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
-
-
-# global values mapping offsets to string and lemma respectively
-offset2string = {}
-offset2lemma = {}
-
-
-def get_string_from_offsets(id_span):
-
-    surface_string = ''
-
-    for mid in id_span:
-        token_string = offset2string.get(mid)
-        surface_string += token_string + ' '
-
-    return surface_string.rstrip()
 
 
 def match_some_span(mentions, coref_info, get_span):
@@ -386,7 +373,7 @@ def find_strict_head_antecedents(mention, mentions, sieve):
     :param mentions: dictionary of all mentions
     :return:         list of antecedent ids
     '''
-    head_string = offset2string.get(mention.head_offset)
+    head_string = offinfo.offset2string.get(mention.head_offset)
     non_stopwords = get_string_from_offsets(mention.non_stopwords)
     main_mods = get_string_from_offsets(mention.main_modifiers)
     antecedents = []
@@ -394,7 +381,8 @@ def find_strict_head_antecedents(mention, mentions, sieve):
         # offset must be smaller to be antecedent and not i-to-i
         if comp_mention.head_offset < mention.head_offset and \
            not mention.head_offset <= comp_mention.end_offset:
-            if head_string == offset2string.get(comp_mention.head_offset):
+            if head_string == offinfo.offset2string.get(
+               comp_mention.head_offset):
                 match = True
                 full_span = get_string_from_offsets(comp_mention.span)
                 if sieve in ['5', '7']:
@@ -666,10 +654,8 @@ def post_process(nafobj, mentions, coref_info,
 
 def initialize_global_dictionaries(nafobj):
 
-    global offset2string, offset2lemma
-
-    logger.debug("get_offset2string_dicts")
-    offset2string, offset2lemma = get_offset2string_dicts(nafobj)
+    logger.debug("create_offset_dicts")
+    create_offset_dicts(nafobj)
 
     logger.debug("create_headdep_dicts")
     create_headdep_dicts(nafobj)

@@ -1,3 +1,13 @@
+# global values mapping offsets to string and lemma respectively
+offset2string = {}
+offset2lemma = {}
+
+
+def create_offset_dicts(nafobj):
+    global offset2string, offset2lemma
+    offset2string, offset2lemma = get_offset2string_dicts(nafobj)
+
+
 def get_offset2string_dicts(nafobj):
 
     offset2string = {}
@@ -14,6 +24,17 @@ def get_offset2string_dicts(nafobj):
         offset2string[identifier] = surface_string
 
     return offset2string, offset2lemma
+
+
+def get_string_from_offsets(id_span):
+
+    surface_string = ''
+
+    for mid in id_span:
+        token_string = offset2string.get(mid)
+        surface_string += token_string + ' '
+
+    return surface_string.rstrip()
 
 
 def get_all_offsets(nafobj):
