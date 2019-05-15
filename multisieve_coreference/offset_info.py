@@ -1,3 +1,21 @@
+def get_offset2string_dicts(nafobj):
+
+    offset2string = {}
+    offset2lemma = {}
+
+    for term in nafobj.get_terms():
+        identifier = get_offset(nafobj, term.get_id())
+        lemma = term.get_lemma()
+        offset2lemma[identifier] = lemma
+
+    for token in nafobj.get_tokens():
+        identifier = int(token.get_offset())
+        surface_string = token.get_text()
+        offset2string[identifier] = surface_string
+
+    return offset2string, offset2lemma
+
+
 def get_offset(nafobj, term_id):
     '''
     Function that returns beginning offset of term
