@@ -12,7 +12,8 @@ from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
 from .offset_info import (
-    get_offset2string_dicts
+    get_offset2string_dicts,
+    get_all_offsets,
 )
 from .naf_info import identify_direct_quotations
 
@@ -655,9 +656,7 @@ def post_process(nafobj, mentions, coref_info,
 
     # Fill gaps in the used mentions
     if fill_gaps:
-        all_offsets = [
-            int(token.get_offset()) for token in nafobj.get_tokens()
-        ]
+        all_offsets = get_all_offsets(nafobj)
         for mention in mentions.values():
             mention.fill_gaps(all_offsets)
 

@@ -16,6 +16,12 @@ def get_offset2string_dicts(nafobj):
     return offset2string, offset2lemma
 
 
+def get_all_offsets(nafobj):
+    return [
+        int(token.get_offset()) for token in nafobj.get_tokens()
+    ]
+
+
 def get_offset(nafobj, term_id):
     '''
     Function that returns beginning offset of term
