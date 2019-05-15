@@ -11,12 +11,10 @@ from .coref_info import CoreferenceInformation
 from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
-from .naf_info import (
-    identify_direct_quotations,
-)
 from .offset_info import (
     get_offset2string_dicts
 )
+from .naf_info import identify_direct_quotations
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
