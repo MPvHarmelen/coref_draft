@@ -1,5 +1,5 @@
 # global values mapping offsets to string and lemma respectively
-offset2string = {}
+offset2string = None
 
 
 def create_offset_dicts(nafobj):
