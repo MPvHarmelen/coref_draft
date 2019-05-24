@@ -178,11 +178,15 @@ def find_closest_to_head(span):
 
 def verify_span_uniqueness(found_spans, span):
     '''
-    Function that checks whether entity is not listed twice (bug in
-    cltl-spotlight; does not check whether entity has already been found)
-    :param found_spans: list of previously found spans
-    :param span: current span
-    :return: boolean (True if span has not been found before)
+    Check whether any span in `found_spans` contains `span`.
+
+    FIXME:  This functionality is weird, as results will differ depending on
+            the order in which span uniqueness is checked: if the larger span
+            is found later than the smaller one, both are kept.
+
+    :param found_spans:     list of previously found spans
+    :param span:            current span
+    :return:                boolean (True if span has not been found before)
     '''
 
     for fspan in found_spans:
