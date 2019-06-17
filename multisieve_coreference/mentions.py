@@ -148,16 +148,15 @@ def get_mentions(nafobj, language):
     mentions = OrderedDict()
     for constituent in get_mention_constituents(nafobj):
         mid = 'm' + str(len(mentions))
-        mention = Mention.from_naf(
-            nafobj, stopwords, constituent, constituent.head_id, mid)
-        mentions[mid] = mention
+        mentions[mid] = Mention.from_naf(
+            nafobj, stopwords, constituent, constituent.head_id, id=mid)
 
     entities = get_named_entities(nafobj)
     for entity, constituent in entities.items():
         mid = 'm' + str(len(mentions))
-        mention = Mention.from_naf(nafobj, stopwords, constituent, entity, mid)
-        mention.entity_type = constituent.etype
-        mentions[mid] = mention
+        mentions[mid] = Mention.from_naf(
+            nafobj, stopwords, constituent, constituent.head_id, id=mid,
+            entity_type=constituent.etype)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions
@@ -312,7 +311,7 @@ class Mention:
             self.span = full_content[start:end + 1]
 
     @classmethod
-    def from_naf(cls, nafobj, stopwords, constituent_info, head, mid):
+    def from_naf(cls, nafobj, stopwords, constituent_info, head, **kwargs):
         '''
         Create a mention object from naf information
 
@@ -328,7 +327,6 @@ class Mention:
         span_ids = constituent_info.span
         span_offsets = convert_term_ids_to_offsets(nafobj, span_ids)
         mention = cls(
-            mid,
             span=span_offsets,
             head_offset=head_offset,
             non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
@@ -339,7 +337,8 @@ class Mention:
             predicatives=[
                 convert_term_ids_to_offsets(nafobj, pred_ids)
                 for pred_ids in constituent_info.predicatives
-            ]
+            ],
+            **kwargs
         )
 
         # modifers and appositives:
