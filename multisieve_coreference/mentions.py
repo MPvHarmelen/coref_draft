@@ -8,7 +8,7 @@ import logging
 from collections import OrderedDict
 
 from .naf_info import get_pos_of_term
-from .constituent_info import get_named_entities, get_constituents
+from .constituent_info import get_named_entities, Constituent
 from .offset_info import (
     convert_term_ids_to_offsets,
     get_offset,
@@ -47,13 +47,16 @@ def get_mention_constituents(nafobj):
     :return:        dictionary of head term with as value constituent object
     '''
     mention_heads = get_relevant_head_ids(nafobj)
+
     logger.debug("Mention candidate heads: {!r}".format(mention_heads))
-    mention_constituents = get_constituents(mention_heads)
+
+    mention_constituents = [Constituent(head) for head in mention_heads]
+
     if logger.getEffectiveLevel() <= logging.DEBUG:
-        import itertools as it
         logger.debug("Mention candidate constituents: {}".format('\n'.join(
-            it.starmap('{}: {!r}'.format, mention_constituents.items())
+            map('{!r}'.format, mention_constituents)
         )))
+
     return mention_constituents
 
 
@@ -142,11 +145,11 @@ def get_mentions(nafobj, language):
 
     stopwords = read_stopword_set(language)
 
-    mention_constituents = get_mention_constituents(nafobj)
     mentions = OrderedDict()
-    for head, constituent in mention_constituents.items():
+    for constituent in get_mention_constituents(nafobj):
         mid = 'm' + str(len(mentions))
-        mention = Mention.from_naf(nafobj, stopwords, constituent, head, mid)
+        mention = Mention.from_naf(
+            nafobj, stopwords, constituent, constituent.head_id, mid)
         mentions[mid] = mention
 
     entities = get_named_entities(nafobj)

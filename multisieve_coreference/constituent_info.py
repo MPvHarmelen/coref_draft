@@ -100,10 +100,6 @@ def get_mwe_and_modifiers_and_appositives(head_id):
     return mwe, mods, apps
 
 
-def get_constituents(mention_heads):
-    return {head: Constituent(head) for head in mention_heads}
-
-
 def get_named_entities(nafobj):
     '''
     Function that runs to entity layer and registers named entities
