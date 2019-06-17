@@ -320,7 +320,7 @@ class Mention:
         :return:                    a `Mention` object
         '''
 
-        head_offset = None if head is None else get_offset(nafobj, head)
+        head_offset = get_offset(nafobj, head)
 
         span_ids = constituent_info.span
         span_offsets = convert_term_ids_to_offsets(nafobj, span_ids)
