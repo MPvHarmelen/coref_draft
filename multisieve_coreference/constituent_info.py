@@ -10,7 +10,7 @@ class Constituent:
     '''
 
     def __init__(self, head_id, span=None, multiword=None, modifiers=None,
-                 appositives=None, predicatives=None, etype=''):
+                 appositives=None, predicatives=None):
         '''
         Constructor for the Constituent object.
 
@@ -44,8 +44,6 @@ class Constituent:
         else:
             self.predicatives = predicatives
 
-        self.etype = etype
-
     def __repr__(self):
         return self.__class__.__name__ + '(' \
             'head_id={self.head_id}, ' \
@@ -54,7 +52,6 @@ class Constituent:
             'modifiers={self.modifiers}, ' \
             'appositives={self.appositives}, ' \
             'predicatives={self.predicatives}, ' \
-            'etype={self.etype}, ' \
             ')'.format(self=self)
 
     def add_predicative(self, pred):
@@ -103,30 +100,45 @@ def get_mwe_and_modifiers_and_appositives(head_id):
 def get_named_entities(nafobj):
     '''
     Function that runs to entity layer and registers named entities
+
     :param nafobj: the input nafobject
-    :return: dictionary of entities, linked to span and entity type
+    :return:       a list of (type, entity)-pairs
     '''
-    entities = {}
-    found_spans = []
+    # For administration purposes, spans will point to (type, entity)-pairs.
+    # In the end, we'll just return a list of entities.
+    entities = dict()
+
     for entity in nafobj.get_entities():
         etype = entity.get_type()
         for ref in entity.get_references():
-            espan = ref.get_span().get_span_ids()
-            head_term = find_head_in_span(espan)
-            myConstituent = Constituent(
-                head_term,
-                multiword=espan,
-                etype=etype
+            span = ref.get_span().get_span_ids()
+            constituent = Constituent(
+                find_head_in_span(span),
+                multiword=span
             )
-            if verify_span_uniqueness(found_spans, espan):
+            # Check uniqueness of the entity span
+            # bug in cltl-spotlight; does not check whether entity has already
+            # been found
+            span = frozenset(span)
+            # If this span is smaller than or equal to some existing span,
+            # this entity can be ignore
+            if any(span <= other_span for other_span in entities.keys()):
+                continue
+            else:
+                # If this span is larger than some existing span,
+                # the existing entity should be replaced by this entity.
+                # This is done by removing all entities that have smaller spans
+                # and then adding this entity.
+                to_delete = [
+                    other_span
+                    for other_span in entities
+                    if other_span < span
+                ]
+                for other_span in to_delete:
+                    del entities[other_span]
+                entities[span] = (etype, constituent)
 
-                if head_term not in entities:
-                    entities[head_term] = myConstituent
-                else:
-                    entities[head_term + 'b'] = myConstituent
-                found_spans.append(espan)
-
-    return entities
+    return list(entities.values())
 
 
 def find_head_in_span(span):
@@ -170,22 +182,3 @@ def find_closest_to_head(span):
             return best_candidates[0]
 
     return span[0]
-
-
-def verify_span_uniqueness(found_spans, span):
-    '''
-    Check whether any span in `found_spans` contains `span`.
-
-    FIXME:  This functionality is weird, as results will differ depending on
-            the order in which span uniqueness is checked: if the larger span
-            is found later than the smaller one, both are kept.
-
-    :param found_spans:     list of previously found spans
-    :param span:            current span
-    :return:                boolean (True if span has not been found before)
-    '''
-
-    for fspan in found_spans:
-        if len(set(fspan) & set(span)) == len(span):
-            return False
-    return True

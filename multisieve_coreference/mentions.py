@@ -151,12 +151,11 @@ def get_mentions(nafobj, language):
         mentions[mid] = Mention.from_naf(
             nafobj, stopwords, constituent, constituent.head_id, id=mid)
 
-    entities = get_named_entities(nafobj)
-    for entity, constituent in entities.items():
+    for entity_type, constituent in get_named_entities(nafobj):
         mid = 'm' + str(len(mentions))
         mentions[mid] = Mention.from_naf(
             nafobj, stopwords, constituent, constituent.head_id, id=mid,
-            entity_type=constituent.etype)
+            entity_type=entity_type)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions
