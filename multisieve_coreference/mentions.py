@@ -191,7 +191,7 @@ class Mention:
             entity_type=None,
             in_quotation=False,
             is_relative_pronoun=False,
-            is_reflective_pronoun=False,
+            is_reflexive_pronoun=False,
             coreference_prohibited=None,
             modifiers=None,
             appositives=None,
@@ -216,7 +216,7 @@ class Mention:
         :type entity_type:             str
         :type in_quotation:            bool
         :type is_relative_pronoun:     bool
-        :type is_reflective_pronoun:   bool
+        :type is_reflexive_pronoun:    bool
         :type coreference_prohibited:  list
         :type begin_offset:            str
         :type end_offset:              str
@@ -257,7 +257,7 @@ class Mention:
 
         self.in_quotation = in_quotation
         self.is_relative_pronoun = is_relative_pronoun
-        self.is_reflective_pronoun = is_reflective_pronoun
+        self.is_reflexive_pronoun = is_reflexive_pronoun
 
     def __repr__(self):
         return self.__class__.__name__ + '(' + \
@@ -273,7 +273,7 @@ class Mention:
             'entity_type={self.entity_type!r}, ' \
             'in_quotation={self.in_quotation!r}, ' \
             'is_relative_pronoun={self.is_relative_pronoun!r}, ' \
-            'is_reflective_pronoun={self.is_reflective_pronoun!r}, ' \
+            'is_reflexive_pronoun={self.is_reflexive_pronoun!r}, ' \
             'coreference_prohibited={self.coreference_prohibited!r}, ' \
             'modifiers={self.modifiers!r}, ' \
             'appositives={self.appositives!r}, ' \
@@ -470,4 +470,4 @@ def set_is_relative_pronoun(morphofeat, mention):
     if 'betr,' in morphofeat:
         mention.is_relative_pronoun = True
     if 'refl,' in morphofeat:
-        mention.is_reflective_pronoun = True
+        mention.is_reflexive_pronoun = True

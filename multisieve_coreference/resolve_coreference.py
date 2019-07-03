@@ -257,9 +257,9 @@ def resolve_relative_pronoun_structures(mentions, coref_info):
                 coref_info.add_coref_class([my_match.id, mid])
 
 
-def resolve_reflective_pronoun_structures(mentions, coref_info):
+def resolve_reflexive_pronoun_structures(mentions, coref_info):
     '''
-    Identifies mention that is correct coreference for reflectives
+    Identifies mention that is correct coreference for reflexives
 
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
@@ -267,7 +267,7 @@ def resolve_reflective_pronoun_structures(mentions, coref_info):
     :return:            None (mentions and coref_classes are updated in place)
     '''
     for mid, mention in mentions.items():
-        if mention.is_reflective_pronoun:
+        if mention.is_reflexive_pronoun:
             matching = []
             sent_nr = mention.sentence_number
             for omid, othermention in mentions.items():
@@ -360,7 +360,7 @@ def apply_precise_constructs(mentions, coref_info):
     identify_predicative_structures(mentions, coref_info)
     resolve_relative_pronoun_structures(mentions, coref_info)
     identify_acronyms_or_alternative_names(mentions, coref_info)
-    resolve_reflective_pronoun_structures(mentions, coref_info)
+    resolve_reflexive_pronoun_structures(mentions, coref_info)
     # f. Demonym Israel, Israeli (later)
 
 
