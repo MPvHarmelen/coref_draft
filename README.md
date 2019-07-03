@@ -3,7 +3,7 @@ coref_draft [![Build Status](https://travis-ci.org/mpvharmelen/coref_draft.svg?b
 
 Description
 ----------
-Implementation of Stanford multi-seive coreference resolution approach for Dutch.
+Implementation of Stanford multi-seive coreference resolution approach for Dutch. This version assumes the input is in the format produced by the [Alpino parser][].
 This is a draft version of the code. An official first release will be made available on github/cltl upon completion and basic testing of the first version of the system.
 
 
@@ -92,8 +92,15 @@ License
 ------
 Sofware distributed under Apache License v2.0, see LICENSE file for details.
 
+Further Reading
+---------------
+[Description of POS tags in Alpino output (in Dutch)](http://www.let.rug.nl/~vannoord/Lassy/POS_manual.pdf)
+[Description of dependency structures in Alpino output (in Dutch)](http://www.let.rug.nl/vannoord/Lassy/sa-man_lassy.pdf)
+
 
 References
 ----------
 
 Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu, and Dan Jurafsky. 2013. Deterministic coreference resolution based on entity-centric, precision-ranked rules. Comput. Linguist. 39, 4 (December 2013), 885-916. DOI=http://dx.doi.org/10.1162/COLI_a_00152
+
+[Alpino parser]: http://www.let.rug.nl/vannoord/alp/Alpino/
