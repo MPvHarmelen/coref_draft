@@ -341,7 +341,7 @@ class Mention:
         )
 
         # modifers and appositives:
-        relaxed_span = span_offsets
+        relaxed_span = list(span_offsets)
         for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             mention.add_modifier(mod_span)
