@@ -149,12 +149,12 @@ def get_mentions(nafobj, language):
     for constituent in get_mention_constituents(nafobj):
         mid = 'm' + str(len(mentions))
         mentions[mid] = Mention.from_naf(
-            nafobj, stopwords, constituent, constituent.head_id, id=mid)
+            nafobj, stopwords, constituent, id=mid)
 
     for entity_type, constituent in get_named_entities(nafobj):
         mid = 'm' + str(len(mentions))
         mentions[mid] = Mention.from_naf(
-            nafobj, stopwords, constituent, constituent.head_id, id=mid,
+            nafobj, stopwords, constituent, id=mid,
             entity_type=entity_type)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -175,19 +175,32 @@ class Mention:
     coreference resolution.
 
     `span` and other things store _offsets_.
+
+    All attributes must contain hashable values.
     '''
 
+    # FIXME: begin and end offset are required arguments because the end_offset
+    #        is not necessarily the last offset in the span, as the offsets may
+    #        be more fine grained than the term level.
+    #        Although AFAIK no term will exist with an offset strictly between
+    #        span[-1] and end_offset + 1, apparently Antske thought it
+    #        worthwhile to write `get_offsets_from_span` to exactly calculate
+    #        the offset of the **end** of the last term, instead of just using
+    #        the offset of the **start** of the last term.
+    #        Someone should try what happens when this last option is used.
     def __init__(
             self,
             id,
             span,
-            head_offset=None,
-            head_pos=None,
-            number='',
-            gender='',
-            person='',
-            full_head=None,
             relaxed_span=None,
+            full_head=None,
+            head_offset=None,
+            begin_offset=None,
+            end_offset=None,
+            head_pos=None,
+            number=None,
+            gender=None,
+            person=None,
             entity_type=None,
             in_quotation=False,
             is_relative_pronoun=False,
@@ -198,57 +211,61 @@ class Mention:
             predicatives=None,
             non_stopwords=None,
             main_modifiers=None,
-            sentence_number='',
+            sentence_number=None,
             ):
         '''
         Constructor of the mention
         #TODO: revise so that provides information needed for some sieve;
         #STEP 1: seive 3 needs option to remove post-head modifiers
 
-        :type span:                    list
+        :type span:                    tuple
+        :type relaxed_span:            tuple
+        :type full_head:               tuple
         :type head_offset:             int
+        :type begin_offset:            int
+        :type end_offset:              int
         :type head_pos:                str
         :type number:                  str
         :type gender:                  str
         :type person:                  str
-        :type full_head:               list
-        :type relaxed_span:            list
         :type entity_type:             str
         :type in_quotation:            bool
         :type is_relative_pronoun:     bool
-        :type is_reflexive_pronoun:    bool
+        :type is_reflexive_pronoun :   bool
         :type coreference_prohibited:  list
-        :type begin_offset:            str
-        :type end_offset:              str
-        :type modifiers:               list
-        :type appositives:             list
-        :type predicatives:            list
-        :type non_stopwords:           list
-        :type main_modifiers:          list
+        :type modifiers:               tuple
+        :type appositives:             tuple
+        :type predicatives:            tuple
+        :type non_stopwords:           tuple
+        :type main_modifiers:          tuple
         :type sentence_number:         str
         '''
 
         self.id = id   # confirmed
-        self.span = span
+        self.span = tuple(span)
+
+        self.full_head = () if full_head is None else tuple(full_head)
+        self.relaxed_span = () if relaxed_span is None else tuple(relaxed_span)
+
         self.head_offset = head_offset
+        self.begin_offset = begin_offset
+        self.end_offset = end_offset
+
         self.head_pos = head_pos
 
-        self.full_head = [] if full_head is None else full_head
-
-        self.begin_offset = self.span[0]
-        self.end_offset = self.span[-1]
         self.sentence_number = sentence_number
 
-        self.relaxed_span = [] if relaxed_span is None else relaxed_span
-        self.non_stopwords = [] if non_stopwords is None else non_stopwords
+        self.non_stopwords = () if non_stopwords is None \
+            else tuple(non_stopwords)
 
         self.coreference_prohibited = [] if coreference_prohibited is None \
-            else coreference_prohibited
+            else list(coreference_prohibited)
 
-        self.modifiers = [] if modifiers is None else modifiers
-        self.main_modifiers = [] if main_modifiers is None else main_modifiers
-        self.appositives = [] if appositives is None else appositives
-        self.predicatives = [] if predicatives is None else predicatives
+        self.modifiers = () if modifiers is None else tuple(modifiers)
+        self.main_modifiers = () if main_modifiers is None \
+            else tuple(main_modifiers)
+        self.appositives = () if appositives is None else tuple(appositives)
+        self.predicatives = () if predicatives is None else tuple(predicatives)
 
         self.number = number
         self.gender = gender
@@ -263,13 +280,15 @@ class Mention:
         return self.__class__.__name__ + '(' + \
             'id={self.id!r}, ' \
             'span={self.span!r}, ' \
+            'relaxed_span={self.relaxed_span!r}, ' \
+            'full_head={self.full_head!r}, ' \
+            'head_offset={self.head_offset!r}, ' \
+            'begin_offset={self.begin_offset!r}, ' \
+            'end_offset={self.end_offset!r}, ' \
+            'head_pos={self.head_pos!r}, ' \
             'number={self.number!r}, ' \
             'gender={self.gender!r}, ' \
             'person={self.person!r}, ' \
-            'head_offset={self.head_offset!r}, ' \
-            'full_head={self.full_head!r}, ' \
-            'head_pos={self.head_pos!r}, ' \
-            'relaxed_span={self.relaxed_span!r}, ' \
             'entity_type={self.entity_type!r}, ' \
             'in_quotation={self.in_quotation!r}, ' \
             'is_relative_pronoun={self.is_relative_pronoun!r}, ' \
@@ -283,18 +302,6 @@ class Mention:
             'sentence_number={self.sentence_number!r}, ' \
             ')'.format(self=self)
 
-    def add_modifier(self, mod):
-
-        self.modifiers.append(mod)
-
-    def add_appositive(self, app):
-
-        self.appositives.append(app)
-
-    def add_no_stopword(self, nsw):
-
-        self.non_stopwords.append(nsw)
-
     def fill_gaps(self, full_content, allow_adding=lambda _: True):
         """
         Find and fill gaps in the span of this mention.
@@ -307,10 +314,10 @@ class Mention:
         if len(self.span) >= 2:
             start = full_content.index(self.span[0])
             end = full_content.index(self.span[-1], start)
-            self.span = full_content[start:end + 1]
+            self.span = tuple(full_content[start:end + 1])
 
     @classmethod
-    def from_naf(cls, nafobj, stopwords, constituent_info, head, **kwargs):
+    def from_naf(cls, nafobj, stopwords, constituent_info, **kwargs):
         '''
         Create a mention object from naf information
 
@@ -321,52 +328,65 @@ class Mention:
         :return:                    a `Mention` object
         '''
 
-        head_offset = get_offset(nafobj, head)
+        head_offset = get_offset(nafobj, constituent_info.head_id)
 
         span_ids = constituent_info.span
         span_offsets = convert_term_ids_to_offsets(nafobj, span_ids)
-        mention = cls(
-            span=span_offsets,
-            head_offset=head_offset,
-            non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
-            full_head=convert_term_ids_to_offsets(
-                nafobj, constituent_info.multiword),
-            sentence_number=get_sentence_number(nafobj, head),
-            main_modifiers=get_main_modifiers(nafobj, span_ids),
-            predicatives=[
-                convert_term_ids_to_offsets(nafobj, pred_ids)
-                for pred_ids in constituent_info.predicatives
-            ],
-            **kwargs
-        )
+        begin_offset, end_offset = get_offsets_from_span(nafobj, span_ids)
 
-        # modifers and appositives:
+        # get POS of head
+        head_pos = get_pos_of_term(nafobj, constituent_info.head_id)
+
+        # modifiers and appositives:
+        modifiers, appositives = [], []
+
         relaxed_span = list(span_offsets)
         for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
-            mention.add_modifier(mod_span)
+            modifiers.append(mod_span)
             for mid in mod_span:
                 if mid > head_offset and mid in relaxed_span:
                     relaxed_span.remove(mid)
 
         for app_in_tids in constituent_info.appositives:
             app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
-            mention.add_appositive(app_span)
+            appositives.append(app_span)
             for mid in app_span:
                 if mid > head_offset and mid in relaxed_span:
                     relaxed_span.remove(mid)
-        mention.relaxed_span = relaxed_span
 
-        # set POS of head
-        if head is not None:
-            head_pos = get_pos_of_term(nafobj, head)
-            mention.head_pos = head_pos
-            if head_pos in ['pron', 'noun', 'name']:
-                analyze_nominal_information(nafobj, head, mention)
+        extra_kwargs = {}
+        if head_pos in ['pron', 'noun', 'name']:
+            extra_kwargs['person'], \
+                extra_kwargs['gender'], \
+                extra_kwargs['number'], \
+                extra_kwargs['is_relative_pronoun'], \
+                extra_kwargs['is_reflexive_pronoun'] = \
+                analyze_nominal_information(nafobj, constituent_info.head_id)
 
-        begin_offset, end_offset = get_offsets_from_span(nafobj, span_ids)
-        mention.begin_offset = begin_offset
-        mention.end_offset = end_offset
+        extra_kwargs.update(kwargs)
+
+        mention = cls(
+            span=span_offsets,
+            relaxed_span=relaxed_span,
+            full_head=convert_term_ids_to_offsets(
+                nafobj, constituent_info.multiword),
+            head_offset=head_offset,
+            begin_offset=begin_offset,
+            end_offset=end_offset,
+            head_pos=head_pos,
+            modifiers=modifiers,
+            appositives=appositives,
+            predicatives=[
+                convert_term_ids_to_offsets(nafobj, pred_ids)
+                for pred_ids in constituent_info.predicatives
+            ],
+            non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
+            main_modifiers=get_main_modifiers(nafobj, span_ids),
+            sentence_number=get_sentence_number(
+                nafobj, constituent_info.head_id),
+            **extra_kwargs
+        )
 
         return mention
 
@@ -411,14 +431,17 @@ def get_non_stopwords(nafobj, stopwords, span):
     return convert_term_ids_to_offsets(nafobj, non_stop_terms)
 
 
-def analyze_nominal_information(nafobj, term_id, mention):
+def analyze_nominal_information(nafobj, term_id):
 
-    myterm = nafobj.get_term(term_id)
-    morphofeat = myterm.get_morphofeat()
-    identify_and_set_person(morphofeat, mention)
-    identify_and_set_gender(morphofeat, mention)
-    identify_and_set_number(morphofeat, myterm, mention)
-    set_is_relative_pronoun(morphofeat, mention)
+    term = nafobj.get_term(term_id)
+    morphofeat = term.get_morphofeat()
+    return (
+        identify_person(morphofeat),
+        identify_gender(morphofeat),
+        identify_number(morphofeat, term),
+        is_relative_pronoun(morphofeat),
+        is_reflexive_pronoun(morphofeat),
+    )
 
 
 def get_sentence_number(nafobj, head):
@@ -431,43 +454,40 @@ def get_sentence_number(nafobj, head):
     return sent_nr
 
 
-def identify_and_set_person(morphofeat, mention):
-
+def identify_person(morphofeat):
     if '1' in morphofeat:
-        mention.person = '1'
+        return '1'
     elif '2' in morphofeat:
-        mention.person = '2'
+        return '2'
     elif '3' in morphofeat:
-        mention.person = '3'
+        return '3'
 
 
-def identify_and_set_number(morphofeat, myterm, mention):
-
+def identify_number(morphofeat, myterm):
     if 'ev' in morphofeat:
-        mention.number = 'ev'
+        return 'ev'
     elif 'mv' in morphofeat:
-        mention.number = 'mv'
+        return 'mv'
     elif 'getal' in morphofeat:
         lemma = myterm.get_lemma()
         if lemma in ['haar', 'zijn', 'mijn', 'jouw', 'je']:
-            mention.number = 'ev'
+            return 'ev'
         elif lemma in ['ons', 'jullie', 'hun']:
-            mention.number = 'mv'
+            return 'mv'
 
 
-def identify_and_set_gender(morphofeat, mention):
-
+def identify_gender(morphofeat):
     if 'fem' in morphofeat:
-        mention.gender = 'fem'
+        return 'fem'
     elif 'masc' in morphofeat:
-        mention.gender = 'masc'
-    elif 'onz,' in morphofeat:
-        mention.gender = 'neut'
+        return 'masc'
+    elif 'onz,' in morphofeat:      # FIXME: Should this comma be here?
+        return 'neut'
 
 
-def set_is_relative_pronoun(morphofeat, mention):
+def is_relative_pronoun(morphofeat):
+    return 'betr,' in morphofeat    # FIXME: Should this comma be here?
 
-    if 'betr,' in morphofeat:
-        mention.is_relative_pronoun = True
-    if 'refl,' in morphofeat:
-        mention.is_reflexive_pronoun = True
+
+def is_reflexive_pronoun(morphofeat):
+    return 'refl,' in morphofeat    # FIXME: Should this comma be here?
