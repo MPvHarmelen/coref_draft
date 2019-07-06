@@ -238,7 +238,7 @@ class Mention:
         :type predicatives:            tuple
         :type non_stopwords:           tuple
         :type main_modifiers:          tuple
-        :type sentence_number:         str
+        :type sentence_number:         int
         '''
 
         self.id = id   # confirmed
