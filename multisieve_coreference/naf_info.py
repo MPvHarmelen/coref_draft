@@ -3,8 +3,7 @@ from collections import defaultdict
 
 from .offset_info import (
     convert_term_ids_to_offsets,
-    get_offsets_from_span,
-    get_offset
+    get_offsets_from_span
 )
 from .quotation import Cquotation
 from .quotation_naf import CquotationNaf
