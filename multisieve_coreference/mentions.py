@@ -231,7 +231,7 @@ class Mention:
         :type entity_type:             str
         :type in_quotation:            bool
         :type is_relative_pronoun:     bool
-        :type is_reflexive_pronoun :   bool
+        :type is_reflexive_pronoun:    bool
         :type coreference_prohibited:  list
         :type modifiers:               tuple
         :type appositives:             tuple
