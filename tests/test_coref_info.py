@@ -75,7 +75,7 @@ def test_merge_keys_fully_random_dicts(indic):
         max_size=100
     ),
     integers())
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 def test_merge_keys_pointwise_random_dicts(indic, combinations):
     if indic:
         combinations %= len(indic)
