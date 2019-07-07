@@ -8,7 +8,7 @@ with open('README.md') as f:
 
 setup(
     name='multisieve_coreference',
-    version='0.1.1',
+    version='0.1.2',
     description='Basic coreference resolution module, based on multi-sieve',
     long_description=readme,
     long_description_content_type="text/markdown",
