@@ -192,8 +192,8 @@ class Mention:
             self,
             id,
             span,
-            relaxed_span=None,
-            full_head=None,
+            relaxed_span=(),
+            full_head=(),
             head_offset=None,
             begin_offset=None,
             end_offset=None,
@@ -206,12 +206,12 @@ class Mention:
             is_relative_pronoun=False,
             is_reflexive_pronoun=False,
             coreference_prohibited=None,
-            modifiers=None,
-            appositives=None,
-            predicatives=None,
-            non_stopwords=None,
-            main_modifiers=None,
-            sentence_number=None,
+            modifiers=(),
+            appositives=(),
+            predicatives=(),
+            non_stopwords=(),
+            main_modifiers=(),
+            sentence_number=(),
             ):
         '''
         Constructor of the mention
@@ -244,8 +244,8 @@ class Mention:
         self.id = id   # confirmed
         self.span = tuple(span)
 
-        self.full_head = () if full_head is None else tuple(full_head)
-        self.relaxed_span = () if relaxed_span is None else tuple(relaxed_span)
+        self.full_head = full_head
+        self.relaxed_span = relaxed_span
 
         self.head_offset = head_offset
         self.begin_offset = begin_offset
@@ -255,17 +255,15 @@ class Mention:
 
         self.sentence_number = sentence_number
 
-        self.non_stopwords = () if non_stopwords is None \
-            else tuple(non_stopwords)
+        self.non_stopwords = non_stopwords
 
         self.coreference_prohibited = [] if coreference_prohibited is None \
             else list(coreference_prohibited)
 
-        self.modifiers = () if modifiers is None else tuple(modifiers)
-        self.main_modifiers = () if main_modifiers is None \
-            else tuple(main_modifiers)
-        self.appositives = () if appositives is None else tuple(appositives)
-        self.predicatives = () if predicatives is None else tuple(predicatives)
+        self.modifiers = modifiers
+        self.main_modifiers = main_modifiers
+        self.appositives = appositives
+        self.predicatives = predicatives
 
         self.number = number
         self.gender = gender
