@@ -52,6 +52,6 @@ def test_integration(in_dir, correct_out_dir, temp_file, expected_failures):
         run_integration(filename, in_dir, correct_out_dir, temp_file)
 
 
-@pytest.mark.xfail(strict=True)
+@pytest.mark.xfail(strict=True, error=AssertionError)
 def test_failing_integration(failure, in_dir, correct_out_dir, temp_file):
     run_integration(failure, in_dir, correct_out_dir, temp_file)
