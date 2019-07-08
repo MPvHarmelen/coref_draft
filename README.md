@@ -10,7 +10,7 @@ This is a draft version of the code. An official first release will be made avai
 Current implementation
 ----------------------
 
-The current implementation works on naf input files parsed by Alpino (i.e. it works for Dutch).
+The current implementation works on naf input files parsed by Alpino (i.e. it works for Dutch), on Python 3.6 and higher.
 
 Future plans:
 
