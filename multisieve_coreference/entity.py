@@ -38,7 +38,9 @@ class Entity:
         this one. Consequently, this Entity may contain duplicates after
         merging.
         """
-        self.mentions.extend(entity)
+        # Prevent infinite extension
+        if entity.mentions is not self.mentions:
+            self.mentions.extend(entity)
 
     def non_unique_mention_attr(self, attr):
         """
