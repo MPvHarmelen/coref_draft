@@ -59,11 +59,9 @@ Issues
 
 Design ideal
 ------------
-Instead of passing around a bare dictionary of mentions, an iterable `MentionCollection` object would be a better idea because it would be able to take care of mention ordering and filtering.
-
-It would be great if all changing information (mostly related to which mentions should or should not be in the same coreference class) is kept in one object, instead of spread out amongst the mention objects themselves. (This is currently the case with `Cmention.coreference_prohibited`.)
-
-It would be even nicer if every sieve would inherit from some `Sieve` abstraction and these sieves could be easily plugged and played by moving them around in some input sequence.
+ - [X] Instead of passing around a bare dictionary of mentions, an iterable `MentionCollection` object would be a better idea because it would be able to take care of mention ordering and filtering. **Done, see `Entities` in `entities.py`.**
+ - [X] It would be great if all changing information (mostly related to which mentions should or should not be in the same coreference class) is kept in one object, instead of spread out amongst the mention objects themselves. (This is currently the case with `Cmention.coreference_prohibited`.) **Done, see `Entities` in `entities.py`.**
+- [ ] It would be even nicer if every sieve would inherit from some `Sieve` abstraction and these sieves could be easily plugged and played by moving them around in some input sequence.
 
 
 Contact
