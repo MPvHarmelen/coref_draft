@@ -216,7 +216,7 @@ class Mention:
         '''
         Constructor of the mention
         #TODO: revise so that provides information needed for some sieve;
-        #STEP 1: seive 3 needs option to remove post-head modifiers
+        #STEP 1: sieve 3 needs option to remove post-head modifiers
 
         :type span:                    tuple
         :type relaxed_span:            tuple

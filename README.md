@@ -3,7 +3,7 @@ Multisieve Coreference [![Build Status](https://travis-ci.org/mpvharmelen/coref_
 
 Description
 ----------
-Implementation of Stanford multi-seive coreference resolution approach for Dutch. This version assumes the input is in the format produced by the [Alpino parser][].
+Implementation of Stanford multi-sieve coreference resolution approach for Dutch. This version assumes the input is in the format produced by the [Alpino parser][].
 This is a draft version of the code. An official first release will be made available on github/cltl upon completion and basic testing of the first version of the system.
 
 
