@@ -37,6 +37,9 @@ class Entity:
         No attention is paid to whether any mention in `entity` is already in
         this one. Consequently, this Entity may contain duplicates after
         merging.
+
+        If you are thinking of using this function, you probably want to use
+        `Entities.merge` instead.
         """
         # Prevent infinite extension
         if entity.mentions is not self.mentions:
