@@ -20,14 +20,7 @@ def get_offset2string_dict(nafobj):
 
 
 def get_string_from_offsets(id_span):
-
-    surface_string = ''
-
-    for mid in id_span:
-        token_string = offset2string.get(mid)
-        surface_string += token_string + ' '
-
-    return surface_string.rstrip()
+    return ' '.join(offset2string.get(mid) for mid in id_span)
 
 
 def get_all_offsets(nafobj):
