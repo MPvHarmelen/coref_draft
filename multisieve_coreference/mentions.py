@@ -112,12 +112,15 @@ def merge_two_mentions(mention1, mention2):
 
 def merge_mentions(mentions):
     '''
-    Function that merges information from entity mentions
-    :param mentions: dictionary mapping mention number to specific mention
-    :return: list of mentions where identical spans are merged
+    Merge mentions that have an identical span or head.
+
+    Keeps the position of the earliest duplicate mention.
+
+    :param mentions: (possibly ordered) {id: mention} dictionary
+    :return:         (possibly ordered) {id: mention} dictionary
     '''
 
-    final_mentions = {}
+    final_mentions = type(mentions)()
 
     # TODO: create merge function and merge identical candidates
     # TODO: This code is O(m**2), but it shouldn't have to be, because we can
