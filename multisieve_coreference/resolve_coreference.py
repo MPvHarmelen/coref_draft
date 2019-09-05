@@ -403,7 +403,7 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
     return antecedents
 
 
-def apply_strict_head_match(mentions, coref_info, offset2string, sieve='5'):
+def apply_strict_head_match(mentions, coref_info, offset2string, sieve):
     """
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
@@ -742,8 +742,9 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 5-7: Strict Head Match")
-    apply_strict_head_match(mentions, coref_info, offset2string)
-    coref_info.merge()
+    for sieve in ['5', '6', '7']:
+        apply_strict_head_match(mentions, coref_info, offset2string, sieve)
+        coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
