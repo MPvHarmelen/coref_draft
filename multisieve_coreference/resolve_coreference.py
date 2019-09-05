@@ -811,8 +811,8 @@ def process_coreference(
         language=c.LANGUAGE):
     """
     Process coreferences and add to the given NAF.
-    Note that coreferences are added in place, and the NAF is returned for
-    convenience
+
+    Note that coreferences are added in place.
     """
     coref_classes, mentions = resolve_coreference(
         nafin,
