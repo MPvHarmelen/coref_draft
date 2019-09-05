@@ -224,39 +224,46 @@ def test_from_mentions(mentions):
                    " Entities is a filter function. As of now they do not have"
                    " a `repr` that can be `eval`ed.")
 @settings(verbosity=Verbosity.quiet)  # Tell hypothesis to shut up
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_repr(entities):
     assert entities == eval(repr(entities))
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_containment(entities):
     for entity in entities:
         assert entity in entities
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_length(entities):
     assert ilen(entities) == len(entities)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_reversed(entities):
     assert list(reversed(entities)) == list(reversed(list(entities)))
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_clear_disjointness_constraints(entities):
     entities.clear_disjointness_constraints()
     assert 0 == len(entities.disjoint_mentions)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_clear_entities(entities):
     entities.clear_entities()
     assert 0 == len(entities)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_clear_all(entities):
     entities.clear_all()
@@ -264,6 +271,7 @@ def test_clear_all(entities):
     assert 0 == len(entities)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_add(entities):
     new_entities = Entities(())
@@ -284,6 +292,7 @@ def test_remove(entities, random):
     assert len(list(entities)) == 0
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_discard_ignores(entities):
     not_there = 'Not in there'
@@ -291,6 +300,7 @@ def test_discard_ignores(entities):
     entities.discard(not_there)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=1), randoms())
 def test_void_disjointness_constraints(entities, random):
     # Randomly choose an entity
@@ -308,7 +318,7 @@ def test_void_disjointness_constraints(entities, random):
 
 
 @pytest.mark.slow
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(), randoms())
 def test_adhered_disjointness_constraints(entities, random):
     # Mark everything that is already disjoint as disjoint, and check that it
@@ -321,6 +331,7 @@ def test_adhered_disjointness_constraints(entities, random):
                 assert entities.disjointness_constraints_satisfied()
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(), randoms())
 def test_mark_disjoint_same(entities, random):
     for entity in entities:
@@ -328,6 +339,7 @@ def test_mark_disjoint_same(entities, random):
             entities.mark_disjoint(entity, entity)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=1), randoms())
 def test_merge(entities, random):
     # This should be more than enough to shrink entities
@@ -356,6 +368,7 @@ def test_merge(entities, random):
     assert len(all_mentions) == len(EmptyMention.unique(all_mentions))
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=3), randoms())
 def test_merge_foreign(entities, random):
     e1, e2, e3 = random.sample(list(entities), k=3)  # None should overlap
@@ -380,6 +393,7 @@ def test_merge_foreign(entities, random):
     entities.merge(e3, e2)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_all_merge_allowed(entities):
     for an_entity in entities:
@@ -387,6 +401,7 @@ def test_all_merge_allowed(entities):
             assert entities.merge_allowed(an_entity, another_entity)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=2), randoms())
 def test_merge_allowed(entities, random):
     # Randomly choose three entities, s.t. one is definitely different from
@@ -409,6 +424,7 @@ def test_merge_allowed(entities, random):
     assert not entities.merge_allowed(e1, e3)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_to_discard=10))
 def test_entities_before(entities):
     for i, entity in enumerate(entities):
@@ -417,17 +433,20 @@ def test_entities_before(entities):
         assert entity not in before
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_to_discard=10))
 def test_entity_sort_key(entities):
     assert sorted(entities, key=entities.entity_sort_key) == list(entities)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_self_not_candidate(entities):
     for entity in entities:
         assert entity not in entities.get_candidates(entity)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_maximum_candidates(entities):
     for entity in entities:
@@ -435,6 +454,7 @@ def test_maximum_candidates(entities):
             list(entities.entities_before(entity))
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=2), randoms())
 def test_no_unmergable_candidates(entities, random):
     # Randomly choose three entities, s.t. one is definitely different from
@@ -465,6 +485,7 @@ def test_no_unmergable_candidates(entities, random):
     assert e3 not in entities.get_candidates(e1)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses(min_size=1), integers())
 def test_candidates_of_discarded(entities, index):
     index %= len(entities)
@@ -474,6 +495,7 @@ def test_candidates_of_discarded(entities, index):
         entities.get_candidates(entity)
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_candidate_filter(entities):
     for entity in entities:
@@ -481,21 +503,3 @@ def test_candidate_filter(entities):
             entity,
             entity_filter=lambda x: False)
         ) == 0
-
-
-# def get_candidates(self, entity, entity_filter=None):
-#     """
-#     Get all Entity objects occurring before `entity` that pass
-#     `entity_filter` and would not void mention disjointness constraints if
-#     merged with `entity`.
-
-#     If `entity_filter` is None, use `self.default_filter`.
-#     """
-#     if entity_filter is None:
-#         entity_filter = self.default_filter
-#     return (
-#         candidate
-#         for candidate in self.entities_before(entity)
-#         if entity_filter(candidate)     # This filter first, because..
-#         and self.merge_allowed(entity, candidate)   # this one is expensive
-#     )
