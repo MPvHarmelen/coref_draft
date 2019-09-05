@@ -223,8 +223,9 @@ def test_from_mentions(mentions):
 @pytest.mark.xfail(error=SyntaxError, reason="One of the arguments of"
                    " Entities is a filter function. As of now they do not have"
                    " a `repr` that can be `eval`ed.")
-@settings(verbosity=Verbosity.quiet)  # Tell hypothesis to shut up
-@settings(suppress_health_check=[HealthCheck.too_slow])
+@settings(
+    verbosity=Verbosity.quiet,  # Tell hypothesis to shut up
+    suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
 def test_repr(entities):
     assert entities == eval(repr(entities))
