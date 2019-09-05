@@ -12,10 +12,9 @@ from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
 
-from . import offset_info as offinfo
 from .offset_info import (
     get_all_offsets,
-    create_offset_dicts,
+    get_offset2string_dict,
     get_string_from_offsets
 )
 from .naf_info import identify_direct_quotations
@@ -23,7 +22,7 @@ from .naf_info import identify_direct_quotations
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def match_some_span(mentions, coref_info, get_span):
+def match_some_span(mentions, coref_info, get_span, offset2string):
     '''
     Function that places entities with full string match in the same
     coreference group
@@ -41,7 +40,8 @@ def match_some_span(mentions, coref_info, get_span):
     #          as well
     for mid, mention in mentions.items():
         if mention.head_pos in ['name', 'noun']:
-            mention_string = get_string_from_offsets(get_span(mention))
+            mention_string = get_string_from_offsets(
+                get_span(mention), offset2string)
             if mention_string in found_entities:
                 coref_id = found_entities[mention_string]
                 coref_classes[coref_id].add(mention.id)
@@ -61,7 +61,7 @@ def match_some_span(mentions, coref_info, get_span):
                 found_entities[mention_string] = coref_id
 
 
-def match_full_name_overlap(mentions, coref_info):
+def match_full_name_overlap(mentions, coref_info, offset2string):
     '''
     Function that places entities with full string match in the same
     coreference group
@@ -71,10 +71,10 @@ def match_full_name_overlap(mentions, coref_info):
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     '''
-    match_some_span(mentions, coref_info, lambda m: m.span)
+    match_some_span(mentions, coref_info, lambda m: m.span, offset2string)
 
 
-def match_relaxed_string(mentions, coref_info):
+def match_relaxed_string(mentions, coref_info, offset2string):
     '''
     Function that matches mentions which have the same relaxed head
 
@@ -83,7 +83,8 @@ def match_relaxed_string(mentions, coref_info):
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     '''
-    match_some_span(mentions, coref_info, lambda m: m.relaxed_span)
+    match_some_span(
+        mentions, coref_info, lambda m: m.relaxed_span, offset2string)
 
 
 def included_in_direct_speech(quotations, mention, coref_info):
@@ -364,7 +365,7 @@ def apply_precise_constructs(mentions, coref_info):
     # f. Demonym Israel, Israeli (later)
 
 
-def find_strict_head_antecedents(mention, mentions, sieve):
+def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
     '''
     Function that looks at which other mentions might be antecedent for the
     current mention
@@ -373,18 +374,21 @@ def find_strict_head_antecedents(mention, mentions, sieve):
     :param mentions: dictionary of all mentions
     :return:         list of antecedent ids
     '''
-    head_string = offinfo.offset2string.get(mention.head_offset)
-    non_stopwords = get_string_from_offsets(mention.non_stopwords)
-    main_mods = get_string_from_offsets(mention.main_modifiers)
+    head_string = offset2string.get(mention.head_offset)
+    non_stopwords = get_string_from_offsets(
+        mention.non_stopwords, offset2string)
+    main_mods = get_string_from_offsets(
+        mention.main_modifiers, offset2string)
     antecedents = []
     for mid, comp_mention in mentions.items():
         # offset must be smaller to be antecedent and not i-to-i
         if comp_mention.head_offset < mention.head_offset and \
            not mention.head_offset <= comp_mention.end_offset:
-            if head_string == offinfo.offset2string.get(
+            if head_string == offset2string.get(
                comp_mention.head_offset):
                 match = True
-                full_span = get_string_from_offsets(comp_mention.span)
+                full_span = get_string_from_offsets(
+                    comp_mention.span, offset2string)
                 if sieve in ['5', '7']:
                     for non_stopword in non_stopwords:
                         if non_stopword not in full_span:
@@ -399,7 +403,7 @@ def find_strict_head_antecedents(mention, mentions, sieve):
     return antecedents
 
 
-def apply_strict_head_match(mentions, coref_info, sieve='5'):
+def apply_strict_head_match(mentions, coref_info, offset2string, sieve='5'):
     """
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
@@ -413,34 +417,35 @@ def apply_strict_head_match(mentions, coref_info, sieve='5'):
             antecedents = find_strict_head_antecedents(
                 mention,
                 mentions,
-                sieve
+                sieve,
+                offset2string,
             )
             if len(antecedents) > 0:
                 coref_info.add_coref_class(antecedents + [mention.id])
 
 
-def only_identical_numbers(span1, span2):
+def only_identical_numbers(span1, span2, offset2string):
 
-    word_list1 = get_string_from_offsets(span1)
-    word_list2 = get_string_from_offsets(span2)
+    word1 = get_string_from_offsets(span1, offset2string)
+    word2 = get_string_from_offsets(span2, offset2string)
 
-    for word in word_list1:
-        if word.isdigit() and word not in word_list2:
+    for letter in word1:
+        if letter.isdigit() and letter not in word2:
             return False
 
     return True
 
 
-def contains_number(span):
+def contains_number(span, offset2string):
 
-    for word in get_string_from_offsets(span):
-        if word.isdigit():
+    for letter in get_string_from_offsets(span, offset2string):
+        if letter.isdigit():
             return True
 
     return False
 
 
-def find_head_match_coreferents(mention, mentions):
+def find_head_match_coreferents(mention, mentions, offset2string):
     '''
     Function that looks at which mentions might be antecedent for the current
     mention
@@ -452,8 +457,9 @@ def find_head_match_coreferents(mention, mentions):
 
     boffset = mention.begin_offset
     eoffset = mention.end_offset
-    full_head_string = get_string_from_offsets(mention.full_head)
-    contains_numbers = contains_number(mention.span)
+    full_head_string = get_string_from_offsets(
+        mention.full_head, offset2string)
+    contains_numbers = contains_number(mention.span, offset2string)
 
     coreferents = []
 
@@ -464,13 +470,16 @@ def find_head_match_coreferents(mention, mentions):
             if not comp_mention.begin_offset <= boffset and \
                comp_mention.end_offset >= eoffset:
                 match = True
-                comp_string = get_string_from_offsets(comp_mention.full_head)
+                comp_string = get_string_from_offsets(
+                    comp_mention.full_head, offset2string)
                 for word in full_head_string.split():
                     if word not in comp_string:
                         match = False
-                if contains_numbers and contains_number(comp_mention.span):
+                comp_contains_numbers = contains_number(
+                   comp_mention.span, offset2string)
+                if contains_numbers and comp_contains_numbers:
                     if not only_identical_numbers(
-                            mention.span, comp_mention.span):
+                            mention.span, comp_mention.span, offset2string):
                         match = False
                 if match:
                     coreferents.append(mid)
@@ -478,17 +487,18 @@ def find_head_match_coreferents(mention, mentions):
     return coreferents
 
 
-def apply_proper_head_word_match(mentions, coref_info):
+def apply_proper_head_word_match(mentions, coref_info, offset2string):
 
     # FIXME: tool specific output for entity type
     for mention in mentions.values():
         if mention.entity_type in ['PER', 'ORG', 'LOC', 'MISC']:
-            coreferents = find_head_match_coreferents(mention, mentions)
+            coreferents = find_head_match_coreferents(
+                mention, mentions, offset2string)
             if len(coreferents) > 0:
                 coref_info.add_coref_class(coreferents + [mention.id])
 
 
-def find_relaxed_head_antecedents(mention, mentions):
+def find_relaxed_head_antecedents(mention, mentions, offset2string):
     '''
     Function that identifies antecedents for which relaxed head match applies
 
@@ -498,8 +508,10 @@ def find_relaxed_head_antecedents(mention, mentions):
     '''
 
     boffset = mention.begin_offset
-    full_head_string = get_string_from_offsets(mention.full_head)
-    non_stopwords = get_string_from_offsets(mention.non_stopwords)
+    full_head_string = get_string_from_offsets(
+        mention.full_head, offset2string)
+    non_stopwords = get_string_from_offsets(
+        mention.non_stopwords, offset2string)
     antecedents = []
 
     for mid, comp_mention in mentions.items():
@@ -508,12 +520,12 @@ def find_relaxed_head_antecedents(mention, mentions):
             if comp_mention.entity_type == mention.entity_type:
                 match = True
                 full_comp_head = get_string_from_offsets(
-                    comp_mention.full_head
-                )
+                    comp_mention.full_head, offset2string)
                 for word in full_head_string.split():
                     if word not in full_comp_head:
                         match = False
-                full_span = get_string_from_offsets(comp_mention.span)
+                full_span = get_string_from_offsets(
+                    comp_mention.span, offset2string)
                 for non_stopword in non_stopwords:
                     if non_stopword not in full_span:
                         match = False
@@ -523,7 +535,7 @@ def find_relaxed_head_antecedents(mention, mentions):
     return antecedents
 
 
-def apply_relaxed_head_match(mentions, coref_info):
+def apply_relaxed_head_match(mentions, coref_info, offset2string):
     """
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
@@ -532,7 +544,8 @@ def apply_relaxed_head_match(mentions, coref_info):
     """
     for mention in mentions.values():
         if mention.entity_type in ['PER', 'ORG', 'LOC', 'MISC']:
-            antecedents = find_relaxed_head_antecedents(mention, mentions)
+            antecedents = find_relaxed_head_antecedents(
+                mention, mentions, offset2string)
             if len(antecedents) > 0:
                 coref_info.add_coref_class(antecedents + [mention.id])
 
@@ -653,10 +666,6 @@ def post_process(nafobj, mentions, coref_info,
 
 
 def initialize_global_dictionaries(nafobj):
-
-    logger.debug("create_offset_dicts")
-    create_offset_dicts(nafobj)
-
     logger.debug("create_headdep_dicts")
     create_headdep_dicts(nafobj)
 
@@ -667,9 +676,13 @@ def resolve_coreference(nafin,
                         language=c.LANGUAGE):
 
     logger.info("Initializing...")
+    logger.debug("create_offset_dicts")
+    offset2string = get_offset2string_dict(nafin)
     initialize_global_dictionaries(nafin)
+
     logger.info("Finding mentions...")
     mentions = get_mentions(nafin, language)
+
     logger.info("Finding quotations...")
     quotations = identify_direct_quotations(nafin, mentions)
 
@@ -696,7 +709,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 2: String Match")
-    match_full_name_overlap(mentions, coref_info)
+    match_full_name_overlap(mentions, coref_info, offset2string)
     coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -707,7 +720,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 3: Relaxed String Match")
-    match_relaxed_string(mentions, coref_info)
+    match_relaxed_string(mentions, coref_info, offset2string)
     coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -729,7 +742,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 5-7: Strict Head Match")
-    apply_strict_head_match(mentions, coref_info)
+    apply_strict_head_match(mentions, coref_info, offset2string)
     coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -740,7 +753,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 8: Proper Head Word Match")
-    apply_proper_head_word_match(mentions, coref_info)
+    apply_proper_head_word_match(mentions, coref_info, offset2string)
     coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -751,7 +764,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 9: Relaxed Head Match")
-    apply_relaxed_head_match(mentions, coref_info)
+    apply_relaxed_head_match(mentions, coref_info, offset2string)
     coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:

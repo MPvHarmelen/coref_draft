@@ -1,12 +1,3 @@
-# global values mapping offsets to string and lemma respectively
-offset2string = None
-
-
-def create_offset_dicts(nafobj):
-    global offset2string
-    offset2string = get_offset2string_dict(nafobj)
-
-
 def get_offset2string_dict(nafobj):
 
     offset2string = {}
@@ -19,7 +10,7 @@ def get_offset2string_dict(nafobj):
     return offset2string
 
 
-def get_string_from_offsets(id_span):
+def get_string_from_offsets(id_span, offset2string):
     return ' '.join(offset2string.get(mid) for mid in id_span)
 
 
