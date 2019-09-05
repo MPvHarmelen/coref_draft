@@ -86,6 +86,8 @@ def partitions(draw, iterables, min_size=None, max_size=None):
     # Speed up, because this will take very long if we wait for chance.
     if min_size == bare_size:
         return partition(li, (1 for _ in li))
+    if max_size == 0:
+        return partition(li, ())
     if max_size == 1:
         return partition(li, (bare_size,))
 

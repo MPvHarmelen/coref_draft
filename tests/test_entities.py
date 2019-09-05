@@ -164,6 +164,12 @@ def entitieses(draw, min_size=None, max_size=None, min_to_discard=None,
     return entities
 
 
+@given(data())
+def test_empty_entitieses(data):
+    entities = data.draw(entitieses(max_size=0, max_to_discard=0))
+    assert len(entities) == 0
+
+
 @settings(suppress_health_check=[HealthCheck.too_slow])
 @given(data(), integers(min_value=1, max_value=MAX_PARTITIONABLE_NUMBER),
        integers(min_value=0))
