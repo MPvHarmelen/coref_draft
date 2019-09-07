@@ -30,7 +30,7 @@ class Entity:
     def __contains__(self, mention):
         return mention in self.mentions
 
-    def merge(self, entity):
+    def _merge(self, entity):
         """
         Merge a given Entity into this one.
 

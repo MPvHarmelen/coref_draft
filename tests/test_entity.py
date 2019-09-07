@@ -115,7 +115,7 @@ def test_repr(entity):
 
 def test_merge(an_entity, another_entity):
     merged = copy(an_entity)
-    merged.merge(another_entity)
+    merged._merge(another_entity)
     assert all(entity in merged for entity in an_entity)
     assert all(entity in merged for entity in another_entity)
 

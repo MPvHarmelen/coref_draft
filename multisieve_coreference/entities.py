@@ -246,7 +246,7 @@ class Entities:
             raise ValueError(
                 "I can only keep an Entity if it is already mine, but"
                 f" {entity_to_keep!r} not in {self!r}")
-        entity_to_keep.merge(other)
+        entity_to_keep._merge(other)
         if entity_to_keep is not other:
             self.discard(other)
         return entity_to_keep
