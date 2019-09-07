@@ -27,7 +27,6 @@ SINGLETON_MENTION_ATTRIBUTES = [
         'gender',
         'person',
         'entity_type',
-        'in_quotation',
         'is_relative_pronoun',
         'is_reflexive_pronoun',
         'sentence_number',

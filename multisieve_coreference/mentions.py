@@ -205,7 +205,6 @@ class Mention:
             gender=None,
             person=None,
             entity_type=None,
-            in_quotation=False,
             is_relative_pronoun=False,
             is_reflexive_pronoun=False,
             coreference_prohibited=None,
@@ -232,7 +231,6 @@ class Mention:
         :type gender:                  str
         :type person:                  str
         :type entity_type:             str
-        :type in_quotation:            bool
         :type is_relative_pronoun:     bool
         :type is_reflexive_pronoun:    bool
         :type coreference_prohibited:  list
@@ -273,7 +271,6 @@ class Mention:
         self.person = person
         self.entity_type = entity_type
 
-        self.in_quotation = in_quotation
         self.is_relative_pronoun = is_relative_pronoun
         self.is_reflexive_pronoun = is_reflexive_pronoun
 
@@ -291,7 +288,6 @@ class Mention:
             'gender={self.gender!r}, ' \
             'person={self.person!r}, ' \
             'entity_type={self.entity_type!r}, ' \
-            'in_quotation={self.in_quotation!r}, ' \
             'is_relative_pronoun={self.is_relative_pronoun!r}, ' \
             'is_reflexive_pronoun={self.is_reflexive_pronoun!r}, ' \
             'coreference_prohibited={self.coreference_prohibited!r}, ' \

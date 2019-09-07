@@ -98,8 +98,6 @@ def included_in_direct_speech(quotations, mention, coref_info):
     mention_span_set = set(mention.span)
     for quote in quotations:
         if mention_span_set.issubset(set(quote.span)):
-            # FIXME check if needed
-            mention.in_quotation = True
             source = quote.source
             addressee = quote.addressee
             topic = quote.topic
