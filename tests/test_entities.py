@@ -246,12 +246,6 @@ def test_length(entities):
 
 @settings(suppress_health_check=[HealthCheck.too_slow])
 @given(entitieses())
-def test_reversed(entities):
-    assert list(reversed(entities)) == list(reversed(list(entities)))
-
-
-@settings(suppress_health_check=[HealthCheck.too_slow])
-@given(entitieses())
 def test_clear_disjointness_constraints(entities):
     entities.clear_disjointness_constraints()
     assert 0 == len(entities.disjoint_mentions)
@@ -276,9 +270,9 @@ def test_clear_all(entities):
 @given(entitieses())
 def test_add(entities):
     new_entities = Entities(())
-    for entity in reversed(entities):
+    for entity in reversed(list(entities)):
         new_entities.add(entity)
-    assert list(entities) == list(reversed(new_entities))
+    assert list(entities) == list(reversed(list(new_entities)))
 
 
 @given(entitieses(), randoms())
@@ -504,3 +498,40 @@ def test_candidate_filter(entities):
             entity,
             entity_filter=lambda x: False)
         ) == 0
+
+
+@settings(suppress_health_check=[HealthCheck.too_slow])
+@given(entitieses(min_size=2), integers(), randoms())
+def test_nice_merge_during_iterations(entities, n_final, random):
+    n_final %= len(entities) - 1
+    n_final += 1
+    final_entities = random.sample(list(entities), n_final)
+    final_entities_ids = set(map(id, final_entities))
+    for entity in entities:
+        if id(entity) not in final_entities_ids:
+            entities.merge(
+                random.choice(final_entities),
+                entity
+            )
+    assert len(entities) == n_final
+
+
+@settings(suppress_health_check=[HealthCheck.too_slow])
+@given(entitieses(min_size=2), integers(), randoms())
+def test_mean_merge_during_iterations(entities, n_to_merge, random):
+    """
+    Test whether entities that are merged and discarded before they are
+    encountered during iteration are indeed left out of the iteration.
+    """
+    n_to_merge %= len(entities) - 1
+    n_to_merge += 1
+    to_merge = random.sample(list(entities)[1:], n_to_merge)
+    to_merge_ids = set(map(id, to_merge))
+    merged = False
+    for entity in entities:
+        if not merged:
+            merged = True
+            # This should only happen on the first iteration
+            for other in to_merge:
+                entities.merge(entity, other)
+        assert id(entity) not in to_merge_ids

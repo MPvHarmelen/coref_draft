@@ -71,18 +71,16 @@ class Entities:
     def __len__(self):
         return len(self._contained_entities)
 
-    def __iter__(self, end=None, increment=None):
+    def __iter__(self, stop=None):
         """
         Iterate over all remaining Entity objects.
 
-        :param end:     index with respect to self._all_entities to stop at
+        :param stop:    index with respect to self._all_entities to stop at
         """
         return filter(
             lambda x: x is not None,
-            self._all_entities[:end:increment])
-
-    def __reversed__(self):
-        return self.__iter__(increment=-1)
+            it.islice(self._all_entities, stop)
+        )
 
     def _get_entity_key(self, entity):
         return id(entity)
@@ -92,7 +90,7 @@ class Entities:
 
     def entities_before(self, entity):
         return self.__iter__(
-            end=self._contained_entities[self._get_entity_key(entity)])
+            stop=self._contained_entities[self._get_entity_key(entity)])
 
     def overwrite_entities(self, entities):
         """
