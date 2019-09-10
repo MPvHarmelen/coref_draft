@@ -21,6 +21,9 @@ class Entity:
     def __repr__(self):
         return self.__class__.__name__ + f"({self.mentions!r})"
 
+    def __str__(self):
+        return self.__class__.__name__ + f"({[m.id for m in self.mentions]!r})"
+
     def __eq__(self, other):
         return isinstance(other, Entity) and self.mentions == other.mentions
 

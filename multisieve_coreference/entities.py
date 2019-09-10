@@ -63,7 +63,11 @@ class Entities:
 
     def __repr__(self):
         return self.__class__.__name__ + f'({list(self)!r}, ' \
-            f'{self.disjoint_mentions}, {self.default_filter})'
+            f'{self.disjoint_mentions!r}, {self.default_filter!r})'
+
+    def __str__(self):
+        return self.__class__.__name__ + f'({list(self)!s}, ' \
+            f'{self.disjoint_mentions!s}, {self.default_filter!s})'
 
     def __contains__(self, entity):
         return self._get_entity_key(entity) in self._contained_entities
