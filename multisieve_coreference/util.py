@@ -51,3 +51,16 @@ def view_coref_classes(nafobj, mentions, coref_classes):
         )
         for cID, mention_ids in coref_classes.items()
     )
+
+
+def view_entities(nafobj, entities):
+    """
+    Content of Entity constituents on separate lines
+    """
+    return '\n'.join(
+        str(entity) + ':\n\t' + '\n\t'.join(
+            view_mention(nafobj, mention)
+            for mention in entity
+        )
+        for entity in entities
+    )
