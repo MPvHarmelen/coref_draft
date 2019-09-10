@@ -24,15 +24,15 @@ def view_mentions(nafobj, mentions):
     Content of mention constituent on separate lines
     """
     return '\n'.join(
-        view_mention(nafobj, mID, mention)
-        for mID, mention in mentions.items()
+        view_mention(nafobj, mention)
+        for mention in mentions.values()
     )
 
 
-def view_mention(nafobj, mention_ID, mention):
+def view_mention(nafobj, mention):
     dic = get_offset_to_term_id_dict(nafobj)
     return '{}: {!r}'.format(
-        mention_ID,
+        mention.id,
         list(it.chain.from_iterable(
             term_id_to_tokens(nafobj, termID)
             for termID in map(dic.get, mention.span)
@@ -46,7 +46,7 @@ def view_coref_classes(nafobj, mentions, coref_classes):
     """
     return '\n'.join(
         str(cID) + ':\n\t' + '\n\t'.join(
-            view_mention(nafobj, mID, mentions[mID])
+            view_mention(nafobj, mentions[mID])
             for mID in mention_ids
         )
         for cID, mention_ids in coref_classes.items()

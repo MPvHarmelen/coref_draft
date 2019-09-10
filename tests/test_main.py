@@ -14,6 +14,12 @@ def test_example_without_fill(example_naf_object, caplog):
     assert example_naf_object.coreference_layer is not None
 
 
+def test_example_debug(example_naf_object, caplog):
+    caplog.set_level('DEBUG')
+    process_coreference(example_naf_object)
+    assert example_naf_object.coreference_layer is not None
+
+
 @pytest.mark.slow
 def test_main_sonar1_without_fill(sonar_naf_object1, caplog):
     caplog.set_level('DEBUG', 'multisieve_coreference.dump')
