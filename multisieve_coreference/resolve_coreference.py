@@ -7,10 +7,10 @@ from pkg_resources import get_distribution
 from KafNafParserPy import KafNafParser, Clp
 
 from . import constants as c
-from .coref_info import CoreferenceInformation
 from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
+from .entities import Entities
 
 from .offset_info import (
     get_all_offsets,
@@ -22,297 +22,329 @@ from .naf_info import identify_direct_quotations
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def match_some_span(mentions, coref_info, get_span, offset2string):
+def match_some_span(entities, get_span, offset2string,
+                    entity_filter=lambda e: True):
     '''
-    Function that places entities with full string match in the same
-    coreference group
+    Merge entities that contain mentions with (full) string match.
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:        entities to use
+    :param get_span:        (mention -> span) function to get the span to use
+    :param offset2string:   offset2string dictionary to use
+    :param entity_filter:   filter to choose which entities this sieve should
+                            act upon
     '''
-    found_entities = {}
-    coref_classes = coref_info.coref_classes
-    # FIXME: verify (when evaluating) whether prohibited needs to be taken into
-    #        account here
-    # FIXME 2: now only surface strings, we may want to look at lemma matches
-    #          as well
-    for mid, mention in mentions.items():
-        if mention.head_pos in ['name', 'noun']:
+    # FIXME: now only surface strings, we may want to look at lemma matches
+    #        as well
+    # FIXME: this code calls `get_string_from_offsets` (at least) twice for
+    #        every mention: once (the first time) when it is `mention` (in
+    #        `entity`), and again every time that it is `candidate_mention` (in
+    #        `candidate`). (Attempt at faster algorithm commented below.)
+
+    # For every `entity`, we should break the `for mention` loop at the first
+    # `candidate` with a matching `candidate_mention`.
+    for entity in filter(entity_filter, entities):
+        for mention in entity:
             mention_string = get_string_from_offsets(
                 get_span(mention), offset2string)
-            if mention_string in found_entities:
-                coref_id = found_entities[mention_string]
-                coref_classes[coref_id].add(mention.id)
-            else:
-                classes_of_mention = coref_info.classes_of_mention(mention.id)
-                if len(classes_of_mention) == 0:
-                    # Don't merge because merging may change the IDs in
-                    # `found_entities`
-                    coref_id = coref_info.add_coref_class(
-                        [mention.id],
-                        merge=False
-                    )
+            for candidate in entities.get_candidates(entity, entity_filter):
+                for candidate_mention in candidate:
+                    candidate_string = get_string_from_offsets(
+                        get_span(mention), offset2string)
+                    if candidate_string == mention_string:
+                        # Candidates should be kept, because they appear
+                        # earlier. (Lee et al. 2013)
+                        entities.merge(candidate, entity)
+                        break   # We're done now
                 else:
-                    # coref classes will usually have a length 1; if not, it
-                    # doesn't matter which one is picked
-                    coref_id = next(iter(classes_of_mention))
-                found_entities[mention_string] = coref_id
+                    # The `for candidate_mention` loop wasn't broken, so we
+                    # should try the next `candidate`. Thus we must `continue`
+                    # to avoid breaking the `for candidate` loop.
+                    continue
+                # Break the `for candidate` loop, because apparently the
+                # `for candidate_mention` loop was broken too.
+                break
+            else:
+                # The `for candidate` loop wasn't broken, so we should try the
+                # next `mention`. Therefore we must `continue` to avoid
+                # breaking the `for mention` loop.
+                continue
+            # Break the `for mention` loop, because apparently the
+            # `for candidate` loop was broken too, indicating that we've found
+            # a matching `candidate`, and this `entity` has been merged into it
+            break
+
+    # Attempt at faster algorithm (I will only finish this when this function
+    # seems to take a lot of time).
+    # earlier_strings = {}
+    # for entity in filter(entity_filter, entities):
+    #     for mention in entity:
+    #         mention_string = get_string_from_offsets(
+    #             get_span(mention), offset2string)
+    #         if mention_string in earlier_strings:
+    #             possibly_candidate = earlier_strings[mention_string]
+    #             if possibly_candidate in entities.get_candidates(entity):
+    #                 entities.merge(possibly_candidate, entity)
+    #                 break
+    #             else:
+    #                 # ????
+    #                 ...
+    #         else:
+    #             earlier_strings[mention_string] = entity
 
 
-def match_full_name_overlap(mentions, coref_info, offset2string):
+def match_full_name_overlap(entities, offset2string):
     '''
-    Function that places entities with full string match in the same
-    coreference group
+    Merge entities with full string match
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:        entities to use
+    :param offset2string:   offset2string dictionary to use
+    :return:                None (Entities is updated in place)
     '''
-    match_some_span(mentions, coref_info, lambda m: m.span, offset2string)
+    match_some_span(entities, lambda m: m.span, offset2string)
 
 
-def match_relaxed_string(mentions, coref_info, offset2string):
+def match_relaxed_string(entities, offset2string):
     '''
-    Function that matches mentions which have the same relaxed head
+    Merge nominal entities which have the same relaxed string
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:        entities to use
+    :param offset2string:   offset2string dictionary to use
+    :return:                None (Entities is updated in place)
     '''
+    nominal_poses = {'name', 'noun'}
+
+    def entity_filter(entity):
+        return bool(
+            nominal_poses.intersection(entity.mention_attr('head_pos')))
+
     match_some_span(
-        mentions, coref_info, lambda m: m.relaxed_span, offset2string)
+        entities, lambda m: m.relaxed_span, offset2string, entity_filter)
 
 
-def included_in_direct_speech(quotations, mention, coref_info):
+def speaker_identification(quotations, entities):
     '''
-    Function that verifies whether mention is included in some quotation
+    Apply the first sieve; assigning coreference or prohibiting coreference
+    based on direct speech.
+
+    The algorithm for this function is quoted below from Lee et al. (2013),
+    with check marks indicating whether the rules are actually implemented:
+
+        - [X] <I>s assigned to the same speaker are coreferent.
+        - [ ] <you>s with the same speaker are coreferent.
+        - [X] The speaker and <I>s in her text are coreferent.
+        (...)
+        - [ ] The speaker and a mention which is not <I> in the speaker's
+              utterance cannot be coreferent.
+        - [ ] Two <I>s (or two <you>s, or two <we>s) assigned to different
+              speakers cannot be coreferent.
+        - [ ] Two different person pronouns by the same speaker cannot be
+              coreferent.
+        - [ ] Nominal mentions cannot be coreferent with <I>, <you>, or <we> in
+              the same turn or quotation.
+        - [ ] In conversations, <you> can corefer only with the previous
+              speaker.
+        (...)
+        We define <I> as _I_, _my_, _me_, or _mine_, <we> as first person
+        plural pronouns, and <you> as second person pronouns.
+
+    The quote entities are kept, while the ones corresponding to pronouns in
+    the are discarded when merged.
+
     :param quotations:  list of quotation objects
     :param mention:     one specific `Mention`
     :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :return:            None (Entities is updated in place)
     '''
-    mention_span_set = set(mention.span)
-    for quote in quotations:
-        if mention_span_set.issubset(set(quote.span)):
-            source = quote.source
-            addressee = quote.addressee
-            topic = quote.topic
-            if mention.head_pos == 'pron':
-                if mention.person == '1':
-                    if source:
-                        coref_info.add_coref_class([mention.id, source])
-                    if topic:
-                        mention.coreference_prohibited.append(topic)
-                    if addressee:
-                        mention.coreference_prohibited.append(addressee)
-                elif mention.person == '2':
-                    if source:
-                        mention.coreference_prohibited.append(source)
-                    if topic:
-                        mention.coreference_prohibited.append(topic)
-                    if addressee:
-                        coref_info.add_coref_class([mention.id, addressee])
-                elif mention.person == '3':
-                    if source:
-                        mention.coreference_prohibited.append(source)
-                    if topic:
-                        coref_info.add_coref_class([mention.id, topic])
-                    if addressee:
-                        mention.coreference_prohibited.append(addressee)
-            elif source:
-                    mention.coreference_prohibited.append(source)
-                # FIXME this bad indentation could indicate a mistake. Check
-                # with algorithm from paper
-                # TODO once vocative check installed; also prohibit linking
-                # names to speaker
+    for entity in entities:
+        entity_span = entity.flat_mention_attr('span')
+        for quote in quotations:
+            if entity_span.issubset(set(quote.span)):
+                source = quote.source
+                addressee = quote.addressee
+                topic = quote.topic
+                if 'pron' in entity.mention_attr('head_pos'):
+                    person = entity.mention_attr('person')
+                    if '1' in person:
+                        if source:
+                            entities.merge(source, entity)
+                        if topic:
+                            entities.mark_disjoint(entity, topic)
+                        if addressee:
+                            entities.mark_disjoint(entity, addressee)
+                    elif '2' in person:
+                        if source:
+                            entities.mark_disjoint(entity, source)
+                        if topic:
+                            entities.mark_disjoint(entity, topic)
+                        if addressee:
+                            entities.merge(addressee, entity)
+                    elif '3' in person:
+                        if source:
+                            entities.mark_disjoint(entity, source)
+                        if topic:
+                            # Why should every third person pronoun refer to
+                            # the `topic` of the quote?
+                            # There can be multiple genders and/or
+                            # multiplicities in the pronouns, and therefore
+                            # they shouldn't all refer to the same topic??
+                            entities.merge(topic, entity)
+                        if addressee:
+                            entities.merge(addressee, entity)
+                elif source:
+                    entities.mark_disjoint(entity, source)
+                    # TODO once vocative check installed; also prohibit linking
+                    # names to speaker
 
 
-def direct_speech_interpretation(quotations, mentions, coref_info):
-    '''
-    Function that applies the first sieve; assigning coreference or prohibited
-    coreference based on direct speech
-
-    :param quotations:  list of quotation objects
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
-    '''
-    for mid, mention in mentions.items():
-        included_in_direct_speech(quotations, mention, coref_info)
-
-
-def identify_span_matching_mention(span, mid, mentions):
-    """
-    Find the mentions different from `mid` that have the same span as `span`.
-
-    :param span:        span to match mention spans against
-    :param mid:         ID of the mention that should be ignored
-    :param mentions:    {ID: mention} dictionary of all mentions to consider
-    :return:            list of IDs of mentions that have `span` as their span
-    """
-
-    matching_mentions = []
-    for ment_id, mention in mentions.items():
-        if not ment_id == mid:
-            if set(mention.span) == set(span):
-                matching_mentions.append(ment_id)
-
-    return matching_mentions
-
-
-def identify_some_structures(mentions, coref_info, get_structures):
+def identify_some_structures(entities, structure_name):
     """
     Assigns coreference for some structures in place
 
-    :param mentions:       dictionary of all available mention objects (key is
-                           mention id)
-    :param coref_info:     CoreferenceInformation with current coreference
-                           classes
-    :param get_structures: function that returns a list of spans given a
-                           `Mention` object.
-    :return:               None (mentions and coref_classes are updated in
-                           place)
+    :param entities:        entities to use
+    :param get_structures:  name of the Mention attribute that is an iterable
+                            of (hashable) spans.
+    :return:                None (Entities is updated in place)
     """
-    for mid, mention in mentions.items():
-        structures = get_structures(mention)
-        for structure in structures:
-            matching_mentions = identify_span_matching_mention(
-                structure,
-                mid,
-                mentions
-            )
-            if len(matching_mentions) > 0:
-                coref_info.add_coref_class([mid] + matching_mentions)
+    for entity in entities:
+        structures = entity.flat_mention_attr(structure_name)
+        for candidate in entities.get_candidates(entity):
+            if any(mention.span in structures for mention in candidate):
+                entities.merge(candidate, entity)
+                break
 
 
-def identify_appositive_structures(mentions, coref_info):
+def identify_appositive_structures(entities):
     '''
     Assigns coreference for appositive structures in place
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:    entities to use
+    :return:            None (Entities is updated in place)
     '''
-    identify_some_structures(mentions, coref_info, lambda m: m.appositives)
+    identify_some_structures(entities, 'appositives')
 
 
-def identify_predicative_structures(mentions, coref_info):
+def identify_predicative_structures(entities):
     '''
     Assigns coreference for predicative structures in place
 
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
     :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :return:                None (Entities is updated in place)
     '''
-    identify_some_structures(mentions, coref_info, lambda m: m.predicatives)
+    identify_some_structures(entities, 'predicatives')
 
 
-def get_closest_match_relative_pronoun(mentions, matching, mention_index):
-
-    candidates = {}
-    for mid in matching:
-        mention = mentions.get(mid)
-        offset = mention.head_offset
-        candidates[mention] = offset
-    antecedent = identify_closest_candidate(mention_index, candidates)
-    return antecedent
-
-
-def resolve_relative_pronoun_structures(mentions, coref_info):
+def resolve_relative_pronoun_structures(entities):
     '''
     Identifies relative pronouns and assigns them to the class of the noun
     they're modifying
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:    entities to use
+    :return:            None (Entities is updated in place)
     '''
-    for mid, mention in mentions.items():
-        if mention.is_relative_pronoun:
-            matching = []
-            for omid, othermention in mentions.items():
-                if not omid == mid and \
-                   mention.head_offset not in othermention.span:
-                    for mod in othermention.modifiers:
-                        if mention.head_offset in mod:
-                            matching.append(omid)
-            if len(matching) == 1:
-                coref_info.add_coref_class(matching + [mid])
-            elif len(matching) > 1:
-                mention_index = mention.head_offset
-                my_match = get_closest_match_relative_pronoun(
-                    mentions,
-                    matching,
-                    mention_index
-                )
-                coref_info.add_coref_class([my_match.id, mid])
+    for entity in entities:
+        if any(entity.mention_attr('is_relative_pronoun')):
+            head_offsets = entity.mention_attr('head_offsets')
+            for candidate in entities.get_candidates(entity):
+                # If any of the `head_offsets` of this entity appear in the
+                # `modifiers` of the candidate
+                if head_offsets & candidate.flat_mention_attr('modifiers'):
+                    entities.merge(candidate, entity)
+                    break
 
 
-def resolve_reflexive_pronoun_structures(mentions, coref_info):
+def resolve_reflexive_pronoun_structures(entities):
     '''
-    Identifies mention that is correct coreference for reflexives
+    Merge two entities containing mentions for which all of the following hold:
+     - they are in the same sentence
+     - they aren't contained in each other
+     - other is before mention
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    But this algorithm is wrong for Dutch (thinks Martin):
+
+     - it's far too eager:
+        it does not check whether the antecedent is the subject.
+     - it's too strict:
+        "[zich] wassen deed [hij] elke dag"
+        is a counter-example for the last rule
+
+    :param entities:    entities to use
+    :return:            None (Entities is updated in place)
     '''
-    for mid, mention in mentions.items():
-        if mention.is_reflexive_pronoun:
-            matching = []
-            sent_nr = mention.sentence_number
-            for omid, othermention in mentions.items():
-                if othermention.sentence_number == sent_nr:
-                    if not omid == mid and \
-                       mention.head_offset not in othermention.span:
-                        if int(othermention.head_offset) < mention.head_offset:
-                            matching.append(omid)
-            if len(matching) == 1:
-                coref_info.add_coref_class(matching + [mid])
-            elif len(matching) > 1:
-                mention_index = mention.head_offset
-                my_match = get_closest_match_relative_pronoun(
-                    mentions,
-                    matching,
-                    mention_index
-                )
-                coref_info.add_coref_class([my_match.id, mid])
+    for entity in entities:
+        for mention in entity:
+            if mention.is_reflexive_pronoun:
+                sent_nr = mention.sentence_number
+                for candidate in entities.get_candidates(entity):
+                    for cand_mention in candidate:
+                        if cand_mention.sentence_number == sent_nr and \
+                           mention.head_offset not in cand_mention.span and \
+                           cand_mention.head_offset < mention.head_offset:
+                            # We've found what we want!
+                            entities.merge(candidate, entity)
+                            break
+                    else:
+                        # This `candidate` is inadequate, thus we should
+                        # `continue` and try the next.
+                        continue
+                    # We didn't continue, so we should break the
+                    # `for candidate` loop.
+                    break
+                else:
+                    # the `for candidate` wasn't broken, so this `mention` did
+                    # not lead to an adequate `candidate`, thus we should
+                    # `continue` and try the next `mention`.
+                    continue
+                # We didn't continue, so we should break the `for mention`
+                # loop, as we have apparently merged this `entity` into an
+                # adequate `candidate`.
+                break
 
 
-def identify_acronyms_or_alternative_names(mentions, coref_info):
+def identify_acronyms_or_alternative_names(entities):
     '''
     Identifies structures that add alternative name
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    This function, does **not** do any acronym detection.
+    It does merge two named entities if one modifies the other.
+
+    According to Lee et al. (2013), this should adhere to the following
+    algorithm:
+
+    > both mentions are tagged as NNP and one of them is an acronym of the
+    > other (e.g., [Agence France Presse] ... [AFP]). Our acronym detection
+    > algorithm marks a mention as an acronym of another if its text equals the
+    > sequence of upper case characters in the other mention. The algorithm is
+    > simple, but our error analysis suggests it nonetheless does not lead to
+    > errors.
+
+    :param entities:    entities to use
+    :return:            None (Entities is updated in place)
     '''
-    # FIXME input specific
-    for mid, mention in mentions.items():
-        if mention.entity_type in ['PER', 'ORG', 'LOC', 'MISC'] and \
-           len(mention.modifiers) > 0:
-            final_matches = []
-            for mod in mention.modifiers:
-                matching_mentions = identify_span_matching_mention(
-                    mod,
-                    mid,
-                    mentions
-                )
-                for matchid in matching_mentions:
-                    mymatch = mentions.get(matchid)
-                    if mymatch.entity_type in ['PER', 'ORG', 'LOC', 'MISC']:
-                        final_matches.append(matchid)
-            if len(final_matches) > 0:
-                coref_info.add_coref_class(final_matches + [mid])
+    # FIXME: input specific
+    correct_types = {
+        'PER',  # person
+        'ORG',  # organisation
+        'LOC',  # location
+        'MISC'  # miscellaneous
+    }
+    for entity in entities:
+        # modifiers is of type `list(tuple(offset))`
+        # If this entity is a named one
+        if correct_types.intersection(entity.mention_attr('entity_type')):
+            for candidate in entities.get_candidates(entity):
+                etypes = candidate.mention_attr('entity_type')
+                if correct_types.intersection(etypes):
+                    e_modifies_c = entity.mention_attr('span').intersection(
+                        candidate.flat_mention_attr('modifiers')
+                    )
+                    c_modifies_e = candidate.mention_attr('span').intersection(
+                        entity.flat_mention_attr('modifiers')
+                    )
+                    if e_modifies_c or c_modifies_e:
+                        entities.merge(candidate, entity)
+                        break
 
 
 def get_sentence_mentions(mentions):
@@ -345,21 +377,19 @@ def add_coref_prohibitions(mentions, coref_info):
                     mention.coreference_prohibited.append(same_sent_mid)
 
 
-def apply_precise_constructs(mentions, coref_info):
+def apply_precise_constructs(entities):
     '''
     Function that moderates the precise constructs (calling one after the
     other)
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:    entities to use
+    :return:            None (Entities is updated in place)
     '''
-    identify_appositive_structures(mentions, coref_info)
-    identify_predicative_structures(mentions, coref_info)
-    resolve_relative_pronoun_structures(mentions, coref_info)
-    identify_acronyms_or_alternative_names(mentions, coref_info)
-    resolve_reflexive_pronoun_structures(mentions, coref_info)
+    identify_appositive_structures(entities)
+    identify_predicative_structures(entities)
+    resolve_relative_pronoun_structures(entities)
+    identify_acronyms_or_alternative_names(entities)
+    resolve_reflexive_pronoun_structures(entities)
     # f. Demonym Israel, Israeli (later)
 
 
@@ -401,25 +431,84 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
     return antecedents
 
 
-def apply_strict_head_match(mentions, coref_info, offset2string, sieve):
+def apply_strict_head_match(entities, offset2string, sieve):
     """
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :param sieve:       ID of the sieve as a string
-    :return:            None (mentions and coref_classes are updated in place)
+    :param entities:        entities to use
+    :param offset2string:   offset2string dictionary to use
+    :param sieve:           ID of the sieve as a string
+    :return:                None (Entities is updated in place)
     """
     # FIXME: parser specific check for pronoun
-    for mention in mentions.values():
-        if not mention.head_pos == 'pron':
-            antecedents = find_strict_head_antecedents(
-                mention,
-                mentions,
-                sieve,
-                offset2string,
-            )
-            if len(antecedents) > 0:
-                coref_info.add_coref_class(antecedents + [mention.id])
+    # FIXME: lots of things are calculated repeatedly and forgotten again.
+    for entity in entities:
+        # entity level "Word inclusion"
+        non_stopwords = set(map(
+            offset2string.get,
+            entity.flat_mention_attr('non_stopwords')
+        ))
+        # For any mention in this entity that isn't a pronoun
+        for mention in (m for m in entity if m.head_pos != 'pron'):
+            head_word = offset2string[mention.head_offset]
+            main_mods = set(map(offset2string.get, mention.main_modifiers))
+            for antecedent in entities.get_candidates(entity):
+                # "Entity head match", i.e.:
+                #   the mention `head_word` matches _any_ head word of mentions
+                #   in the `antecedent` entity.
+                antecedent_head_words = map(
+                    offset2string.get,
+                    antecedent.mention_attr('head_offset')
+                )
+                # entity level "Word inclusion", i.e.:
+                #   all the non-stop words in `entity` are included in the set
+                #   of non-stop words in the `antecedent` entity.
+                antecedent_non_stopwords = set(map(
+                    offset2string.get,
+                    antecedent.flat_mention_attr('non_stopwords')
+                ))
+                if head_word in antecedent_head_words and \
+                   (sieve == '7' or non_stopwords <= antecedent_non_stopwords):
+                    # "Not I-within-I" is ignored for Dutch
+                    if sieve != '6':
+                        # "Compatible modifiers only", i.e.:
+                        #   the `mention`s modifiers are all included in in the
+                        #   modifiers of the `antecedent_mention`. (...)
+                        #   For this feature we only use modifiers that are
+                        #   nouns or adjectives. (Thus `main_modifiers` instead
+                        #   of `modifiers`.)
+                        for antecedent_mention in antecedent:
+                            antecedent_main_mods = set(map(
+                                offset2string.get, antecedent.main_modifiers
+                            ))
+                            if main_mods <= antecedent_main_mods:
+                                # We've found an adequate antecedent!
+                                # Merging is done just before breaking the
+                                # `for antecedent` loop, to reduce double code
+                                # and the number of break statements.
+                                # To make sure the `continue` statement below
+                                # isn't run, we should break this
+                                # `for antecedent_mention` loop.
+                                break
+                        else:
+                            # Nothing found, so `continue` the `for antecedent`
+                            # loop to avoid breakage, so we try the next
+                            # `antecedent` instead of merging.
+                            continue
+                    # Break the `for antecedent` loop, because apparently the
+                    # inner loop was broken or skipped, indicating that we've
+                    # found a matching antecedent.
+                    # To avoid duplicate code and extra breaks, the merging is
+                    # done now.
+                    entities.merge(antecedent, entity)
+                    break
+            else:
+                # The inner loops weren't broken, so we must `continue` to
+                # avoid breaking the `for mention` loop, because we want to
+                # try whether the next `mention` has any adequate antecedents.
+                continue
+            # Break the `for mention` loop, because apparently the
+            # `for antecedent` loop was broken too, indicating that we've found
+            # an adequate antecedent.
+            break
 
 
 def only_identical_numbers(span1, span2, offset2string):
@@ -485,11 +574,18 @@ def find_head_match_coreferents(mention, mentions, offset2string):
     return coreferents
 
 
-def apply_proper_head_word_match(mentions, coref_info, offset2string):
-
+def apply_proper_head_word_match(entities, offset2string):
     # FIXME: tool specific output for entity type
+    correct_types = {
+        'PER',  # person
+        'ORG',  # organisation
+        'LOC',  # location
+        'MISC'  # miscellaneous
+    }
+    for entity in entities:
+        ...  # First do the abstraction to fix spaghetti code
     for mention in mentions.values():
-        if mention.entity_type in ['PER', 'ORG', 'LOC', 'MISC']:
+        if mention.entity_type in correct_types:
             coreferents = find_head_match_coreferents(
                 mention, mentions, offset2string)
             if len(coreferents) > 0:
@@ -681,95 +777,89 @@ def resolve_coreference(nafin,
     logger.info("Finding mentions...")
     mentions = get_mentions(nafin, language)
 
-    logger.info("Finding quotations...")
-    quotations = identify_direct_quotations(nafin, mentions)
-
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions
         logger.debug(
-            "Mentions just before S1: {}".format(
+            "Mentions: {}".format(
                 view_mentions(nafin, mentions)
             )
         )
 
-    coref_info = CoreferenceInformation()
+    # Order matters (a lot), but `mentions` is an OrderedDict (hopefully :)
+    entities = Entities.from_mentions(mentions.values())
+
+    logger.info("Finding quotations...")
+    quotations = identify_direct_quotations(nafin, entities)
 
     logger.info("Sieve 1: Speaker Identification")
-    direct_speech_interpretation(quotations, mentions, coref_info)
-    coref_info.merge()
+    speaker_identification(quotations, entities)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
-        from .util import view_coref_classes
+        from .util import view_entities
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 2: String Match")
-    match_full_name_overlap(mentions, coref_info, offset2string)
-    coref_info.merge()
+    match_full_name_overlap(entities, offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 3: Relaxed String Match")
-    match_relaxed_string(mentions, coref_info, offset2string)
-    coref_info.merge()
+    match_relaxed_string(entities, offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 4: Precise constructs")
-    apply_precise_constructs(mentions, coref_info)
-    coref_info.merge()
+    apply_precise_constructs(entities)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 5-7: Strict Head Match")
     for sieve in ['5', '6', '7']:
-        apply_strict_head_match(mentions, coref_info, offset2string, sieve)
-        coref_info.merge()
+        apply_strict_head_match(entities, offset2string, sieve)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 8: Proper Head Word Match")
-    apply_proper_head_word_match(mentions, coref_info, offset2string)
-    coref_info.merge()
+    apply_proper_head_word_match(entities, offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
     logger.info("Sieve 9: Relaxed Head Match")
     apply_relaxed_head_match(mentions, coref_info, offset2string)
-    coref_info.merge()
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
@@ -780,8 +870,8 @@ def resolve_coreference(nafin,
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 
@@ -790,17 +880,8 @@ def resolve_coreference(nafin,
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
-            )
-        )
-
-    coref_info.merge()
-
-    if logger.getEffectiveLevel() <= logging.DEBUG:
-        logger.debug(
-            "Coreference classes: {}".format(
-                view_coref_classes(nafin, mentions, coref_info.coref_classes)
+            "Entities: {}".format(
+                view_entities(nafin, entities)
             )
         )
 

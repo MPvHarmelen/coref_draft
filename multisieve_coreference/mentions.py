@@ -220,6 +220,8 @@ class Mention:
         #TODO: revise so that provides information needed for some sieve;
         #STEP 1: sieve 3 needs option to remove post-head modifiers
 
+        :param main_modifiers:          all `modifiers` that are
+
         :type span:                    tuple
         :type relaxed_span:            tuple
         :type full_head:               tuple
