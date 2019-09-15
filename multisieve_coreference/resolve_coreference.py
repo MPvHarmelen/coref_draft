@@ -11,6 +11,7 @@ from .constituents import create_headdep_dicts
 from .dump import add_coreference_to_naf
 from .mentions import get_mentions
 from .entities import Entities
+from .sieve_runner import SieveRunner
 
 from .offset_info import (
     get_all_offsets,
@@ -22,8 +23,8 @@ from .naf_info import identify_direct_quotations
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def match_some_span(entities, get_span, offset2string,
-                    entity_filter=lambda e: True):
+def match_some_span(entity, candidates, get_span, offset2string,
+                    candidate_filter=lambda e: True):
     '''
     Merge entities that contain mentions with (full) string match.
 
@@ -42,57 +43,36 @@ def match_some_span(entities, get_span, offset2string,
 
     # For every `entity`, we should break the `for mention` loop at the first
     # `candidate` with a matching `candidate_mention`.
-    for entity in filter(entity_filter, entities):
-        for mention in entity:
-            mention_string = get_string_from_offsets(
-                get_span(mention), offset2string)
-            for candidate in entities.get_candidates(entity, entity_filter):
-                for candidate_mention in candidate:
-                    candidate_string = get_string_from_offsets(
-                        get_span(mention), offset2string)
-                    if candidate_string == mention_string:
-                        # Candidates should be kept, because they appear
-                        # earlier. (Lee et al. 2013)
-                        entities.merge(candidate, entity)
-                        break   # We're done now
-                else:
-                    # The `for candidate_mention` loop wasn't broken, so we
-                    # should try the next `candidate`. Thus we must `continue`
-                    # to avoid breaking the `for candidate` loop.
-                    continue
-                # Break the `for candidate` loop, because apparently the
-                # `for candidate_mention` loop was broken too.
-                break
-            else:
-                # The `for candidate` loop wasn't broken, so we should try the
-                # next `mention`. Therefore we must `continue` to avoid
-                # breaking the `for mention` loop.
-                continue
-            # Break the `for mention` loop, because apparently the
-            # `for candidate` loop was broken too, indicating that we've found
-            # a matching `candidate`, and this `entity` has been merged into it
-            break
+    for mention in entity:
+        mention_string = get_string_from_offsets(
+            get_span(mention), offset2string)
+        for candidate in filter(candidate_filter, candidates):
+            for candidate_mention in candidate:
+                candidate_string = get_string_from_offsets(
+                    get_span(mention), offset2string)
+                if candidate_string == mention_string:
+                    # Candidates should be kept, because they appear
+                    # earlier. (Lee et al. 2013)
+                    return candidate
 
     # Attempt at faster algorithm (I will only finish this when this function
     # seems to take a lot of time).
     # earlier_strings = {}
-    # for entity in filter(entity_filter, entities):
-    #     for mention in entity:
-    #         mention_string = get_string_from_offsets(
-    #             get_span(mention), offset2string)
-    #         if mention_string in earlier_strings:
-    #             possibly_candidate = earlier_strings[mention_string]
-    #             if possibly_candidate in entities.get_candidates(entity):
-    #                 entities.merge(possibly_candidate, entity)
-    #                 break
-    #             else:
-    #                 # ????
-    #                 ...
+    # for mention in entity:
+    #     mention_string = get_string_from_offsets(
+    #         get_span(mention), offset2string)
+    #     if mention_string in earlier_strings:
+    #         possibly_candidate = earlier_strings[mention_string]
+    #         if possibly_candidate in entities.get_candidates(entity):
+    #             return possibly_candidate
     #         else:
-    #             earlier_strings[mention_string] = entity
+    #             # ????
+    #             ...
+    #     else:
+    #         earlier_strings[mention_string] = entity
 
 
-def match_full_name_overlap(entities, offset2string):
+def match_full_name_overlap(entity, candidates, mark_disjoint, offset2string):
     '''
     Merge entities with full string match
 
@@ -100,10 +80,11 @@ def match_full_name_overlap(entities, offset2string):
     :param offset2string:   offset2string dictionary to use
     :return:                None (Entities is updated in place)
     '''
-    match_some_span(entities, lambda m: m.span, offset2string)
+    return match_some_span(entity, candidates, lambda m: m.span, offset2string)
 
 
-def match_relaxed_string(entities, offset2string):
+def match_relaxed_string(
+        entity, candidates, mark_disjoint, offset2string, candidate_filter):
     '''
     Merge nominal entities which have the same relaxed string
 
@@ -111,17 +92,15 @@ def match_relaxed_string(entities, offset2string):
     :param offset2string:   offset2string dictionary to use
     :return:                None (Entities is updated in place)
     '''
-    nominal_poses = {'name', 'noun'}
-
-    def entity_filter(entity):
-        return bool(
-            nominal_poses.intersection(entity.mention_attr('head_pos')))
-
-    match_some_span(
-        entities, lambda m: m.relaxed_span, offset2string, entity_filter)
+    return match_some_span(
+        entity,
+        candidates,
+        lambda m: m.relaxed_span,
+        offset2string,
+        candidate_filter)
 
 
-def speaker_identification(quotations, entities):
+def speaker_identification(entity, candidates, mark_disjoint, quotations):
     '''
     Apply the first sieve; assigning coreference or prohibiting coreference
     based on direct speech.
@@ -151,52 +130,49 @@ def speaker_identification(quotations, entities):
     the are discarded when merged.
 
     :param quotations:  list of quotation objects
-    :param mention:     one specific `Mention`
-    :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (Entities is updated in place)
     '''
-    for entity in entities:
-        entity_span = entity.flat_mention_attr('span')
-        for quote in quotations:
-            if entity_span.issubset(set(quote.span)):
-                source = quote.source
-                addressee = quote.addressee
-                topic = quote.topic
-                if 'pron' in entity.mention_attr('head_pos'):
-                    person = entity.mention_attr('person')
-                    if '1' in person:
-                        if source:
-                            entities.merge(source, entity)
-                        if topic:
-                            entities.mark_disjoint(entity, topic)
-                        if addressee:
-                            entities.mark_disjoint(entity, addressee)
-                    elif '2' in person:
-                        if source:
-                            entities.mark_disjoint(entity, source)
-                        if topic:
-                            entities.mark_disjoint(entity, topic)
-                        if addressee:
-                            entities.merge(addressee, entity)
-                    elif '3' in person:
-                        if source:
-                            entities.mark_disjoint(entity, source)
-                        if topic:
-                            # Why should every third person pronoun refer to
-                            # the `topic` of the quote?
-                            # There can be multiple genders and/or
-                            # multiplicities in the pronouns, and therefore
-                            # they shouldn't all refer to the same topic??
-                            entities.merge(topic, entity)
-                        if addressee:
-                            entities.merge(addressee, entity)
-                elif source:
-                    entities.mark_disjoint(entity, source)
-                    # TODO once vocative check installed; also prohibit linking
-                    # names to speaker
+    entity_span = entity.flat_mention_attr('span')
+    for quote in quotations:
+        if entity_span.issubset(set(quote.span)):
+            source = quote.source
+            addressee = quote.addressee
+            topic = quote.topic
+            if 'pron' in entity.mention_attr('head_pos'):
+                person = entity.mention_attr('person')
+                if '1' in person:
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if source:
+                        return source
+                elif '2' in person:
+                    if source:
+                        mark_disjoint(source)
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        return addressee
+                elif '3' in person:
+                    if source:
+                        mark_disjoint(source)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if topic:
+                        # Why should every third person pronoun refer to
+                        # the `topic` of the quote?
+                        # There can be multiple genders and/or
+                        # multiplicities in the pronouns, and therefore
+                        # they shouldn't all refer to the same topic??
+                        return topic
+            elif source:
+                mark_disjoint(source)
+                # TODO once vocative check installed; also prohibit linking
+                # names to speaker
 
 
-def identify_some_structures(entities, structure_name):
+def identify_some_structures(entity, candidates, structure_name):
     """
     Assigns coreference for some structures in place
 
@@ -205,25 +181,23 @@ def identify_some_structures(entities, structure_name):
                             of (hashable) spans.
     :return:                None (Entities is updated in place)
     """
-    for entity in entities:
-        structures = entity.flat_mention_attr(structure_name)
-        for candidate in entities.get_candidates(entity):
-            if any(mention.span in structures for mention in candidate):
-                entities.merge(candidate, entity)
-                break
+    structures = entity.flat_mention_attr(structure_name)
+    for candidate in candidates:
+        if any(mention.span in structures for mention in candidate):
+            return candidate
 
 
-def identify_appositive_structures(entities):
+def identify_appositive_structures(entity, candidates, mark_disjoint):
     '''
     Assigns coreference for appositive structures in place
 
     :param entities:    entities to use
     :return:            None (Entities is updated in place)
     '''
-    identify_some_structures(entities, 'appositives')
+    identify_some_structures(entity, candidates, 'appositives')
 
 
-def identify_predicative_structures(entities):
+def identify_predicative_structures(entity, candidates, mark_disjoint):
     '''
     Assigns coreference for predicative structures in place
 
@@ -232,10 +206,10 @@ def identify_predicative_structures(entities):
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:                None (Entities is updated in place)
     '''
-    identify_some_structures(entities, 'predicatives')
+    identify_some_structures(entity, candidates, 'predicatives')
 
 
-def resolve_relative_pronoun_structures(entities):
+def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
     '''
     Identifies relative pronouns and assigns them to the class of the noun
     they're modifying
@@ -243,18 +217,16 @@ def resolve_relative_pronoun_structures(entities):
     :param entities:    entities to use
     :return:            None (Entities is updated in place)
     '''
-    for entity in entities:
-        if any(entity.mention_attr('is_relative_pronoun')):
-            head_offsets = entity.mention_attr('head_offsets')
-            for candidate in entities.get_candidates(entity):
-                # If any of the `head_offsets` of this entity appear in the
-                # `modifiers` of the candidate
-                if head_offsets & candidate.flat_mention_attr('modifiers'):
-                    entities.merge(candidate, entity)
-                    break
+    if any(entity.mention_attr('is_relative_pronoun')):
+        head_offsets = entity.mention_attr('head_offsets')
+        for candidate in candidates:
+            # If any of the `head_offsets` of this entity appear in the
+            # `modifiers` of the candidate
+            if head_offsets & candidate.flat_mention_attr('modifiers'):
+                return candidate
 
 
-def resolve_reflexive_pronoun_structures(entities):
+def resolve_reflexive_pronoun_structures(entity, candidates, mark_disjoint):
     '''
     Merge two entities containing mentions for which all of the following hold:
      - they are in the same sentence
@@ -272,37 +244,19 @@ def resolve_reflexive_pronoun_structures(entities):
     :param entities:    entities to use
     :return:            None (Entities is updated in place)
     '''
-    for entity in entities:
-        for mention in entity:
-            if mention.is_reflexive_pronoun:
-                sent_nr = mention.sentence_number
-                for candidate in entities.get_candidates(entity):
-                    for cand_mention in candidate:
-                        if cand_mention.sentence_number == sent_nr and \
-                           mention.head_offset not in cand_mention.span and \
-                           cand_mention.head_offset < mention.head_offset:
-                            # We've found what we want!
-                            entities.merge(candidate, entity)
-                            break
-                    else:
-                        # This `candidate` is inadequate, thus we should
-                        # `continue` and try the next.
-                        continue
-                    # We didn't continue, so we should break the
-                    # `for candidate` loop.
-                    break
-                else:
-                    # the `for candidate` wasn't broken, so this `mention` did
-                    # not lead to an adequate `candidate`, thus we should
-                    # `continue` and try the next `mention`.
-                    continue
-                # We didn't continue, so we should break the `for mention`
-                # loop, as we have apparently merged this `entity` into an
-                # adequate `candidate`.
-                break
+    for mention in entity:
+        if mention.is_reflexive_pronoun:
+            sent_nr = mention.sentence_number
+            for candidate in candidates:
+                for cand_mention in candidate:
+                    if cand_mention.sentence_number == sent_nr and \
+                       mention.head_offset not in cand_mention.span and \
+                       cand_mention.head_offset < mention.head_offset:
+                        # We've found what we want!
+                        return candidate
 
 
-def identify_acronyms_or_alternative_names(entities):
+def identify_acronyms_or_alternative_names(entity, candidates, mark_disjoint):
     '''
     Identifies structures that add alternative name
 
@@ -329,22 +283,20 @@ def identify_acronyms_or_alternative_names(entities):
         'LOC',  # location
         'MISC'  # miscellaneous
     }
-    for entity in entities:
-        # modifiers is of type `list(tuple(offset))`
-        # If this entity is a named one
-        if correct_types.intersection(entity.mention_attr('entity_type')):
-            for candidate in entities.get_candidates(entity):
-                etypes = candidate.mention_attr('entity_type')
-                if correct_types.intersection(etypes):
-                    e_modifies_c = entity.mention_attr('span').intersection(
-                        candidate.flat_mention_attr('modifiers')
-                    )
-                    c_modifies_e = candidate.mention_attr('span').intersection(
-                        entity.flat_mention_attr('modifiers')
-                    )
-                    if e_modifies_c or c_modifies_e:
-                        entities.merge(candidate, entity)
-                        break
+    # modifiers is of type `list(tuple(offset))`
+    # If this entity is a named one
+    if correct_types.intersection(entity.mention_attr('entity_type')):
+        for candidate in candidates:
+            etypes = candidate.mention_attr('entity_type')
+            if correct_types.intersection(etypes):
+                e_modifies_c = entity.mention_attr('span').intersection(
+                    candidate.flat_mention_attr('modifiers')
+                )
+                c_modifies_e = candidate.mention_attr('span').intersection(
+                    entity.flat_mention_attr('modifiers')
+                )
+                if e_modifies_c or c_modifies_e:
+                    return candidate
 
 
 def get_sentence_mentions(mentions):
@@ -377,7 +329,7 @@ def add_coref_prohibitions(mentions, coref_info):
                     mention.coreference_prohibited.append(same_sent_mid)
 
 
-def apply_precise_constructs(entities):
+def apply_precise_constructs(entity, candidates, mark_disjoint):
     '''
     Function that moderates the precise constructs (calling one after the
     other)
@@ -385,11 +337,17 @@ def apply_precise_constructs(entities):
     :param entities:    entities to use
     :return:            None (Entities is updated in place)
     '''
-    identify_appositive_structures(entities)
-    identify_predicative_structures(entities)
-    resolve_relative_pronoun_structures(entities)
-    identify_acronyms_or_alternative_names(entities)
-    resolve_reflexive_pronoun_structures(entities)
+    # return the first match, or None
+    return \
+        identify_appositive_structures(entity, candidates, mark_disjoint) or \
+        identify_predicative_structures(entity, candidates, mark_disjoint) or \
+        resolve_relative_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        identify_acronyms_or_alternative_names(
+            entity, candidates, mark_disjoint) or \
+        resolve_reflexive_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        None
     # f. Demonym Israel, Israeli (later)
 
 
@@ -431,7 +389,8 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
     return antecedents
 
 
-def apply_strict_head_match(entities, offset2string, sieve):
+def apply_strict_head_match(
+        entity, candidates, mark_disjoint, offset2string, sieve):
     """
     :param entities:        entities to use
     :param offset2string:   offset2string dictionary to use
@@ -440,75 +399,55 @@ def apply_strict_head_match(entities, offset2string, sieve):
     """
     # FIXME: parser specific check for pronoun
     # FIXME: lots of things are calculated repeatedly and forgotten again.
-    for entity in entities:
-        # entity level "Word inclusion"
-        non_stopwords = set(map(
-            offset2string.get,
-            entity.flat_mention_attr('non_stopwords')
-        ))
-        # For any mention in this entity that isn't a pronoun
-        for mention in (m for m in entity if m.head_pos != 'pron'):
-            head_word = offset2string[mention.head_offset]
-            main_mods = set(map(offset2string.get, mention.main_modifiers))
-            for antecedent in entities.get_candidates(entity):
-                # "Entity head match", i.e.:
-                #   the mention `head_word` matches _any_ head word of mentions
-                #   in the `antecedent` entity.
-                antecedent_head_words = map(
-                    offset2string.get,
-                    antecedent.mention_attr('head_offset')
-                )
-                # entity level "Word inclusion", i.e.:
-                #   all the non-stop words in `entity` are included in the set
-                #   of non-stop words in the `antecedent` entity.
-                antecedent_non_stopwords = set(map(
-                    offset2string.get,
-                    antecedent.flat_mention_attr('non_stopwords')
-                ))
-                if head_word in antecedent_head_words and \
-                   (sieve == '7' or non_stopwords <= antecedent_non_stopwords):
-                    # "Not I-within-I" is ignored for Dutch
-                    if sieve != '6':
-                        # "Compatible modifiers only", i.e.:
-                        #   the `mention`s modifiers are all included in in the
-                        #   modifiers of the `antecedent_mention`. (...)
-                        #   For this feature we only use modifiers that are
-                        #   nouns or adjectives. (Thus `main_modifiers` instead
-                        #   of `modifiers`.)
-                        for antecedent_mention in antecedent:
-                            antecedent_main_mods = set(map(
-                                offset2string.get, antecedent.main_modifiers
-                            ))
-                            if main_mods <= antecedent_main_mods:
-                                # We've found an adequate antecedent!
-                                # Merging is done just before breaking the
-                                # `for antecedent` loop, to reduce double code
-                                # and the number of break statements.
-                                # To make sure the `continue` statement below
-                                # isn't run, we should break this
-                                # `for antecedent_mention` loop.
-                                break
-                        else:
-                            # Nothing found, so `continue` the `for antecedent`
-                            # loop to avoid breakage, so we try the next
-                            # `antecedent` instead of merging.
-                            continue
-                    # Break the `for antecedent` loop, because apparently the
-                    # inner loop was broken or skipped, indicating that we've
-                    # found a matching antecedent.
-                    # To avoid duplicate code and extra breaks, the merging is
-                    # done now.
-                    entities.merge(antecedent, entity)
-                    break
-            else:
-                # The inner loops weren't broken, so we must `continue` to
-                # avoid breaking the `for mention` loop, because we want to
-                # try whether the next `mention` has any adequate antecedents.
-                continue
-            # Break the `for mention` loop, because apparently the
-            # `for antecedent` loop was broken too, indicating that we've found
-            # an adequate antecedent.
-            break
+    # entity level "Word inclusion"
+    non_stopwords = set(map(
+        offset2string.get,
+        entity.flat_mention_attr('non_stopwords')
+    ))
+    # For any mention in this entity that isn't a pronoun
+    for mention in (m for m in entity if m.head_pos != 'pron'):
+        head_word = offset2string[mention.head_offset]
+        main_mods = set(map(offset2string.get, mention.main_modifiers))
+        for antecedent in candidates:
+            # "Entity head match", i.e.:
+            #   the mention `head_word` matches _any_ head word of mentions
+            #   in the `antecedent` entity.
+            antecedent_head_words = map(
+                offset2string.get,
+                antecedent.mention_attr('head_offset')
+            )
+            # entity level "Word inclusion", i.e.:
+            #   all the non-stop words in `entity` are included in the set
+            #   of non-stop words in the `antecedent` entity.
+            antecedent_non_stopwords = set(map(
+                offset2string.get,
+                antecedent.flat_mention_attr('non_stopwords')
+            ))
+            if head_word in antecedent_head_words and \
+               (sieve == '7' or non_stopwords <= antecedent_non_stopwords):
+                # "Not I-within-I" is ignored for Dutch
+                if sieve == '6':
+                    return antecedent
+                else:
+                    # "Compatible modifiers only", i.e.:
+                    #   the `mention`s modifiers are all included in in the
+                    #   modifiers of the `antecedent_mention`. (...)
+                    #   For this feature we only use modifiers that are
+                    #   nouns or adjectives. (Thus `main_modifiers` instead
+                    #   of `modifiers`.)
+                    for antecedent_mention in antecedent:
+                        antecedent_main_mods = set(map(
+                            offset2string.get, antecedent.main_modifiers
+                        ))
+                        if main_mods <= antecedent_main_mods:
+                            # We've found an adequate antecedent!
+                            # Merging is done just before breaking the
+                            # `for antecedent` loop, to reduce double code
+                            # and the number of break statements.
+                            # To make sure the `continue` statement below
+                            # isn't run, we should break this
+                            # `for antecedent_mention` loop.
+                            return antecedent
 
 
 def only_identical_numbers(span1, span2, offset2string):
@@ -787,12 +726,13 @@ def resolve_coreference(nafin,
 
     # Order matters (a lot), but `mentions` is an OrderedDict (hopefully :)
     entities = Entities.from_mentions(mentions.values())
+    sieve_runner = SieveRunner(entities)
 
     logger.info("Finding quotations...")
     quotations = identify_direct_quotations(nafin, entities)
 
     logger.info("Sieve 1: Speaker Identification")
-    speaker_identification(quotations, entities)
+    sieve_runner.run(speaker_identification, quotations=quotations)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_entities
@@ -803,7 +743,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 2: String Match")
-    match_full_name_overlap(entities, offset2string)
+    sieve_runner.run(match_full_name_overlap, offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -813,7 +753,17 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 3: Relaxed String Match")
-    match_relaxed_string(entities, offset2string)
+    nominal_poses = {'name', 'noun'}
+
+    def entity_filter(entity):
+        return bool(
+            nominal_poses.intersection(entity.mention_attr('head_pos')))
+
+    sieve_runner.run(
+        match_relaxed_string,
+        entity_filter,
+        offset2string=offset2string,
+        candidate_filter=entity_filter)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -823,7 +773,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 4: Precise constructs")
-    apply_precise_constructs(entities)
+    sieve_runner.run(apply_precise_constructs)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -834,7 +784,11 @@ def resolve_coreference(nafin,
 
     logger.info("Sieve 5-7: Strict Head Match")
     for sieve in ['5', '6', '7']:
-        apply_strict_head_match(entities, offset2string, sieve)
+        sieve_runner.run(
+            apply_strict_head_match,
+            offset2string=offset2string,
+            sieve=sieve
+        )
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -844,7 +798,7 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 8: Proper Head Word Match")
-    apply_proper_head_word_match(entities, offset2string)
+    sieve_runner.run(apply_proper_head_word_match, offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
