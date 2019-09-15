@@ -79,11 +79,17 @@ def test_non_unique_mention_attr(entity, attr):
         len(entity.mentions)
 
 
+@pytest.mark.parametrize('attr', ALL_MENTION_ATTRIBUTES)
+def test_non_unique_non_none_mention_attr(entity, attr):
+    assert len(entity.non_unique_non_none_mention_attr(attr)) <= \
+        len(entity.mentions)
+
+
 @pytest.mark.parametrize('attr', HASHABLE_MENTION_ATTRIBUTES)
 def test_mention_attr(entity, attr):
     unique = entity.mention_attr(attr)
-    full = entity.non_unique_mention_attr(attr)
-    assert 0 < len(unique) <= len(full)
+    full = entity.non_unique_non_none_mention_attr(attr)
+    assert 0 <= len(unique) <= len(full)
     assert set(full) == set(unique)
 
 
@@ -92,13 +98,14 @@ def test_flat_mention_attr(entity, attr):
     flat = entity.flat_mention_attr(attr)
     assert {
         elem
-        for iterable in entity.non_unique_mention_attr(attr)
+        for iterable in entity.non_unique_non_none_mention_attr(attr)
         for elem in iterable
     } == flat
 
 
 @pytest.mark.parametrize('method', [
     Entity.non_unique_mention_attr,
+    Entity.non_unique_non_none_mention_attr,
     Entity.mention_attr,
     Entity.flat_mention_attr,
 ])
