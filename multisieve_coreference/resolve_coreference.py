@@ -3,6 +3,7 @@ import logging
 import time
 from collections import defaultdict
 from pkg_resources import get_distribution
+from functools import partial
 
 from KafNafParserPy import KafNafParser, Clp
 
@@ -16,7 +17,7 @@ from .sieve_runner import SieveRunner
 from .offset_info import (
     get_all_offsets,
     get_offset2string_dict,
-    get_string_from_offsets
+    get_strings_from_offsets
 )
 from .naf_info import identify_direct_quotations
 
@@ -36,7 +37,7 @@ def match_some_span(entity, candidates, get_span, offset2string,
     '''
     # FIXME: now only surface strings, we may want to look at lemma matches
     #        as well
-    # FIXME: this code calls `get_string_from_offsets` (at least) twice for
+    # FIXME: this code calls `get_strings_from_offsets` (at least) twice for
     #        every mention: once (the first time) when it is `mention` (in
     #        `entity`), and again every time that it is `candidate_mention` (in
     #        `candidate`). (Attempt at faster algorithm commented below.)
@@ -44,11 +45,11 @@ def match_some_span(entity, candidates, get_span, offset2string,
     # For every `entity`, we should break the `for mention` loop at the first
     # `candidate` with a matching `candidate_mention`.
     for mention in entity:
-        mention_string = get_string_from_offsets(
+        mention_string = get_strings_from_offsets(
             get_span(mention), offset2string)
         for candidate in filter(candidate_filter, candidates):
             for candidate_mention in candidate:
-                candidate_string = get_string_from_offsets(
+                candidate_string = get_strings_from_offsets(
                     get_span(mention), offset2string)
                 if candidate_string == mention_string:
                     # Candidates should be kept, because they appear
@@ -59,7 +60,7 @@ def match_some_span(entity, candidates, get_span, offset2string,
     # seems to take a lot of time).
     # earlier_strings = {}
     # for mention in entity:
-    #     mention_string = get_string_from_offsets(
+    #     mention_string = get_strings_from_offsets(
     #         get_span(mention), offset2string)
     #     if mention_string in earlier_strings:
     #         possibly_candidate = earlier_strings[mention_string]
@@ -361,9 +362,9 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
     :return:         list of antecedent ids
     '''
     head_string = offset2string.get(mention.head_offset)
-    non_stopwords = get_string_from_offsets(
+    non_stopwords = get_strings_from_offsets(
         mention.non_stopwords, offset2string)
-    main_mods = get_string_from_offsets(
+    main_mods = get_strings_from_offsets(
         mention.main_modifiers, offset2string)
     antecedents = []
     for mid, comp_mention in mentions.items():
@@ -373,7 +374,7 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
             if head_string == offset2string.get(
                comp_mention.head_offset):
                 match = True
-                full_span = get_string_from_offsets(
+                full_span = get_strings_from_offsets(
                     comp_mention.span, offset2string)
                 if sieve in ['5', '7']:
                     for non_stopword in non_stopwords:
@@ -425,35 +426,63 @@ def apply_strict_head_match(
             ))
             if head_word in antecedent_head_words and \
                (sieve == '7' or non_stopwords <= antecedent_non_stopwords):
-                # "Not I-within-I" is ignored for Dutch
-                if sieve == '6':
-                    return antecedent
-                else:
-                    # "Compatible modifiers only", i.e.:
-                    #   the `mention`s modifiers are all included in in the
-                    #   modifiers of the `antecedent_mention`. (...)
-                    #   For this feature we only use modifiers that are
-                    #   nouns or adjectives. (Thus `main_modifiers` instead
-                    #   of `modifiers`.)
-                    for antecedent_mention in antecedent:
-                        antecedent_main_mods = set(map(
-                            offset2string.get, antecedent.main_modifiers
-                        ))
-                        if main_mods <= antecedent_main_mods:
-                            # We've found an adequate antecedent!
-                            # Merging is done just before breaking the
-                            # `for antecedent` loop, to reduce double code
-                            # and the number of break statements.
-                            # To make sure the `continue` statement below
-                            # isn't run, we should break this
-                            # `for antecedent_mention` loop.
+                # "Not i-within-i", i.e.:
+                #   the two mentions are not in an i-within-i constructs, that
+                #   is, one cannot be a child NP in the other's NP constituent
+                # In this case, this is interpreted as "one mention does not
+                # fully contain the other"
+                for antecedent_mention in antecedent:
+                    if check_not_i_within_i(antecedent_mention, mention):
+                        # "Compatible modifiers only", i.e.:
+                        #   the `mention`s modifiers are all included in in the
+                        #   modifiers of the `antecedent_mention`. (...)
+                        #   For this feature we only use modifiers that are
+                        #   nouns or adjectives. (Thus `main_modifiers` instead
+                        #   of `modifiers`.)
+                        if sieve == '6':
                             return antecedent
+                        else:
+                            antecedent_main_mods = set(map(
+                                offset2string.get, antecedent.main_modifiers
+                            ))
+                            if main_mods <= antecedent_main_mods:
+                                return antecedent
+
+
+def check_not_i_within_i(mention1, mention2):
+    """
+    Check whether one of the two mentions fully contains the other.
+
+    "Not i-within-i", i.e.:
+      the two mentions are not in an i-within-i constructs, that
+      is, one cannot be a child NP in the other's NP constituent
+
+    In this case, this is interpreted as "one mention does not
+    fully contain the other"
+
+
+    The following expression is equivalent to the one below
+    not_i_within_i = not (
+        (boffset2 <= boffset1 and eoffset1 <= eoffset2)
+        or
+        (boffset1 <= boffset2 and eoffset2 <= eoffset1)
+    )
+    """
+    boffset1 = mention1.begin_offset
+    eoffset1 = mention1.end_offset
+    boffset2 = mention2.begin_offset
+    eoffset2 = mention2.end_offset
+    return (
+        (boffset2 > boffset1 and eoffset2 > eoffset1)
+        or
+        (eoffset1 > eoffset2 and boffset1 > boffset2)
+    )
 
 
 def only_identical_numbers(span1, span2, offset2string):
 
-    word1 = get_string_from_offsets(span1, offset2string)
-    word2 = get_string_from_offsets(span2, offset2string)
+    word1 = get_strings_from_offsets(span1, offset2string)
+    word2 = get_strings_from_offsets(span2, offset2string)
 
     for letter in word1:
         if letter.isdigit() and letter not in word2:
@@ -464,56 +493,44 @@ def only_identical_numbers(span1, span2, offset2string):
 
 def contains_number(span, offset2string):
 
-    for letter in get_string_from_offsets(span, offset2string):
+    for letter in get_strings_from_offsets(span, offset2string):
         if letter.isdigit():
             return True
 
     return False
 
 
-def find_head_match_coreferents(mention, mentions, offset2string):
-    '''
-    Function that looks at which mentions might be antecedent for the current
-    mention
+def get_numbers(mention, offset2string):
+    """
+    Get the set of numbers in this mention (as per `str.isdigit`).
 
-    :param mention: current mention
-    :param mentions: dictionary of all mentions
-    :return: list of mention coreferents
-    '''
-
-    boffset = mention.begin_offset
-    eoffset = mention.end_offset
-    full_head_string = get_string_from_offsets(
-        mention.full_head, offset2string)
-    contains_numbers = contains_number(mention.span, offset2string)
-
-    coreferents = []
-
-    for mid, comp_mention in mentions.items():
-        if mid != mention.id and \
-           comp_mention.entity_type in ['PER', 'ORG', 'LOC']:
-            # mention may not be included in other mention
-            if not comp_mention.begin_offset <= boffset and \
-               comp_mention.end_offset >= eoffset:
-                match = True
-                comp_string = get_string_from_offsets(
-                    comp_mention.full_head, offset2string)
-                for word in full_head_string.split():
-                    if word not in comp_string:
-                        match = False
-                comp_contains_numbers = contains_number(
-                   comp_mention.span, offset2string)
-                if contains_numbers and comp_contains_numbers:
-                    if not only_identical_numbers(
-                            mention.span, comp_mention.span, offset2string):
-                        match = False
-                if match:
-                    coreferents.append(mid)
-
-    return coreferents
+    A word containing only digits is considered a number.
+    """
+    return {
+        word
+        for word in get_strings_from_offsets(mention.span, offset2string)
+        if word.isdigit()
+    }
 
 
-def apply_proper_head_word_match(entities, offset2string):
+def apply_proper_head_word_match(
+        entity, candidates, mark_disjoint, offset2string):
+    """
+    Pass 8 - Proper Head Word Match. This sieve marks two mentions headed by
+    proper nouns as coreferent if they have the same head word and satisfy the
+    following constraints (constraints marked by X are implemented):
+
+     - [X] Not i-within-i
+     - [ ] No location mismatches - the modifiers of two mentions cannot
+           contain different location named entities, other proper nouns, or
+           spatial modifiers. For example, [Lebanon] and [southern Lebanon] are
+           not coreferent.
+     - [X] No numeric mismatches - the second mention cannot have a number that
+           does not appear in the antecedent, e.g., [people] and
+           [around 200 people] (in that order) are not coreferent.
+
+    This documentation string is adopted from Lee et al. (2013)
+    """
     # FIXME: tool specific output for entity type
     correct_types = {
         'PER',  # person
@@ -521,14 +538,37 @@ def apply_proper_head_word_match(entities, offset2string):
         'LOC',  # location
         'MISC'  # miscellaneous
     }
-    for entity in entities:
-        ...  # First do the abstraction to fix spaghetti code
-    for mention in mentions.values():
-        if mention.entity_type in correct_types:
-            coreferents = find_head_match_coreferents(
-                mention, mentions, offset2string)
-            if len(coreferents) > 0:
-                coref_info.add_coref_class(coreferents + [mention.id])
+    # FIXME: Location mismatches?!
+    # FIXME: Why is this different?
+    correct_antecedent_types = {'PER', 'ORG', 'LOC'}
+    for mention in entity:
+        mention_head = get_strings_from_offsets(
+            mention.full_head, offset2string)
+        mention_numbers = get_numbers(mention)
+        check_not_i_within_i_for_this_mention = partial(
+            check_not_i_within_i, mention)
+        for antecedent in candidates:
+            # Filter by type (I guess this is to implement the
+            # "headed by proper nouns" part)
+            antecedent_mentions = filter(
+                lambda c: c.entity_type in correct_antecedent_types,
+                antecedent)
+            # "Not i-within-i"
+            antecedent_mentions = filter(
+                check_not_i_within_i_for_this_mention,
+                antecedent_mentions
+            )
+            for antecedent_mention in antecedent_mentions:
+                antecedent_head = get_strings_from_offsets(
+                    antecedent_mention.full_head, offset2string)
+                # "if they have the same head word"
+                if mention_head == antecedent_head:
+                    # "No numeric mismatches", i.e.:
+                    #   the second mention cannot have a number that does not
+                    #   appear in the antecedent
+                    antecedent_numbers = get_numbers(antecedent_mention)
+                    if antecedent_numbers >= mention_numbers:
+                        return antecedent
 
 
 def find_relaxed_head_antecedents(mention, mentions, offset2string):
@@ -541,9 +581,9 @@ def find_relaxed_head_antecedents(mention, mentions, offset2string):
     '''
 
     boffset = mention.begin_offset
-    full_head_string = get_string_from_offsets(
+    full_head_string = get_strings_from_offsets(
         mention.full_head, offset2string)
-    non_stopwords = get_string_from_offsets(
+    non_stopwords = get_strings_from_offsets(
         mention.non_stopwords, offset2string)
     antecedents = []
 
@@ -552,12 +592,12 @@ def find_relaxed_head_antecedents(mention, mentions, offset2string):
         if comp_mention.end_offset < boffset:
             if comp_mention.entity_type == mention.entity_type:
                 match = True
-                full_comp_head = get_string_from_offsets(
+                full_comp_head = get_strings_from_offsets(
                     comp_mention.full_head, offset2string)
                 for word in full_head_string.split():
                     if word not in full_comp_head:
                         match = False
-                full_span = get_string_from_offsets(
+                full_span = get_strings_from_offsets(
                     comp_mention.span, offset2string)
                 for non_stopword in non_stopwords:
                     if non_stopword not in full_span:
