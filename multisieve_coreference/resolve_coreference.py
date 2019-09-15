@@ -400,11 +400,6 @@ def apply_strict_head_match(
     """
     # FIXME: parser specific check for pronoun
     # FIXME: lots of things are calculated repeatedly and forgotten again.
-    # entity level "Word inclusion"
-    non_stopwords = set(map(
-        offset2string.get,
-        entity.flat_mention_attr('non_stopwords')
-    ))
     # For any mention in this entity that isn't a pronoun
     for mention in (m for m in entity if m.head_pos != 'pron'):
         head_word = offset2string[mention.head_offset]
@@ -420,12 +415,8 @@ def apply_strict_head_match(
             # entity level "Word inclusion", i.e.:
             #   all the non-stop words in `entity` are included in the set
             #   of non-stop words in the `antecedent` entity.
-            antecedent_non_stopwords = set(map(
-                offset2string.get,
-                antecedent.flat_mention_attr('non_stopwords')
-            ))
             if head_word in antecedent_head_words and \
-               (sieve == '7' or non_stopwords <= antecedent_non_stopwords):
+               (sieve == '7' or check_word_inclusion(antecedent, entity)):
                 # "Not i-within-i", i.e.:
                 #   the two mentions are not in an i-within-i constructs, that
                 #   is, one cannot be a child NP in the other's NP constituent
@@ -447,6 +438,23 @@ def apply_strict_head_match(
                             ))
                             if main_mods <= antecedent_main_mods:
                                 return antecedent
+
+
+def check_word_inclusion(antecedent, entity):
+    """
+    entity level "Word inclusion", i.e.:
+      all the non-stop words in `entity` are included in the set
+      of non-stop words in the `antecedent` entity.
+    """
+    non_stopwords = set(map(
+        offset2string.get,
+        entity.flat_mention_attr('non_stopwords')
+    ))
+    antecedent_non_stopwords = set(map(
+        offset2string.get,
+        antecedent.flat_mention_attr('non_stopwords')
+    ))
+    return non_stopwords <= antecedent_non_stopwords
 
 
 def check_not_i_within_i(mention1, mention2):
@@ -571,56 +579,50 @@ def apply_proper_head_word_match(
                         return antecedent
 
 
-def find_relaxed_head_antecedents(mention, mentions, offset2string):
-    '''
-    Function that identifies antecedents for which relaxed head match applies
-
-    :param mention:
-    :param mentions:
-    :return:
-    '''
-
-    boffset = mention.begin_offset
-    full_head_string = get_strings_from_offsets(
-        mention.full_head, offset2string)
-    non_stopwords = get_strings_from_offsets(
-        mention.non_stopwords, offset2string)
-    antecedents = []
-
-    for mid, comp_mention in mentions.items():
-        # we want only antecedents
-        if comp_mention.end_offset < boffset:
-            if comp_mention.entity_type == mention.entity_type:
-                match = True
-                full_comp_head = get_strings_from_offsets(
-                    comp_mention.full_head, offset2string)
-                for word in full_head_string.split():
-                    if word not in full_comp_head:
-                        match = False
-                full_span = get_strings_from_offsets(
-                    comp_mention.span, offset2string)
-                for non_stopword in non_stopwords:
-                    if non_stopword not in full_span:
-                        match = False
-                if match:
-                    antecedents.append(mid)
-
-    return antecedents
-
-
-def apply_relaxed_head_match(mentions, coref_info, offset2string):
+def apply_relaxed_head_match(
+        entity, candidates, mark_disjoint, candidate_filter, offset2string):
     """
+    Pass 9 - Relaxed Head Match.
+
+    This pass relaxes the entity head match heuristic by allowing the mention
+    head to match any word in the antecedent entity. For example, this
+    heuristic matches the mention Sanders to an entity containing the mentions
+    {Sauls, the judge, Circuit Judge N. Sanders Sauls}. To maintain high
+    precision, this pass requires that both mention and antecedent be labelled
+    as named entities and the types coincide. Furthermore, this pass
+    implements a conjunction of the given features with word inclusion and not
+    i-within-i. This pass yields less than 0.4 point improvement in most
+    metrics.
+
+    Quoted from Lee et al. (2013)
+
+    Things marked by an X are implemented:
+     - [X] mention head must match any word in the antecedent entity
+     - [ ] ~~both mention and antecedent be labelled as named entities~~
+           this filter is not implemented within the sieve, but at a slightly
+           higher level (TODO: Maybe it should be implemented here)
+     - [X] the types coincide
+     - [X] not i-within-i
+     - [X] word inclusion
+
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     """
-    for mention in mentions.values():
-        if mention.entity_type in ['PER', 'ORG', 'LOC', 'MISC']:
-            antecedents = find_relaxed_head_antecedents(
-                mention, mentions, offset2string)
-            if len(antecedents) > 0:
-                coref_info.add_coref_class(antecedents + [mention.id])
+    for antecedent in filter(candidate_filter, candidates):
+        antecedent_entity_type = antecedent.mention_attr('entity_type')
+        antecedent_words = set(get_strings_from_offsets(
+            antecedent.flat_mention_attr('span'), offset2string))
+        for mention in entity:
+            mention_head = set(get_strings_from_offsets(
+                mention.full_head, offset2string))
+            # entity centric way of interpreting "the types coincide"
+            if mention.entity_type in antecedent_entity_type and \
+               mention_head <= antecedent_words and \
+               check_not_i_within_i(antecedent, entity) and \
+               check_word_inclusion(antecedent, entity):
+                return antecedent
 
 
 def is_compatible(string1, string2):
@@ -795,15 +797,15 @@ def resolve_coreference(nafin,
     logger.info("Sieve 3: Relaxed String Match")
     nominal_poses = {'name', 'noun'}
 
-    def entity_filter(entity):
+    def is_nominal(entity):
         return bool(
             nominal_poses.intersection(entity.mention_attr('head_pos')))
 
     sieve_runner.run(
         match_relaxed_string,
-        entity_filter,
+        is_nominal,
         offset2string=offset2string,
-        candidate_filter=entity_filter)
+        candidate_filter=is_nominal)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -847,8 +849,18 @@ def resolve_coreference(nafin,
             )
         )
 
+    def is_named_entity(entity):
+        """
+        If `entity_type` is not None, this was a named entity.
+        """
+        return bool(entity.mention_attr('entity_type'))
+
     logger.info("Sieve 9: Relaxed Head Match")
-    apply_relaxed_head_match(mentions, coref_info, offset2string)
+    sieve_runner.run(
+        apply_relaxed_head_match,
+        is_named_entity,
+        candidate_filter=is_named_entity,
+        offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
