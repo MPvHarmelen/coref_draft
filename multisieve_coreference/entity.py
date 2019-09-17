@@ -30,6 +30,9 @@ class Entity:
     def __iter__(self):
         return iter(self.mentions)
 
+    def __len__(self):
+        return len(self.mentions)
+
     def __contains__(self, mention):
         return mention in self.mentions
 

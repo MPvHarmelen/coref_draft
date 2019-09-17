@@ -1,6 +1,7 @@
 import sys
 import logging
 import time
+import itertools as it
 from collections import defaultdict
 from pkg_resources import get_distribution
 from functools import partial
@@ -686,33 +687,25 @@ def resolve_pronoun_coreference(
                     return candidate
 
 
-def remove_singleton_coreference_classes(coref_classes):
-    singletons = set()
-    for cID, mention_ids in coref_classes.items():
-        if len(mention_ids) < 2:
-            singletons.add(cID)
+def remove_singleton_entities(entities):
+    """
+    Remove singleton Entity objects in-place from the given `entities`.
+    """
+    for entity in entities:
+        if len(entity) < 2:
+            entities.remove(entity)
 
-    for cID in singletons:
-        del coref_classes[cID]
 
-
-def post_process(nafobj, mentions, coref_info,
-                 fill_gaps=c.FILL_GAPS_IN_OUTPUT,
+def post_process(nafobj, entities, fill_gaps=c.FILL_GAPS_IN_OUTPUT,
                  include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT):
-    # Remove unused mentions
-    reffed_mentions = coref_info.referenced_mentions()
-    for ID in tuple(mentions):
-        if ID not in reffed_mentions:
-            del mentions[ID]
-
     # Fill gaps in the used mentions
     if fill_gaps:
         all_offsets = get_all_offsets(nafobj)
-        for mention in mentions.values():
+        for mention in it.chain.from_iterable(entities):
             mention.fill_gaps(all_offsets)
 
     if not include_singletons:
-        remove_singleton_coreference_classes(coref_info.coref_classes)
+        remove_singleton_entities(entities)
 
 
 def initialize_global_dictionaries(nafobj):
@@ -859,13 +852,12 @@ def resolve_coreference(nafin,
     logger.info("Post processing...")
     post_process(
         nafin,
-        mentions,
-        coref_info,
+        entities,
         fill_gaps=fill_gaps,
         include_singletons=include_singletons
     )
 
-    return coref_info.coref_classes, mentions
+    return entities
 
 
 def process_coreference(
