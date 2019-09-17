@@ -260,9 +260,6 @@ class Mention:
 
         self.non_stopwords = non_stopwords
 
-        self.coreference_prohibited = [] if coreference_prohibited is None \
-            else list(coreference_prohibited)
-
         self.modifiers = modifiers
         self.main_modifiers = main_modifiers
         self.appositives = appositives

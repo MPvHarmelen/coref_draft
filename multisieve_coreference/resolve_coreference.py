@@ -311,25 +311,6 @@ def get_sentence_mentions(mentions):
     return sentenceMentions
 
 
-def add_coref_prohibitions(mentions, coref_info):
-    """
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
-    """
-    sentenceMentions = get_sentence_mentions(mentions)
-    for snr, mids in sentenceMentions.items():
-        for mid in mids:
-            mention = mentions.get(mid)
-            corefs = set()
-            for c_class in coref_info.classes_of_mention(mention):
-                corefs |= coref_info.coref_classes[c_class]
-            for same_sent_mid in mids:
-                if same_sent_mid != mid and same_sent_mid not in corefs:
-                    mention.coreference_prohibited.append(same_sent_mid)
-
-
 def apply_precise_constructs(entity, candidates, mark_disjoint):
     '''
     Function that moderates the precise constructs (calling one after the
@@ -625,90 +606,84 @@ def apply_relaxed_head_match(
                 return antecedent
 
 
-def is_compatible(string1, string2):
-    '''
-    Generic function to check if values are not incompatible
-    :param string1: first string
-    :param string2: second string
-    :return: boolean
-    '''
-    # if either is underspecified, they are not incompatible
-    if string1 is None or string2 is None:
-        return True
-    if len(string1) == 0 or len(string2) == 0:
-        return True
-    if string1 == string2:
-        return True
-
-    return False
-
-
-def check_compatibility(mention1, mention2):
-
-    if not is_compatible(mention1.number, mention2.number):
-        return False
-    if not is_compatible(mention1.gender, mention2.gender):
-        return False
-    # speaker/addressee 1/2 person was taken care of earlier on
-    if not is_compatible(mention1.person, mention2.person):
-        return False
-    if not is_compatible(mention1.entity_type, mention2.entity_type):
-        return False
-
-    return True
-
-
-def get_candidates_and_distance(mention, mentions):
-
-    candidates = {}
-    sent_nr = mention.sentence_number
-    for mid, comp_mention in mentions.items():
-        if mention.head_offset > comp_mention.head_offset:
-            csnr = comp_mention.sentence_number
-            # only consider up to 3 preceding sentences
-            if csnr <= sent_nr <= csnr + 3:
-                # check if not prohibited
-                if mid not in mention.coreference_prohibited:
-                    if check_compatibility(mention, comp_mention):
-                        candidates[mid] = comp_mention.head_offset
-
-    return candidates
-
-
-def identify_closest_candidate(mention_index, candidates):
-    distance = 1000000
-    antecedent = None
-    for candidate, head_index in candidates.items():
-        candidate_distance = mention_index - head_index
-        if candidate_distance < distance:
-            distance = candidate_distance
-            antecedent = candidate
-    return antecedent
-
-
-def identify_antecedent(mention, mentions):
-
-    candidates = get_candidates_and_distance(mention, mentions)
-    mention_index = mention.head_offset
-    antecedent = identify_closest_candidate(mention_index, candidates)
-
-    return antecedent
-
-
-def resolve_pronoun_coreference(mentions, coref_info):
+def resolve_pronoun_coreference(
+        entity, candidates, mark_disjoint, max_sentence_distance):
     """
+    We implement pronominal coreference resolution using an approach standard
+    for many decades: enforcing agreement constraints between the coreferent
+    mentions. We use the following attributes for these constraints (actually
+    implemented constraints are marked with X):
+
+     - [X] Number - we assign number attributes based on:
+         - [X] a static list for pronouns;
+         - [ ] NER labels: mentions marked as a named entity are considered
+               singular with the exception of organizations, which can be both
+               singular and plural;
+         - [ ] part of speech tags: NN*S tags are plural and all other NN* tags
+               are singular; and
+         - [ ] a static dictionary from Bergsma and Lin (2006).
+
+     - [X] Gender - we assign gender attributes from static lexicons from
+           Bergsma and Lin (2006), and Ji and Lin (2009).
+
+     - [X] Person - we assign person attributes only to pronouns.
+         - [ ] We do not enforce this constraint when linking two pronouns,
+               however, if one appears within quotes. This is a simple
+               heuristic for speaker detection (e.g., I and she point to the
+               same person in “[I] voted my conscience,” [she] said).
+
+     - [ ] Animacy - we set animacy attributes using:
+         - [ ] a static list for pronouns;
+         - [ ] NER labels (e.g., PERSON is animate whereas LOCATION is not);
+         - [ ] a dictionary bootstrapped from the Web (Ji and Lin 2009).
+
+     - [X] NER label - from the Stanford NER.
+     - [X] Pronoun distance - sentence distance between a pronoun and its
+           antecedent cannot be larger than 3.
+
+    When we cannot extract an attribute, we set the corresponding value to
+    unknown and treat it as a wildcard—that is, it can match any other value.
+    As expected, pronominal coreference resolution has a big impact on
+
+    The above is quoted from Lee et al. (2013).
+
+    !! NB !! The extraction of features is mostly implemented in `mention.py`.
+             Most of the features are already reported by Alpino.
+
     :param mentions:    dictionary of all available mention objects (key is
                         mention id)
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     """
-    for mention in mentions.values():
-        # we only deal with unresolved pronouns here
-        if mention.head_pos == 'pron' and \
-           len(coref_info.classes_of_mention(mention)) == 0:
-            antecedent = identify_antecedent(mention, mentions)
-            if antecedent is not None:
-                coref_info.add_coref_class([antecedent, mention.id])
+    # we only deal with unresolved pronouns here
+    if {'pron'} == entity.mention_attr('head_pos'):
+        # Sentence distance
+        sentence_number = entity.mention_attr('sentence_number')
+        max_sent_nr = max(sentence_number) + max_sentence_distance
+        min_sent_nr = min(sentence_number) - max_sentence_distance
+        # Number
+        number = entity.mention_attr('number')
+        # Gender
+        gender = entity.mention_attr('gender')
+        # Person
+        person = entity.mention_attr('person')
+        # Named entity label
+        label = entity.mention_attr('entity_type')
+        for candidate in candidates:
+            # Entity centric sentence distance
+            close_enough = any(
+                min_sent_nr <= n <= max_sent_nr
+                for n in candidate.mention_attr('sentence_number'))
+            if close_enough:
+                cnd_number = entity.mention_attr('number')
+                cnd_gender = entity.mention_attr('gender')
+                cnd_person = entity.mention_attr('person')
+                cnd_label = entity.mention_attr('entity_type')
+                if (not cnd_number or not number or cnd_number & number) and \
+                   (not cnd_gender or not gender or cnd_gender & gender) and \
+                   (not cnd_person or not person or cnd_person & person) and \
+                   (not cnd_label or not label or cnd_label & label):
+                    return candidate
 
 
 def remove_singleton_coreference_classes(coref_classes):
@@ -871,18 +846,8 @@ def resolve_coreference(nafin,
 
     logger.info("Sieve 10")
 
-    logger.info("\tAdd coreferences prohibitions")
-    add_coref_prohibitions(mentions, coref_info)
-
-    if logger.getEffectiveLevel() <= logging.DEBUG:
-        logger.debug(
-            "Entities: {}".format(
-                view_entities(nafin, entities)
-            )
-        )
-
     logger.info("\tResolve relative pronoun coreferences")
-    resolve_pronoun_coreference(mentions, coref_info)
+    sieve_runner.run(resolve_pronoun_coreference, max_sentence_distance=3)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
