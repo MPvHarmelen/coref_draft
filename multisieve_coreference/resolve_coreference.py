@@ -870,14 +870,14 @@ def process_coreference(
 
     Note that coreferences are added in place.
     """
-    coref_classes, mentions = resolve_coreference(
+    entities = resolve_coreference(
         nafin,
         fill_gaps=fill_gaps,
         include_singletons=include_singletons,
         language=language
     )
     logger.info("Adding coreference information to NAF...")
-    add_coreference_to_naf(nafin, coref_classes, mentions)
+    add_coreference_to_naf(nafin, entities)
 
 
 def add_naf_header(nafobj, begintime):
