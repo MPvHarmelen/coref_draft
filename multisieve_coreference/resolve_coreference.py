@@ -2,9 +2,7 @@ import sys
 import logging
 import time
 import itertools as it
-from collections import defaultdict
 from pkg_resources import get_distribution
-from functools import partial
 
 from KafNafParserPy import KafNafParser, Clp
 
@@ -14,7 +12,13 @@ from .dump import add_coreference_to_naf
 from .mentions import get_mentions
 from .entities import Entities
 from .sieve_runner import SieveRunner
-
+from .filters import is_named_entity, is_nominal, is_proper_noun, is_pronoun
+from .constraints import (
+    check_entity_head_match,
+    check_word_inclusion,
+    check_compaitble_modifiers_only,
+    check_not_i_within_i,
+)
 from .offset_info import (
     get_all_offsets,
     get_offset2string_dict,
@@ -25,8 +29,8 @@ from .naf_info import identify_direct_quotations
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def match_some_span(entity, candidates, get_span, offset2string,
-                    candidate_filter=lambda e: True):
+def match_some_span(entity, candidates, mark_disjoint, get_span, offset2string,
+                    entity_filter=lambda e: True):
     '''
     Merge entities that contain mentions with (full) string match.
 
@@ -45,10 +49,13 @@ def match_some_span(entity, candidates, get_span, offset2string,
 
     # For every `entity`, we should break the `for mention` loop at the first
     # `candidate` with a matching `candidate_mention`.
+    if not entity_filter(entity):
+        return
+
     for mention in entity:
         mention_string = get_strings_from_offsets(
             get_span(mention), offset2string)
-        for candidate in filter(candidate_filter, candidates):
+        for candidate in filter(entity_filter, candidates):
             for candidate_mention in candidate:
                 candidate_string = get_strings_from_offsets(
                     get_span(mention), offset2string)
@@ -72,34 +79,6 @@ def match_some_span(entity, candidates, get_span, offset2string,
     #             ...
     #     else:
     #         earlier_strings[mention_string] = entity
-
-
-def match_full_name_overlap(entity, candidates, mark_disjoint, offset2string):
-    '''
-    Merge entities with full string match
-
-    :param entities:        entities to use
-    :param offset2string:   offset2string dictionary to use
-    :return:                None (Entities is updated in place)
-    '''
-    return match_some_span(entity, candidates, lambda m: m.span, offset2string)
-
-
-def match_relaxed_string(
-        entity, candidates, mark_disjoint, offset2string, candidate_filter):
-    '''
-    Merge nominal entities which have the same relaxed string
-
-    :param entities:        entities to use
-    :param offset2string:   offset2string dictionary to use
-    :return:                None (Entities is updated in place)
-    '''
-    return match_some_span(
-        entity,
-        candidates,
-        lambda m: m.relaxed_span,
-        offset2string,
-        candidate_filter)
 
 
 def speaker_identification(entity, candidates, mark_disjoint, quotations):
@@ -174,7 +153,8 @@ def speaker_identification(entity, candidates, mark_disjoint, quotations):
                 # names to speaker
 
 
-def identify_some_structures(entity, candidates, structure_name):
+def identify_some_structures(
+        entity, candidates, mark_disjoint, structure_name):
     """
     Assigns coreference for some structures in place
 
@@ -187,28 +167,6 @@ def identify_some_structures(entity, candidates, structure_name):
     for candidate in candidates:
         if any(mention.span in structures for mention in candidate):
             return candidate
-
-
-def identify_appositive_structures(entity, candidates, mark_disjoint):
-    '''
-    Assigns coreference for appositive structures in place
-
-    :param entities:    entities to use
-    :return:            None (Entities is updated in place)
-    '''
-    identify_some_structures(entity, candidates, 'appositives')
-
-
-def identify_predicative_structures(entity, candidates, mark_disjoint):
-    '''
-    Assigns coreference for predicative structures in place
-
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:                None (Entities is updated in place)
-    '''
-    identify_some_structures(entity, candidates, 'predicatives')
 
 
 def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
@@ -301,17 +259,6 @@ def identify_acronyms_or_alternative_names(entity, candidates, mark_disjoint):
                     return candidate
 
 
-def get_sentence_mentions(mentions):
-
-    sentenceMentions = defaultdict(list)
-
-    for mid, mention in mentions.items():
-        snr = mention.sentence_number
-        sentenceMentions[snr].append(mid)
-
-    return sentenceMentions
-
-
 def apply_precise_constructs(entity, candidates, mark_disjoint):
     '''
     Function that moderates the precise constructs (calling one after the
@@ -322,8 +269,10 @@ def apply_precise_constructs(entity, candidates, mark_disjoint):
     '''
     # return the first match, or None
     return \
-        identify_appositive_structures(entity, candidates, mark_disjoint) or \
-        identify_predicative_structures(entity, candidates, mark_disjoint) or \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, 'appositives') or \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, 'predicatives') or \
         resolve_relative_pronoun_structures(
             entity, candidates, mark_disjoint) or \
         identify_acronyms_or_alternative_names(
@@ -373,100 +322,86 @@ def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
 
 
 def apply_strict_head_match(
-        entity, candidates, mark_disjoint, offset2string, sieve):
+        entity, candidates, mark_disjoint, offset2string, sieve_name):
     """
+    Pass 5 - Strict Head Match.
+
+    Linking a mention to an antecedent based on the naive matching of their
+    head words generates many spurious links because it completely ignores
+    possibly incompatible modifiers (Elsner and Charniak 2010). For example,
+    _Yale University_ and _Harvard University_ have similar head words, but
+    they are obviously different entities. To address this issue, this pass
+    implements several constraints that must all be matched in order to yield a
+    link (constraints marked by an X are actually implemented):
+
+     - [X] Not a pronoun (This constraint is not from Lee et al. (2013))
+
+     - [X] Entity head match - the mention head word matches any head word of
+           mentions in the antecedent entity. Note that this feature is
+           actually more relaxed than naive head matching in a pair of mentions
+           because here it is satisfied when the mention's head matches the
+           head of any mention in the candidate entity.
+
+     - [X] Word inclusion - all the non-stop words in the current entity to be
+           solved are included in the set of non-stop words in the antecedent
+           entity. This heuristic exploits the discourse property that states
+           that it is uncommon to introduce novel information in later mentions
+           (Fox 1993). Typically, mentions of the same entity become shorter
+           and less informative as the narrative progresses.
+           !! Disabled iff `sieve` is `'7'` !!
+
+
+     - [X] Compatible modifiers only - the mention's modifiers are all included
+           in the modifiers of the antecedent candidate. This feature models
+           the same discourse property as the previous feature, but it focuses
+           on the two individual mentions to be linked, rather than their
+           corresponding entities. For this feature we only use modifiers that
+           are nouns or adjectives.
+           !! Disabled iff `sieve` is `'6'` !!
+
+     - [X] Not i-within-i - the two mentions are not in an i-within-i
+           construct, that is, one cannot be a child NP in the other's NP
+           constituent (Chomsky 1981). Here, this is implemented as
+
+    Documentation string adapted from Lee et al. (2013).
+
     :param entities:        entities to use
     :param offset2string:   offset2string dictionary to use
-    :param sieve:           ID of the sieve as a string
+    :param sieve_name:      name of the sieve as a string
     :return:                None (Entities is updated in place)
     """
-    # FIXME: parser specific check for pronoun
     # FIXME: lots of things are calculated repeatedly and forgotten again.
+
     # For any mention in this entity that isn't a pronoun
-    for mention in (m for m in entity if m.head_pos != 'pron'):
-        head_word = offset2string[mention.head_offset]
-        main_mods = set(map(offset2string.get, mention.main_modifiers))
-        for antecedent in candidates:
-            # "Entity head match", i.e.:
-            #   the mention `head_word` matches _any_ head word of mentions
-            #   in the `antecedent` entity.
-            antecedent_head_words = map(
-                offset2string.get,
-                antecedent.mention_attr('head_offset')
-            )
-            # entity level "Word inclusion", i.e.:
-            #   all the non-stop words in `entity` are included in the set
-            #   of non-stop words in the `antecedent` entity.
-            if head_word in antecedent_head_words and \
-               (sieve == '7' or check_word_inclusion(antecedent, entity)):
-                # "Not i-within-i", i.e.:
-                #   the two mentions are not in an i-within-i constructs, that
-                #   is, one cannot be a child NP in the other's NP constituent
-                # In this case, this is interpreted as "one mention does not
-                # fully contain the other"
-                for antecedent_mention in antecedent:
-                    if check_not_i_within_i(antecedent_mention, mention):
-                        # "Compatible modifiers only", i.e.:
-                        #   the `mention`s modifiers are all included in in the
-                        #   modifiers of the `antecedent_mention`. (...)
-                        #   For this feature we only use modifiers that are
-                        #   nouns or adjectives. (Thus `main_modifiers` instead
-                        #   of `modifiers`.)
-                        if sieve == '6':
-                            return antecedent
-                        else:
-                            antecedent_main_mods = set(map(
-                                offset2string.get, antecedent.main_modifiers
-                            ))
-                            if main_mods <= antecedent_main_mods:
-                                return antecedent
+    mentions = [m for m in entity if not is_pronoun(m)]
+    if not mentions:
+        return
 
+    # Make the loop more readable by currying.
+    def check_entity_head_match_this_entity(antecedent):
+        return check_entity_head_match(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
 
-def check_word_inclusion(antecedent, entity):
-    """
-    entity level "Word inclusion", i.e.:
-      all the non-stop words in `entity` are included in the set
-      of non-stop words in the `antecedent` entity.
-    """
-    non_stopwords = set(map(
-        offset2string.get,
-        entity.flat_mention_attr('non_stopwords')
-    ))
-    antecedent_non_stopwords = set(map(
-        offset2string.get,
-        antecedent.flat_mention_attr('non_stopwords')
-    ))
-    return non_stopwords <= antecedent_non_stopwords
+    def check_word_inclusion_this_entity(antecedent):
+        return check_word_inclusion(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
 
-
-def check_not_i_within_i(mention1, mention2):
-    """
-    Check whether one of the two mentions fully contains the other.
-
-    "Not i-within-i", i.e.:
-      the two mentions are not in an i-within-i constructs, that
-      is, one cannot be a child NP in the other's NP constituent
-
-    In this case, this is interpreted as "one mention does not
-    fully contain the other"
-
-
-    The following expression is equivalent to the one below
-    not_i_within_i = not (
-        (boffset2 <= boffset1 and eoffset1 <= eoffset2)
-        or
-        (boffset1 <= boffset2 and eoffset2 <= eoffset1)
-    )
-    """
-    boffset1 = mention1.begin_offset
-    eoffset1 = mention1.end_offset
-    boffset2 = mention2.begin_offset
-    eoffset2 = mention2.end_offset
-    return (
-        (boffset2 > boffset1 and eoffset2 > eoffset1)
-        or
-        (eoffset1 > eoffset2 and boffset1 > boffset2)
-    )
+    for antecedent in candidates:
+        if check_entity_head_match_this_entity(antecedent) and \
+           (sieve_name == '7' or check_word_inclusion_this_entity(antecedent)):
+            pairs = [
+                (antecedent_mention, mention)
+                for antecedent_mention in antecedent
+                for mention in mentions
+                if check_not_i_within_i(antecedent_mention, mention)
+            ]
+            if pairs and (sieve_name == '6' or
+               any(map(check_compaitble_modifiers_only, pairs))):
+                return antecedent
 
 
 def only_identical_numbers(span1, span2, offset2string):
@@ -519,34 +454,25 @@ def apply_proper_head_word_match(
            does not appear in the antecedent, e.g., [people] and
            [around 200 people] (in that order) are not coreferent.
 
-    This documentation string is adopted from Lee et al. (2013)
+    This documentation string is adapted from Lee et al. (2013)
     """
-    # FIXME: tool specific output for entity type
-    correct_types = {
-        'PER',  # person
-        'ORG',  # organisation
-        'LOC',  # location
-        'MISC'  # miscellaneous
-    }
+    if not is_proper_noun(entity):
+        return
+
     # FIXME: Location mismatches?!
-    # FIXME: Why is this different?
-    correct_antecedent_types = {'PER', 'ORG', 'LOC'}
     for mention in entity:
         mention_head = get_strings_from_offsets(
             mention.full_head, offset2string)
-        mention_numbers = get_numbers(mention)
-        check_not_i_within_i_for_this_mention = partial(
-            check_not_i_within_i, mention)
+        mention_numbers = get_numbers(mention, offset2string)
+
         for antecedent in candidates:
-            # Filter by type (I guess this is to implement the
-            # "headed by proper nouns" part)
-            antecedent_mentions = filter(
-                lambda c: c.entity_type in correct_antecedent_types,
-                antecedent)
+            # Proper nouns only
+            antecedent_mentions = filter(is_proper_noun, antecedent)
             # "Not i-within-i"
-            antecedent_mentions = filter(
-                check_not_i_within_i_for_this_mention,
-                antecedent_mentions
+            antecedent_mentions = (
+                antecedent_mention
+                for antecedent_mention in antecedent_mentions
+                if check_not_i_within_i(antecedent_mention, mention)
             )
             for antecedent_mention in antecedent_mentions:
                 antecedent_head = get_strings_from_offsets(
@@ -556,13 +482,13 @@ def apply_proper_head_word_match(
                     # "No numeric mismatches", i.e.:
                     #   the second mention cannot have a number that does not
                     #   appear in the antecedent
-                    antecedent_numbers = get_numbers(antecedent_mention)
+                    antecedent_numbers = get_numbers(
+                        antecedent_mention, offset2string)
                     if antecedent_numbers >= mention_numbers:
                         return antecedent
 
 
-def apply_relaxed_head_match(
-        entity, candidates, mark_disjoint, candidate_filter, offset2string):
+def apply_relaxed_head_match(entity, candidates, mark_disjoint, offset2string):
     """
     Pass 9 - Relaxed Head Match.
 
@@ -592,7 +518,10 @@ def apply_relaxed_head_match(
     :param coref_info:  CoreferenceInformation with current coreference classes
     :return:            None (mentions and coref_classes are updated in place)
     """
-    for antecedent in filter(candidate_filter, candidates):
+    if not is_named_entity(entity):
+        return
+
+    for antecedent in filter(is_named_entity, candidates):
         antecedent_entity_type = antecedent.mention_attr('entity_type')
         antecedent_words = set(get_strings_from_offsets(
             antecedent.flat_mention_attr('span'), offset2string))
@@ -752,8 +681,11 @@ def resolve_coreference(nafin,
             )
         )
 
-    logger.info("Sieve 2: String Match")
-    sieve_runner.run(match_full_name_overlap, offset2string=offset2string)
+    logger.info("Sieve 2: Exact Match")
+    sieve_runner.run(
+        match_some_span,
+        get_span=lambda m: m.span,
+        offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -763,17 +695,12 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 3: Relaxed String Match")
-    nominal_poses = {'name', 'noun'}
-
-    def is_nominal(entity):
-        return bool(
-            nominal_poses.intersection(entity.mention_attr('head_pos')))
 
     sieve_runner.run(
-        match_relaxed_string,
-        is_nominal,
-        offset2string=offset2string,
-        candidate_filter=is_nominal)
+        match_some_span,
+        get_span=lambda m: m.relaxed_span,
+        entity_filter=is_nominal,
+        offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(
@@ -793,11 +720,11 @@ def resolve_coreference(nafin,
         )
 
     logger.info("Sieve 5-7: Strict Head Match")
-    for sieve in ['5', '6', '7']:
+    for sieve_name in ['5', '6', '7']:
         sieve_runner.run(
             apply_strict_head_match,
             offset2string=offset2string,
-            sieve=sieve
+            sieve_name=sieve_name
         )
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -817,18 +744,8 @@ def resolve_coreference(nafin,
             )
         )
 
-    def is_named_entity(entity):
-        """
-        If `entity_type` is not None, this was a named entity.
-        """
-        return bool(entity.mention_attr('entity_type'))
-
     logger.info("Sieve 9: Relaxed Head Match")
-    sieve_runner.run(
-        apply_relaxed_head_match,
-        is_named_entity,
-        candidate_filter=is_named_entity,
-        offset2string=offset2string)
+    sieve_runner.run(apply_relaxed_head_match, offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         logger.debug(

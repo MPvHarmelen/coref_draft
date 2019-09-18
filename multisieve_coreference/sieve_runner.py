@@ -8,14 +8,14 @@ class SieveRunner:
     def __init__(self, entities):
         self.entities = entities
 
-    def run(self, sieve, entity_filter, **kwargs):
+    def run(self, sieve, **kwargs):
         """
         Run a `sieve` with `entity`, `candidates` and `mark_disjoint` as first
         three arguments, followed by all keyword arguments passed to this
         function. A `sieve` must return the `candidate` with which `entity`
         should be merged, or `None`.
         """
-        for entity in filter(entity_filter, self.entities):
+        for entity in self.entities:
             match = sieve(
                 entity,
                 self.entities.get_candidates(entity),

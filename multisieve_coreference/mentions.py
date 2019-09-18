@@ -245,7 +245,7 @@ class Mention:
         '''
 
         self.id = id   # confirmed
-        self.span = tuple(span)
+        self.span = span
 
         self.full_head = full_head
         self.relaxed_span = relaxed_span
@@ -360,22 +360,24 @@ class Mention:
         extra_kwargs.update(kwargs)
 
         mention = cls(
-            span=span_offsets,
-            relaxed_span=relaxed_span,
-            full_head=convert_term_ids_to_offsets(
-                nafobj, constituent_info.multiword),
+            span=tuple(span_offsets),
+            relaxed_span=tuple(relaxed_span),
+            full_head=tuple(convert_term_ids_to_offsets(
+                nafobj, constituent_info.multiword)),
             head_offset=head_offset,
             begin_offset=begin_offset,
             end_offset=end_offset,
             head_pos=head_pos,
-            modifiers=modifiers,
-            appositives=appositives,
+            modifiers=[tuple(m) for m in modifiers],
+            appositives=[tuple(a) for a in appositives],
             predicatives=[
-                convert_term_ids_to_offsets(nafobj, pred_ids)
+                tuple(convert_term_ids_to_offsets(nafobj, pred_ids))
                 for pred_ids in constituent_info.predicatives
             ],
-            non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
-            main_modifiers=get_main_modifiers(nafobj, span_ids),
+            non_stopwords=tuple(
+                get_non_stopwords(nafobj, stopwords, span_ids)),
+            main_modifiers=tuple()
+                tuple(mods) for mods in get_main_modifiers(nafobj, span_ids)],
             sentence_number=get_sentence_number(
                 nafobj, constituent_info.head_id),
             **extra_kwargs
