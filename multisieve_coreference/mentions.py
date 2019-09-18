@@ -337,16 +337,16 @@ class Mention:
         for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             modifiers.append(mod_span)
-            for mid in mod_span:
-                if mid > head_offset and mid in relaxed_span:
-                    relaxed_span.remove(mid)
+            for offset in mod_span:
+                if offset > head_offset and offset in relaxed_span:
+                    relaxed_span.remove(offset)
 
         for app_in_tids in constituent_info.appositives:
             app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
             appositives.append(app_span)
-            for mid in app_span:
-                if mid > head_offset and mid in relaxed_span:
-                    relaxed_span.remove(mid)
+            for offset in app_span:
+                if offset > head_offset and offset in relaxed_span:
+                    relaxed_span.remove(offset)
 
         extra_kwargs = {}
         if head_pos in ['pron', 'noun', 'name']:
