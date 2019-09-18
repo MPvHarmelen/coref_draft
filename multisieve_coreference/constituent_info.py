@@ -121,7 +121,7 @@ def get_named_entities(nafobj):
             # been found
             span = frozenset(span)
             # If this span is smaller than or equal to some existing span,
-            # this entity can be ignore
+            # this entity can be ignored
             if any(span <= other_span for other_span in entities.keys()):
                 continue
             else:
