@@ -26,9 +26,15 @@ class Constituent:
         self.span = get_constituent(head_id) if span is None else span
 
         # Set the default values for `multiword`, `modifiers` and `appositives`
-        if multiword is None or modifiers is None or appositives is None:
-            self.multiword, self.modifiers, self.appositives = \
-                get_mwe_and_modifiers_and_appositives(self.head_id)
+        self.multiword = get_multiword_expressions(self.head_id) \
+            if multiword is None \
+            else multiword
+        self.modifiers = get_modifiers(self.head_id) \
+            if modifiers is None \
+            else modifiers
+        self.appositives = get_appositives(self.head_id) \
+            if appositives is None \
+            else appositives
 
         # Override the default if something different was passed
         if multiword is not None:
@@ -73,28 +79,28 @@ class Constituent:
                         self.add_predicative(predicative)
 
 
-def get_mwe_and_modifiers_and_appositives(head_id):
-    '''
-    Function that identifies full mwe head and posthead modifiers
-    :param head_id: head_id
-    :return: list of full head terms, list of posthead modifiers
-    '''
+def get_multiword_expressions(head_id):
+    return [
+        ID
+        for ID, relation in csts.head2deps.get(head_id, [])
+        if relation == 'mwp/mwp'
+    ]
 
-    mwe = [head_id]
-    mods = []
-    apps = []
 
-    for ID, relation in csts.head2deps.get(head_id, []):
-        if relation == 'mwp/mwp':
-            mwe.append(ID)
-        elif relation == 'hd/mod':
-            dep_constituent = get_constituent(ID)
-            mods.append(dep_constituent)
-        elif relation == 'hd/app':
-            dep_constituent = get_constituent(ID)
-            apps.append(dep_constituent)
+def get_modifiers(head_id):
+    return [
+        get_constituent(ID)
+        for ID, relation in csts.head2deps.get(head_id, [])
+        if relation == 'hd/mod'
+    ]
 
-    return mwe, mods, apps
+
+def get_appositives(head_id):
+    return [
+        get_constituent(ID)
+        for ID, relation in csts.head2deps.get(head_id, [])
+        if relation == 'hd/app'
+    ]
 
 
 def get_named_entities(nafobj):
