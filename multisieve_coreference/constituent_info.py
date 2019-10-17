@@ -172,7 +172,11 @@ def find_head_in_span(span):
 
 
 def find_closest_to_head(span):
+    """
+    Find the term that heads the most terms in `span`.
 
+    If there is a tie, the term occurring first is taken.
+    """
     if len(span) == 1:
         return span[0]
 
