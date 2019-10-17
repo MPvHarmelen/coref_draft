@@ -86,7 +86,7 @@ def get_mwe_and_modifiers_and_appositives(head_id):
 
     for ID, relation in csts.head2deps.get(head_id, []):
         if relation == 'mwp/mwp':
-            mwe.append(head_id)
+            mwe.append(ID)
         elif relation == 'hd/mod':
             dep_constituent = get_constituent(ID)
             mods.append(dep_constituent)
