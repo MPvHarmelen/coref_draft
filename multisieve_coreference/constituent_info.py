@@ -149,9 +149,13 @@ def get_named_entities(nafobj):
 
 def find_head_in_span(span):
     '''
-    Function that return the identifier of the head in the span
-    :param span: list of term identiers
-    :return: term_id
+    Find the first term in the `span` that is the head of a constituent that
+    contains the whole `span`.
+
+    If no such term exists, `find_closest_to_head` is used as fallback.
+
+    :param span:    list of term identifiers
+    :return:        term identifier of head
     '''
 
     head_term = None
