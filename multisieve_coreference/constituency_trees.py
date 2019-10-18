@@ -1,5 +1,7 @@
 import logging
 
+from collections import defaultdict
+
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
@@ -325,3 +327,53 @@ class ConstituencyTrees:
                     filtered.setdefault(super_head, set()).update(deps)
 
         return filtered
+
+    def find_head_in_span(self, span):
+        '''
+        Find the first term in the `span` that is the head of a constituent
+        that contains the whole `span`.
+
+        If no such term exists, `find_closest_to_head` is used as fallback.
+
+        :param span:    list of term identifiers
+        :return:        term identifier of head
+        '''
+
+        head_term = None
+        for term in span:
+            constituent = self.get_constituent(term)
+            if set(span) < constituent:
+                if head_term is None:
+                    head_term = term
+            #    else:
+            #        print('span has more than one head')
+        if head_term is None:
+            head_term = self.find_closest_to_head(span)
+        return head_term
+
+    def find_closest_to_head(self, span):
+        """
+        Find the term that heads the most terms in `span`.
+
+        If there is a tie, the term occurring first is taken.
+        """
+        if len(span) == 1:
+            return span[0]
+
+        head_term_candidates = defaultdict(list)
+
+        for tid in span:
+            if tid in self.head2deps:
+                count = 0
+                for deprel in self.head2deps:
+                    if deprel[0] in span:
+                        count += 1
+                head_term_candidates[count].append(tid)
+
+        if len(head_term_candidates) > 0:
+            max_deps = sorted(head_term_candidates.keys())[-1]
+            best_candidates = head_term_candidates.get(max_deps)
+            if len(best_candidates) > 0:
+                return best_candidates[0]
+
+        return span[0]
