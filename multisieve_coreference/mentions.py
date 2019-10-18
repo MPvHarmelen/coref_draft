@@ -8,7 +8,7 @@ import logging
 from collections import OrderedDict
 
 from .naf_info import get_pos_of_term
-from .constituent_info import get_named_entities, Constituent
+from .constituent import get_named_entities, Constituent
 from .offset_info import (
     convert_term_ids_to_offsets,
     get_offset,
