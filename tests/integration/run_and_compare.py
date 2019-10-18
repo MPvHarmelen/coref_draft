@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 
@@ -52,3 +53,13 @@ def run_and_compare(infile, outfile, correctoutfile):
             hostname=our_header_data.get_hostname(),
         )
         assert out.read() == correct
+
+
+def run_integration(filename, easy_in_dir, easy_correct_out_dir, temp_file):
+    infile = os.path.join(easy_in_dir, filename)
+    correct_outfile = os.path.join(easy_correct_out_dir, filename)
+
+    assert os.path.exists(infile)
+    assert os.path.exists(correct_outfile)
+
+    run_and_compare(infile, temp_file, correct_outfile)
