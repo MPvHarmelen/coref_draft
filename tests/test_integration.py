@@ -4,12 +4,12 @@ from run_and_compare import run_and_compare
 
 
 @pytest.fixture
-def in_dir(resources_dir):
+def easy_in_dir(resources_dir):
     return os.path.join(resources_dir, 'easy-sentences/NAFin')
 
 
 @pytest.fixture
-def correct_out_dir(resources_dir):
+def easy_correct_out_dir(resources_dir):
     return os.path.join(resources_dir, 'easy-sentences/NAFout')
 
 
@@ -19,22 +19,28 @@ EXPECTED_FAILURES = {
 
 
 @pytest.fixture
-def expected_failures():
+def easy_expected_failures():
     """
     Names of files of which we expect the integration test to fail.
     """
     return EXPECTED_FAILURES
 
 
-def pytest_generate_tests(metafunc):
-    arg = 'failure'
-    if arg in metafunc.fixturenames:
-        metafunc.parametrize(arg, EXPECTED_FAILURES)
+@pytest.fixture
+def easy_expected_to_succeed(easy_in_dir, easy_expected_failures):
+    """
+    Names of files of which we expect the integration test to pass.
+    """
+    return (
+        fn
+        for fn in os.listdir(easy_in_dir)
+        if fn not in easy_expected_failures
+    )
 
 
-def run_integration(filename, in_dir, correct_out_dir, temp_file):
-    infile = os.path.join(in_dir, filename)
-    correct_outfile = os.path.join(correct_out_dir, filename)
+def run_integration(filename, easy_in_dir, easy_correct_out_dir, temp_file):
+    infile = os.path.join(easy_in_dir, filename)
+    correct_outfile = os.path.join(easy_correct_out_dir, filename)
 
     assert os.path.exists(infile)
     assert os.path.exists(correct_outfile)
@@ -43,15 +49,23 @@ def run_integration(filename, in_dir, correct_out_dir, temp_file):
 
 
 @pytest.mark.slow
-def test_integration(in_dir, correct_out_dir, temp_file, expected_failures):
-    expected_to_succeed = filter(
-        lambda fn: fn not in expected_failures,
-        os.listdir(in_dir)
-    )
-    for filename in expected_to_succeed:
-        run_integration(filename, in_dir, correct_out_dir, temp_file)
+def test_integration(easy_expected_to_succeed, easy_in_dir,
+                     easy_correct_out_dir, temp_file):
+    for filename in easy_expected_to_succeed:
+        run_integration(filename, easy_in_dir, easy_correct_out_dir, temp_file)
+
+
+def pytest_generate_tests(metafunc):
+    """
+    Generate a separate test case for every expected failure,
+    because otherwise we can't check that all of them fail.
+    """
+    arg = 'failure'
+    if arg in metafunc.fixturenames:
+        metafunc.parametrize(arg, EXPECTED_FAILURES)
 
 
 @pytest.mark.xfail(strict=True, error=AssertionError)
-def test_failing_integration(failure, in_dir, correct_out_dir, temp_file):
-    run_integration(failure, in_dir, correct_out_dir, temp_file)
+def test_failing_integration(failure, easy_in_dir, easy_correct_out_dir,
+                             temp_file):
+    run_integration(failure, easy_in_dir, easy_correct_out_dir, temp_file)
