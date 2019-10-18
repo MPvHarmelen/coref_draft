@@ -38,28 +38,6 @@ def get_relevant_head_ids(nafobj):
     return mention_heads
 
 
-def get_mention_constituents(nafobj):
-    '''
-    Function explores various layers of nafobj and retrieves all mentions
-    possibly referring to an entity
-
-    :param nafobj:  input nafobj
-    :return:        dictionary of head term with as value constituent object
-    '''
-    mention_heads = get_relevant_head_ids(nafobj)
-
-    logger.debug("Mention candidate heads: {!r}".format(mention_heads))
-
-    mention_constituents = [Constituent(head) for head in mention_heads]
-
-    if logger.getEffectiveLevel() <= logging.DEBUG:
-        logger.debug("Mention candidate constituents: {}".format('\n'.join(
-            map('{!r}'.format, mention_constituents)
-        )))
-
-    return mention_constituents
-
-
 def read_stopword_set(language):
     """
     Read a list of stopwords for the given language from the `resources`
@@ -139,7 +117,7 @@ def merge_mentions(mentions):
     return final_mentions
 
 
-def get_mentions(nafobj, language):
+def get_mentions(nafobj, constituency_trees, language):
     '''
     Function that creates mention objects based on mentions retrieved from NAF
     :param nafobj: input naf
@@ -148,13 +126,23 @@ def get_mentions(nafobj, language):
 
     stopwords = read_stopword_set(language)
 
+    mention_heads = get_relevant_head_ids(nafobj)
+
+    logger.debug("Mention candidate heads: {!r}".format(mention_heads))
+
+    mention_constituents = [
+        Constituent.from_constituency_trees(constituency_trees, head_id=head)
+        for head in mention_heads
+    ]
+
     mentions = OrderedDict()
-    for constituent in get_mention_constituents(nafobj):
+    for constituent in mention_constituents:
         mid = 'm' + str(len(mentions))
         mentions[mid] = Mention.from_naf(
             nafobj, stopwords, constituent, id=mid)
 
-    for entity_type, constituent in get_named_entities(nafobj):
+    entity_constituents = get_named_entities(nafobj, constituency_trees)
+    for entity_type, constituent in entity_constituents:
         mid = 'm' + str(len(mentions))
         mentions[mid] = Mention.from_naf(
             nafobj, stopwords, constituent, id=mid,
