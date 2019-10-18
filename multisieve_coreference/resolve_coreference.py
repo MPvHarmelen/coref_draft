@@ -675,10 +675,11 @@ def resolve_coreference(nafin,
     logger.info("Finding mentions...")
     constituency_trees = ConstituencyTrees.from_naf(nafin, term_filter)
     mentions = get_mentions(nafin, constituency_trees, language)
-    del constituency_trees
 
     logger.info("Finding quotations...")
-    quotations = identify_direct_quotations(nafin, mentions)
+    quotations = identify_direct_quotations(
+        nafin, mentions, constituency_trees)
+    del constituency_trees
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions
