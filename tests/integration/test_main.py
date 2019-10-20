@@ -1,7 +1,7 @@
 import pytest
 from .run_and_compare import run_and_compare
 
-from multisieve_coreference.resolve_coreference import process_coreference
+from multisieve_coreference import process_coreference
 
 
 def test_main_example(example_naf_file, temp_file, example_naf_output):
