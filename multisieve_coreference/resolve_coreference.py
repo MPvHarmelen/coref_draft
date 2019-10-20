@@ -824,21 +824,38 @@ def process_coreference(
     """
     Process coreferences and add to the given NAF.
 
-    Note that coreferences are added in place.
+    Main entry point of multisieve-coreference if you have a NAF-object.
+
+    Note that  header and coreference information is added in-place.
     """
+    # timestamp begin time
+    begintime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+
     coref_classes, mentions = resolve_coreference(
         nafin,
         fill_gaps=fill_gaps,
         include_singletons=include_singletons,
         language=language
     )
+
     logger.info("Adding coreference information to NAF...")
     add_coreference_to_naf(nafin, coref_classes, mentions)
 
-
-def add_naf_header(nafobj, begintime):
-
+    # timestamp end time
     endtime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+
+    # add naf header information
+    add_naf_header(nafin, begintime, endtime)
+
+
+def add_naf_header(nafobj, begintime, endtime):
+    """
+    Add header information to NAF in-place.
+
+    :param nafobj:      NAF-object to add header to
+    :param begintime:   string representation of begin time to add to header
+    :param endtime:     string representation of end time to add to header
+    """
     lp = Clp(
         name="vua-multisieve-coreference",
         version=get_distribution(__name__.split('.')[0]).version,
@@ -847,8 +864,16 @@ def add_naf_header(nafobj, begintime):
     nafobj.add_linguistic_processor('coreferences', lp)
 
 
-def main(argv=None):
-    # args and options left for later
+def parse_args(argv=None):
+    """
+    Parse command-line arguments.
+
+    Also calls `logging.basicConfig` to configure the logging level passed on
+    the command-line.
+
+    :param argv:    list of strings to use for parsing, or None for sys.argv
+    :param return:  {argument: value} dictionary of parsed arguments
+    """
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -876,19 +901,39 @@ def main(argv=None):
     cmdl_args = vars(parser.parse_args(argv))
     logging.basicConfig(level=cmdl_args.pop('level'))
 
-    # timestamp begintime
-    begintime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+    return cmdl_args
+
+
+def main(input_file=None, output_file=None, **kwargs):
+    """
+    Main entry point for multisieve-coreference if all you have is an
+    (input, output)-pair of (open) files.
+
+    Does not parse command-line arguments. Instead, use:
+
+        main(**parse_args())
+
+    :param input_file:      (open) file-object to read input NAF data from
+                            defaults to `sys.stdin`
+    :param output_file:     (open) file-object to write output NAF data to
+                            !! NB !! must be in binary mode!
+                            defaults to `sys.stdout`
+    :param **kwargs:        keyword arguments for `process_coreference`
+    """
+    if input_file is None:
+        input_file = sys.stdin
 
     logger.info("Reading...")
-    nafobj = KafNafParser(sys.stdin)
-    logger.info("Processing...")
-    process_coreference(nafobj, **cmdl_args)
+    nafobj = KafNafParser(input_file)
 
-    # adding naf header information
-    add_naf_header(nafobj, begintime)
+    logger.info("Processing...")
+    process_coreference(nafobj, **kwargs)
+
+    # When `output_file` is None, this should default to `sys.stdout` in
+    # binary mode.
     logger.info("Writing...")
-    nafobj.dump()
+    nafobj.dump(output_file)
 
 
 if __name__ == '__main__':
-    main()
+    main(**parse_args())
