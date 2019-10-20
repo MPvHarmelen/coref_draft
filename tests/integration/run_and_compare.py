@@ -55,9 +55,9 @@ def run_and_compare(infile, outfile, correctoutfile):
         assert out.read() == correct
 
 
-def run_integration(filename, easy_in_dir, easy_correct_out_dir, temp_file):
-    infile = os.path.join(easy_in_dir, filename)
-    correct_outfile = os.path.join(easy_correct_out_dir, filename)
+def run_integration(filename, in_dir, correct_out_dir, temp_file):
+    infile = os.path.join(in_dir, filename)
+    correct_outfile = os.path.join(correct_out_dir, filename)
 
     assert os.path.exists(infile)
     assert os.path.exists(correct_outfile)
