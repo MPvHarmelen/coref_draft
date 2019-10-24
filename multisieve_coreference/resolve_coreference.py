@@ -1,15 +1,10 @@
-import sys
 import logging
-import time
 from collections import defaultdict
-from pkg_resources import get_distribution
-
-from KafNafParserPy import KafNafParser, Clp
 
 from . import constants as c
 from .coref_info import CoreferenceInformation
 from .constituency_trees import ConstituencyTrees
-from .dump import add_coreference_to_naf
+
 from .mentions import get_mentions
 from .offset_info import (
     get_all_offsets,
@@ -813,79 +808,12 @@ def resolve_coreference(nafin,
     return coref_info.coref_classes, mentions
 
 
-def process_coreference(
-        nafin,
-        fill_gaps=c.FILL_GAPS_IN_OUTPUT,
-        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
-        language=c.LANGUAGE):
-    """
-    Process coreferences and add to the given NAF.
-
-    Note that coreferences are added in place.
-    """
-    coref_classes, mentions = resolve_coreference(
-        nafin,
-        fill_gaps=fill_gaps,
-        include_singletons=include_singletons,
-        language=language
-    )
-    logger.info("Adding coreference information to NAF...")
-    add_coreference_to_naf(nafin, coref_classes, mentions)
-
-
-def add_naf_header(nafobj, begintime):
-
-    endtime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
-    lp = Clp(
-        name="vua-multisieve-coreference",
-        version=get_distribution(__name__.split('.')[0]).version,
-        btimestamp=begintime,
-        etimestamp=endtime)
-    nafobj.add_linguistic_processor('coreferences', lp)
-
-
-def main(argv=None):
-    # args and options left for later
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument('-l', '--level', help="Logging level", type=str.upper,
-                        default='WARNING')
-    parser.add_argument(
-        '-s',
-        '--include-singletons',
-        help="Whether to include singletons in the output",
-        action='store_true',
-    )
-    parser.add_argument(
-        '-f',
-        '--fill-gaps',
-        help="Whether to fill gaps in mention spans",
-        action='store_true',
-    )
-    parser.add_argument(
-        '--language',
-        help="RFC5646 language tag of language data to use. Currently only"
-        " reads a different set of stopwords. Defaults to {}".format(
-            c.LANGUAGE),
-        default=c.LANGUAGE
-    )
-    cmdl_args = vars(parser.parse_args(argv))
-    logging.basicConfig(level=cmdl_args.pop('level'))
-
-    # timestamp begintime
-    begintime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
-
-    logger.info("Reading...")
-    nafobj = KafNafParser(sys.stdin)
-    logger.info("Processing...")
-    process_coreference(nafobj, **cmdl_args)
-
-    # adding naf header information
-    add_naf_header(nafobj, begintime)
-    logger.info("Writing...")
-    nafobj.dump()
-
-
 if __name__ == '__main__':
-    main()
+    # Left here for legacy reasons.
+    from warnings import warn
+    warn(
+        "Using multisieve_coreference.resolve_coreference as entry-point is"
+        " deprecated. Use `python -m multisieve_coreference` or"
+        "multisieve_coreference.main instead.")
+    from .main import main, parse_args
+    main(**parse_args())

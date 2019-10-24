@@ -1,3 +1,3 @@
-from multisieve_coreference import resolve_coreference
+from multisieve_coreference.main import parse_args, main
 
-resolve_coreference.main()
+main(**parse_args())
