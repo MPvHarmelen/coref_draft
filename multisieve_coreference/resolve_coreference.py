@@ -3,10 +3,9 @@ from collections import defaultdict
 
 from . import constants as c
 from .coref_info import CoreferenceInformation
-from .constituents import create_headdep_dicts
+from .constituency_trees import ConstituencyTrees
 
 from .mentions import get_mentions
-
 from .offset_info import (
     get_all_offsets,
     get_offset2string_dict,
@@ -658,26 +657,24 @@ def post_process(nafobj, mentions, coref_info,
         remove_singleton_coreference_classes(coref_info.coref_classes)
 
 
-def initialize_global_dictionaries(nafobj):
-    logger.debug("create_headdep_dicts")
-    create_headdep_dicts(nafobj)
-
-
 def resolve_coreference(nafin,
                         fill_gaps=c.FILL_GAPS_IN_OUTPUT,
                         include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
-                        language=c.LANGUAGE):
+                        language=c.LANGUAGE,
+                        term_filter=c.TERM_FILTER):
 
     logger.info("Initializing...")
     logger.debug("create_offset_dicts")
     offset2string = get_offset2string_dict(nafin)
-    initialize_global_dictionaries(nafin)
 
     logger.info("Finding mentions...")
-    mentions = get_mentions(nafin, language)
+    constituency_trees = ConstituencyTrees.from_naf(nafin, term_filter)
+    mentions = get_mentions(nafin, constituency_trees, language)
 
     logger.info("Finding quotations...")
-    quotations = identify_direct_quotations(nafin, mentions)
+    quotations = identify_direct_quotations(
+        nafin, mentions, constituency_trees)
+    del constituency_trees
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
         from .util import view_mentions

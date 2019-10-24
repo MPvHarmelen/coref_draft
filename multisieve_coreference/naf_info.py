@@ -7,8 +7,6 @@ from .offset_info import (
 )
 from .quotation import Cquotation
 from .quotation_naf import CquotationNaf
-from . import constituents as csts
-from .constituents import get_constituent
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
@@ -80,15 +78,6 @@ def get_quotation_spans(nafobj):
     return quotations
 
 
-def create_set_of_tids_from_tidfunction(tidfunctionlist):
-
-    tids = set()
-    for tidfunc in tidfunctionlist:
-        tids.add(tidfunc[0])
-
-    return tids
-
-
 def find_relevant_spans(deps, outside_ids):
 
     for dep in deps:
@@ -98,8 +87,9 @@ def find_relevant_spans(deps, outside_ids):
     return None
 
 
-def analyze_head_relations(nafobj, head_term, head2deps):
-
+def analyze_head_relations(nafobj, head_term, constituency_trees):
+    head2deps = constituency_trees.head2deps
+    get_constituent = constituency_trees.get_constituent
     dependents = head2deps.get(head_term)
     speaker = None
     addressee = None
@@ -136,7 +126,7 @@ def analyze_head_relations(nafobj, head_term, head2deps):
     return speaker, addressee, topic
 
 
-def identify_direct_links_to_sip(nafobj, quotation):
+def identify_direct_links_to_sip(nafobj, quotation, constituency_trees):
     '''
     Function that identifies
     :param head2deps: dictionary linking head to dependents
@@ -145,7 +135,7 @@ def identify_direct_links_to_sip(nafobj, quotation):
     '''
 
     for tid in quotation.span:
-        deps = csts.head2deps.get(tid)
+        deps = constituency_trees.head2deps.get(tid)
         if deps is not None:
             # The first element of every tuple
             depids = set(next(iter(zip(*deps))))
@@ -159,7 +149,7 @@ def identify_direct_links_to_sip(nafobj, quotation):
                 head_term = find_relevant_spans(deps, my_joint_set)
                 if head_term is not None:
                     speaker, addressee, topic = analyze_head_relations(
-                        nafobj, head_term, csts.head2deps)
+                        nafobj, head_term, constituency_trees)
                     if speaker is not None:
                         speaker_in_offsets = convert_term_ids_to_offsets(
                             nafobj, speaker)
@@ -174,7 +164,7 @@ def identify_direct_links_to_sip(nafobj, quotation):
                         quotation.topic = topic_in_offsets
 
 
-def check_if_quotation_contains_dependent(quotation):
+def check_if_quotation_contains_dependent(quotation, constituency_trees):
     # FIXME: verify on larger set of development corpus whether this behaviour
     # is correct
     bad_relations = [
@@ -194,9 +184,9 @@ def check_if_quotation_contains_dependent(quotation):
     #     'nucl/sat'
     # ]
     for tid in quotation.span:
-        heads = csts.dep2heads.get(tid)
+        heads = constituency_trees.dep2heads.get(tid)
         if heads is not None:
-            headids = create_set_of_tids_from_tidfunction(heads)
+            headids = constituency_trees.get_direct_parents(tid)
             span_with_quotes = quotation.span + [
                 quotation.beginquote, quotation.endquote]
             if len(headids.difference(set(span_with_quotes))) > 0:
@@ -206,7 +196,8 @@ def check_if_quotation_contains_dependent(quotation):
                             if headrel[1] in bad_relations:
                                 return False
                             elif headrel[1] in ['crd/cnj']:
-                                motherheadrels = csts.dep2heads.get(headrel[0])
+                                motherheadrels = constituency_trees.dep2heads \
+                                    .get(headrel[0])
                                 if motherheadrels is not None:
                                     for mhid in motherheadrels:
                                         if mhid[1] in bad_relations:
@@ -256,12 +247,12 @@ def get_previous_and_next_sentence(sentences):
     return previous_sentence, following_sentence
 
 
-def retrieve_sentence_preceding_sip(nafobj, terms):
+def retrieve_sentence_preceding_sip(nafobj, constituency_trees, terms):
     source_head = None
     for tid in terms:
         myterm = nafobj.get_term(tid)
         if myterm.get_lemma() == 'volgens':
-            deps = csts.head2deps.get(tid)
+            deps = constituency_trees.head2deps.get(tid)
             if deps is not None:
                 for dep in deps:
                     if dep[1] == 'hd/obj1':
@@ -270,13 +261,13 @@ def retrieve_sentence_preceding_sip(nafobj, terms):
     return source_head
 
 
-def retrieve_quotation_following_sip(nafobj, terms):
+def retrieve_quotation_following_sip(nafobj, constituency_trees, terms):
 
     source_head = None
     for tid in terms:
         myterm = nafobj.get_term(tid)
         if myterm.get_lemma() == 'aldus':
-            deps = csts.head2deps.get(tid)
+            deps = constituency_trees.head2deps.get(tid)
             if deps is not None:
                 for dep in deps:
                     if dep[1] == 'hd/obj1':
@@ -285,33 +276,37 @@ def retrieve_quotation_following_sip(nafobj, terms):
     return source_head
 
 
-def identify_addressee_or_topic_relations(nafobj, tid, quotation):
+def identify_addressee_or_topic_relations(nafobj, constituency_trees, tid,
+                                          quotation):
 
     # FIXME: language specific function
-    heads = csts.dep2heads.get(tid)
+    heads = constituency_trees.dep2heads.get(tid)
     if heads is not None:
         for headrel in heads:
             headterm = nafobj.get_term(headrel[0])
             if headterm.get_lemma() == 'tegen' or headrel[1] == 'hd/obj2':
-                myconstituent = get_constituent(headterm.get_id())
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
                 addressee = convert_term_ids_to_offsets(nafobj, myconstituent)
                 quotation.addressee = addressee
                 return True
             elif headterm.get_lemma() == 'over':
-                myconstituent = get_constituent(headterm.get_id())
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
                 topic = convert_term_ids_to_offsets(nafobj, myconstituent)
                 quotation.topic = topic
                 return True
     return False
 
 
-def get_candidates_not_part_of_addressee_topic(candidate_names, quotation):
+def get_candidates_not_part_of_addressee_topic(
+        constituency_trees, candidate_names, quotation):
 
     remaining_candidates = []
     covered_tids = quotation.addressee + quotation.topic
     for tid in candidate_names:
         if tid not in covered_tids:
-            myconstituent = get_constituent(tid)
+            myconstituent = constituency_trees.get_constituent(tid)
             remaining_candidates.append(myconstituent)
             covered_tids += myconstituent
     return remaining_candidates
@@ -345,12 +340,12 @@ def get_closest(candidates):
     return selected_cand
 
 
-def identify_primary_candidate(candidates):
+def identify_primary_candidate(constituency_trees, candidates):
 
     for cand in candidates:
         for tid in cand:
-            if tid in csts.dep2heads:
-                for headrel in csts.dep2heads:
+            if tid in constituency_trees.dep2heads:
+                for headrel in constituency_trees.dep2heads:
                     if headrel[1] == 'hd/su':
                         return cand
 
@@ -358,7 +353,8 @@ def identify_primary_candidate(candidates):
     return get_closest(candidates)
 
 
-def find_name_or_pronoun(nafobj, preceding_terms, quotation):
+def find_name_or_pronoun(nafobj, constituency_trees, preceding_terms,
+                         quotation):
 
     # FIXME: not over paragraph borders; if nothing found, sentence after can
     #        also work
@@ -367,13 +363,13 @@ def find_name_or_pronoun(nafobj, preceding_terms, quotation):
         term = nafobj.get_term(tid)
         if term.get_pos() == 'name' or term.get_pos() == 'pron':
             if not identify_addressee_or_topic_relations(
-               nafobj, tid, quotation):
+               nafobj, constituency_trees, tid, quotation):
                 candidate_names.append(term.get_id())
 
     # change make dictionary with head term to constituent
     if len(candidate_names) > 0:
         remaining_candidates = get_candidates_not_part_of_addressee_topic(
-            candidate_names, quotation)
+            constituency_trees, candidate_names, quotation)
         if len(remaining_candidates) > 0:
             candidates = extract_full_names_or_prons(
                 nafobj, remaining_candidates)
@@ -382,7 +378,8 @@ def find_name_or_pronoun(nafobj, preceding_terms, quotation):
                     nafobj, candidates[0])
                 quotation.source = candidate_in_offsets
             else:
-                candidate = identify_primary_candidate(candidates)
+                candidate = identify_primary_candidate(
+                    constituency_trees, candidates)
                 candidate_in_offsets = convert_term_ids_to_offsets(
                     nafobj, candidate)
                 quotation.source = candidate_in_offsets
@@ -437,7 +434,7 @@ def get_following_terms_in_sentence(last_sentence, quotation_span):
 
 
 def identify_source_introducing_constructions(
-        nafobj, quotation, sentence_to_term):
+        nafobj, constituency_trees, quotation, sentence_to_term):
     '''
     Function that identifies structures that introduce sources of direct quotes
     :param nafobj: the input nafobj
@@ -458,20 +455,23 @@ def identify_source_introducing_constructions(
     if following_sentence is not None:
         following_terms = get_following_terms_in_sentence(
             following_sentence, quotation.span)
-        source_head = retrieve_quotation_following_sip(nafobj, following_terms)
+        source_head = retrieve_quotation_following_sip(
+            nafobj, constituency_trees, following_terms)
 
     if source_head is None:
         preceding_terms = get_preceding_terms_in_sentence(
             sentence_to_term.get(str(prev_sent + 1)), quotation.span)
-        source_head = retrieve_sentence_preceding_sip(nafobj, preceding_terms)
+        source_head = retrieve_sentence_preceding_sip(
+            nafobj, constituency_trees, preceding_terms)
 
     if source_head is not None:
-        source_constituent = get_constituent(source_head)
+        source_constituent = constituency_trees.get_constituent(source_head)
         source_in_offsets = convert_term_ids_to_offsets(
             nafobj, source_constituent)
         quotation.source = source_in_offsets
     else:
-        find_name_or_pronoun(nafobj, preceding_terms, quotation)
+        find_name_or_pronoun(
+            nafobj, constituency_trees, preceding_terms, quotation)
     # 3. check previous sentence for name or pronoun
 
 
@@ -505,7 +505,7 @@ def get_reduced_list_of_quotations(toremove, found_quotations):
     return reduced_quotations
 
 
-def identify_direct_quotations(nafobj, mentions):
+def identify_direct_quotations(nafobj, mentions, constituency_trees):
     '''
     Function that identifies direct quotations in naf
     :param nafobj: input naf object
@@ -515,14 +515,18 @@ def identify_direct_quotations(nafobj, mentions):
     nafquotations = get_quotation_spans(nafobj)
     toremove = []
     for quotation in nafquotations:
-        identify_direct_links_to_sip(nafobj, quotation)
+        identify_direct_links_to_sip(nafobj, quotation, constituency_trees)
         if len(quotation.source) == 0:
             # this can lead to indication of quotation being attribution rather
             # than quotation
-            if check_if_quotation_contains_dependent(quotation):
+            quotation_contains_dependent = \
+                check_if_quotation_contains_dependent(
+                    quotation,
+                    constituency_trees)
+            if quotation_contains_dependent:
                 sentence_to_terms = get_sentence_to_terms(nafobj)
                 identify_source_introducing_constructions(
-                    nafobj, quotation, sentence_to_terms)
+                    nafobj, constituency_trees, quotation, sentence_to_terms)
             else:
                 toremove.append(quotation)
 
