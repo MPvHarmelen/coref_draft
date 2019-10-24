@@ -4,15 +4,30 @@ import subprocess
 
 from KafNafParserPy import KafNafParser
 
+from multisieve_coreference import main
 
-def run_and_compare(infile, outfile, correctoutfile):
+
+def run_with_subprocess(input_file, output_file):
+    subprocess.check_call(
+        [sys.executable, '-m', 'multisieve_coreference'],
+        stdin=input_file,
+        stdout=output_file
+    )
+
+
+def run_without_subprocess(input_file, output_file):
+    main(input_file, output_file)
+
+
+def run_and_compare(in_filename, out_filename, correct_out_filename,
+                    use_subprocess=True):
     """
-    Runs the system with `infile` as input and `outfile` as output and then
-    compares the result to `correctoutfile`.
+    Runs the system with `in_filename` as input and `out_filename` as output
+    and then compares the result to `correct_out_filename`.
 
     Because some header data changes (as it should), the contents of
-    `correctoutfile` will be formatted using a call to `str.format` with the
-    following keyword arguments:
+    `correct_out_filename` will be formatted using a call to `str.format` with
+    the following keyword arguments:
 
         - version
         - timestamp
@@ -21,16 +36,15 @@ def run_and_compare(infile, outfile, correctoutfile):
         - hostname
 
     """
-    with open(infile) as fd, open(outfile, 'w') as out:
-        subprocess.check_call(
-            [sys.executable, '-m', 'multisieve_coreference'],
-            stdin=fd,
-            stdout=out
-        )
+    with open(in_filename) as fd, open(out_filename, 'wb') as out:
+        if use_subprocess:
+            run_with_subprocess(fd, out)
+        else:
+            run_without_subprocess(fd, out)
 
-    with open(outfile) as out, open(correctoutfile) as correct:
+    with open(out_filename) as out, open(correct_out_filename) as correct:
         # Check something happened and that the result can be parsed
-        outnaf = KafNafParser(outfile)
+        outnaf = KafNafParser(out_filename)
 
         # Get the header information to be able to compare raw files
         our_header_layer = list(
@@ -55,11 +69,11 @@ def run_and_compare(infile, outfile, correctoutfile):
         assert out.read() == correct
 
 
-def run_integration(filename, in_dir, correct_out_dir, temp_file):
-    infile = os.path.join(in_dir, filename)
+def run_integration(filename, in_dir, correct_out_dir, temp_file, **kwargs):
+    in_filename = os.path.join(in_dir, filename)
     correct_outfile = os.path.join(correct_out_dir, filename)
 
-    assert os.path.exists(infile)
+    assert os.path.exists(in_filename)
     assert os.path.exists(correct_outfile)
 
-    run_and_compare(infile, temp_file, correct_outfile)
+    run_and_compare(in_filename, temp_file, correct_outfile, **kwargs)
