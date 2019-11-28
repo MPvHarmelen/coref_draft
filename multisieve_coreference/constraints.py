@@ -50,7 +50,7 @@ def check_word_inclusion(antecedent, entity, offset2string):
     return non_stopwords <= antecedent_non_stopwords
 
 
-def check_compaitble_modifiers_only(
+def check_compatible_modifiers_only(
         antecedent_mention, mention, offset2string):
     """
     Compatible modifiers only

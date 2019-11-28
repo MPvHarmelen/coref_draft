@@ -16,7 +16,7 @@ from .filters import is_named_entity, is_nominal, is_proper_noun, is_pronoun
 from .constraints import (
     check_entity_head_match,
     check_word_inclusion,
-    check_compaitble_modifiers_only,
+    check_compatible_modifiers_only,
     check_not_i_within_i,
 )
 from .offset_info import (
@@ -400,7 +400,7 @@ def apply_strict_head_match(
                 if check_not_i_within_i(antecedent_mention, mention)
             ]
             if pairs and (sieve_name == '6' or
-               any(map(check_compaitble_modifiers_only, pairs))):
+               any(map(check_compatible_modifiers_only, pairs))):
                 return antecedent
 
 
