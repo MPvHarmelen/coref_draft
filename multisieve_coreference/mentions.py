@@ -220,11 +220,9 @@ class Mention:
         #TODO: revise so that provides information needed for some sieve;
         #STEP 1: sieve 3 needs option to remove post-head modifiers
 
-        :param main_modifiers:          all `modifiers` that are
-
-        :type span:                    tuple
-        :type relaxed_span:            tuple
-        :type full_head:               tuple
+        :type span:                    (hashable) span, i.e. tuple
+        :type relaxed_span:            (hashable) span, i.e. tuple
+        :type full_head:               (hashable) span, i.e. tuple
         :type head_offset:             int
         :type begin_offset:            int
         :type end_offset:              int
@@ -236,11 +234,11 @@ class Mention:
         :type is_relative_pronoun:     bool
         :type is_reflexive_pronoun:    bool
         :type coreference_prohibited:  list
-        :type modifiers:               tuple
-        :type appositives:             tuple
-        :type predicatives:            tuple
-        :type non_stopwords:           tuple
-        :type main_modifiers:          tuple
+        :type modifiers:               iterable of (hashable) spans
+        :type appositives:             iterable of (hashable) spans
+        :type predicatives:            iterable of (hashable) spans
+        :type non_stopwords:           tuple of offsets
+        :type main_modifiers:          iterable of (hashable) spans
         :type sentence_number:         int
         '''
 
