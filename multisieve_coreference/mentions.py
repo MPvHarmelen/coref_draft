@@ -374,8 +374,10 @@ class Mention:
             ],
             non_stopwords=tuple(
                 get_non_stopwords(nafobj, stopwords, span_ids)),
-            main_modifiers=tuple()
-                tuple(mods) for mods in get_main_modifiers(nafobj, span_ids)],
+            main_modifiers=[
+                tuple(get_main_modifiers(nafobj, mods))
+                for mods in modifiers
+            ],
             sentence_number=get_sentence_number(
                 nafobj, constituent_info.head_id),
             **extra_kwargs
