@@ -50,15 +50,17 @@ class Constituent:
             head_id = constituency_trees.find_head_in_span(span)
 
         # Set default values
-        if multiword is None or modifiers is None or appositives is None:
+        if multiword is None:
             multiword = cls.get_multiword_expressions(
                 head_id,
                 constituency_trees)
 
+        if modifiers is None:
             modifiers = cls.get_modifiers(
                 head_id,
                 constituency_trees)
 
+        if appositives is None:
             appositives = cls.get_appositives(
                 head_id,
                 constituency_trees)
