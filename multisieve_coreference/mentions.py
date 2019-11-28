@@ -213,7 +213,7 @@ class Mention:
             predicatives=(),
             non_stopwords=(),
             main_modifiers=(),
-            sentence_number=(),
+            sentence_number=None,
             ):
         '''
         Constructor of the mention
