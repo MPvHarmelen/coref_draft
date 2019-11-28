@@ -69,7 +69,8 @@ class Entity:
         ]
         if not all_answers:
             raise AttributeError(
-                f"None of the mentions have the attribute {attr!r}")
+                "None of the mentions have a non-None value for the attribute"
+                f" {attr!r}")
         return all_answers
 
     def non_unique_non_none_mention_attr(self, attr):
