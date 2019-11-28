@@ -7,16 +7,19 @@ from multisieve_coreference.mentions import Mention
 
 
 HASHABLE_AND_ITERABLE_MENTION_ATTRIBUTES = [
-        'span',
-        'relaxed_span',
-        'full_head',
-        'modifiers',
-        'appositives',
-        'predicatives',
-        'non_stopwords',
-        'main_modifiers',
-    ]
+    'span',
+    'relaxed_span',
+    'full_head',
+    'non_stopwords',
+]
 
+ITERABLE__BUT_NOT_HASHABLE_MENTION_ATTRIBUTES = [
+    'modifiers',
+    'appositives',
+    'predicatives',
+    'main_modifiers',
+    # 'coreference_prohibited',
+]
 
 SINGLETON_MENTION_ATTRIBUTES = [
         'head_offset',
@@ -33,8 +36,8 @@ SINGLETON_MENTION_ATTRIBUTES = [
     ]
 
 
-ITERABLE_MENTION_ATTRIBUTES = ['coreference_prohibited'] + \
-    HASHABLE_AND_ITERABLE_MENTION_ATTRIBUTES
+ITERABLE_MENTION_ATTRIBUTES = HASHABLE_AND_ITERABLE_MENTION_ATTRIBUTES + \
+    ITERABLE__BUT_NOT_HASHABLE_MENTION_ATTRIBUTES
 
 
 HASHABLE_MENTION_ATTRIBUTES = HASHABLE_AND_ITERABLE_MENTION_ATTRIBUTES + \
@@ -48,18 +51,18 @@ ALL_MENTION_ATTRIBUTES = ITERABLE_MENTION_ATTRIBUTES + \
 @pytest.fixture
 def some_mentions():
     return [
-        Mention(id=1, span=[1, 2, 5], person='random'),
-        Mention(id=3, span=[17, 23, 50], person='random'),
-        Mention(id=2, span=[15, 16, 18], person='different'),
+        Mention(id=1, span=(1, 2, 5), person='random'),
+        Mention(id=3, span=(17, 23, 50), person='random'),
+        Mention(id=2, span=(15, 16, 18), person='different'),
     ]
 
 
 @pytest.fixture
 def some_other_mentions():
     return [
-        Mention(id=6, span=[7, 14, 16], person='another random'),
-        Mention(id=8, span=[5, 8, 9], person='different'),
-        Mention(id=7, span=[10, 12, 17], person='random'),
+        Mention(id=6, span=(7, 14, 16), person='another random'),
+        Mention(id=8, span=(5, 8, 9), person='different'),
+        Mention(id=7, span=(10, 12, 17), person='random'),
     ]
 
 
