@@ -283,44 +283,6 @@ def apply_precise_constructs(entity, candidates, mark_disjoint):
     # f. Demonym Israel, Israeli (later)
 
 
-def find_strict_head_antecedents(mention, mentions, sieve, offset2string):
-    '''
-    Function that looks at which other mentions might be antecedent for the
-    current mention
-
-    :param mention:  current mention
-    :param mentions: dictionary of all mentions
-    :return:         list of antecedent ids
-    '''
-    head_string = offset2string.get(mention.head_offset)
-    non_stopwords = get_strings_from_offsets(
-        mention.non_stopwords, offset2string)
-    main_mods = get_strings_from_offsets(
-        mention.main_modifiers, offset2string)
-    antecedents = []
-    for mid, comp_mention in mentions.items():
-        # offset must be smaller to be antecedent and not i-to-i
-        if comp_mention.head_offset < mention.head_offset and \
-           not mention.head_offset <= comp_mention.end_offset:
-            if head_string == offset2string.get(
-               comp_mention.head_offset):
-                match = True
-                full_span = get_strings_from_offsets(
-                    comp_mention.span, offset2string)
-                if sieve in ['5', '7']:
-                    for non_stopword in non_stopwords:
-                        if non_stopword not in full_span:
-                            match = False
-                if sieve in ['5', '6']:
-                    for mmod in main_mods:
-                        if mmod not in full_span:
-                            match = False
-                if match:
-                    antecedents.append(mid)
-
-    return antecedents
-
-
 def apply_strict_head_match(
         entity, candidates, mark_disjoint, offset2string, sieve_name):
     """
