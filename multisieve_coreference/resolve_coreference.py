@@ -34,9 +34,8 @@ def match_some_span(entity, candidates, mark_disjoint, get_span, offset2string,
     '''
     Merge entities that contain mentions with (full) string match.
 
-    :param entities:        entities to use
     :param get_span:        (mention -> span) function to get the span to use
-    :param offset2string:   offset2string dictionary to use
+    :param offset2string:   {offset: string} dictionary to use
     :param entity_filter:   filter to choose which entities this sieve should
                             act upon
     '''
@@ -111,7 +110,7 @@ def speaker_identification(entity, candidates, mark_disjoint, quotations):
     the are discarded when merged.
 
     :param quotations:  list of quotation objects
-    :return:            None (Entities is updated in place)
+    :return:    first matching candidate
     '''
     entity_span = entity.flat_mention_attr('span')
     for quote in quotations:
@@ -158,10 +157,9 @@ def identify_some_structures(
     """
     Assigns coreference for some structures in place
 
-    :param entities:        entities to use
-    :param get_structures:  name of the Mention attribute that is an iterable
+    :param structure_name:  name of the Mention attribute that is an iterable
                             of (hashable) spans.
-    :return:                None (Entities is updated in place)
+    :return:                first matching candidate
     """
     structures = entity.flat_mention_attr(structure_name)
     for candidate in candidates:
@@ -174,8 +172,7 @@ def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
     Identifies relative pronouns and assigns them to the class of the noun
     they're modifying
 
-    :param entities:    entities to use
-    :return:            None (Entities is updated in place)
+    :return:    first matching candidate
     '''
     if any(entity.mention_attr('is_relative_pronoun')):
         head_offsets = entity.mention_attr('head_offsets')
@@ -201,8 +198,7 @@ def resolve_reflexive_pronoun_structures(entity, candidates, mark_disjoint):
         "[zich] wassen deed [hij] elke dag"
         is a counter-example for the last rule
 
-    :param entities:    entities to use
-    :return:            None (Entities is updated in place)
+    :return:    first matching candidate
     '''
     for mention in entity:
         if mention.is_reflexive_pronoun:
@@ -233,8 +229,7 @@ def identify_acronyms_or_alternative_names(entity, candidates, mark_disjoint):
     > simple, but our error analysis suggests it nonetheless does not lead to
     > errors.
 
-    :param entities:    entities to use
-    :return:            None (Entities is updated in place)
+    :return:    first matching candidate
     '''
     # FIXME: input specific
     correct_types = {
@@ -264,8 +259,7 @@ def apply_precise_constructs(entity, candidates, mark_disjoint):
     Function that moderates the precise constructs (calling one after the
     other)
 
-    :param entities:    entities to use
-    :return:            None (Entities is updated in place)
+    :return:    first matching candidate
     '''
     # return the first match, or None
     return \
@@ -323,14 +317,14 @@ def apply_strict_head_match(
 
      - [X] Not i-within-i - the two mentions are not in an i-within-i
            construct, that is, one cannot be a child NP in the other's NP
-           constituent (Chomsky 1981). Here, this is implemented as
+           constituent (Chomsky 1981). See `check_not_i_within_i` for how it is
+           implemented here.
 
     Documentation string adapted from Lee et al. (2013).
 
-    :param entities:        entities to use
-    :param offset2string:   offset2string dictionary to use
+    :param offset2string:   {offset: string} dictionary to use
     :param sieve_name:      name of the sieve as a string
-    :return:                None (Entities is updated in place)
+    :return:                first matching candidate
     """
     # FIXME: lots of things are calculated repeatedly and forgotten again.
 
@@ -366,32 +360,14 @@ def apply_strict_head_match(
                 return antecedent
 
 
-def only_identical_numbers(span1, span2, offset2string):
-
-    word1 = get_strings_from_offsets(span1, offset2string)
-    word2 = get_strings_from_offsets(span2, offset2string)
-
-    for letter in word1:
-        if letter.isdigit() and letter not in word2:
-            return False
-
-    return True
-
-
-def contains_number(span, offset2string):
-
-    for letter in get_strings_from_offsets(span, offset2string):
-        if letter.isdigit():
-            return True
-
-    return False
-
-
 def get_numbers(mention, offset2string):
     """
     Get the set of numbers in this mention (as per `str.isdigit`).
 
     A word containing only digits is considered a number.
+
+    :param mention:         mention to get numbers of
+    :param offset2string:   {offset: string} dictionary to use
     """
     return {
         word
@@ -417,6 +393,9 @@ def apply_proper_head_word_match(
            [around 200 people] (in that order) are not coreferent.
 
     This documentation string is adapted from Lee et al. (2013)
+
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
     """
     if not is_proper_noun(entity):
         return
@@ -475,10 +454,8 @@ def apply_relaxed_head_match(entity, candidates, mark_disjoint, offset2string):
      - [X] not i-within-i
      - [X] word inclusion
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
     """
     if not is_named_entity(entity):
         return
@@ -542,10 +519,9 @@ def resolve_pronoun_coreference(
     !! NB !! The extraction of features is mostly implemented in `mention.py`.
              Most of the features are already reported by Alpino.
 
-    :param mentions:    dictionary of all available mention objects (key is
-                        mention id)
-    :param coref_info:  CoreferenceInformation with current coreference classes
-    :return:            None (mentions and coref_classes are updated in place)
+    :param max_sentence_distance:   maximum allowed sentence distance between
+                                    coreferent pronouns
+    :return:                        first matching candidate
     """
     # we only deal with unresolved pronouns here
     if {'pron'} == entity.mention_attr('head_pos'):
