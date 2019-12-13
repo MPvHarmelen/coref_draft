@@ -18,7 +18,6 @@ ITERABLE__BUT_NOT_HASHABLE_MENTION_ATTRIBUTES = [
     'appositives',
     'predicatives',
     'main_modifiers',
-    # 'coreference_prohibited',
 ]
 
 SINGLETON_MENTION_ATTRIBUTES = [

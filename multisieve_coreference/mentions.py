@@ -207,7 +207,6 @@ class Mention:
             entity_type=None,
             is_relative_pronoun=False,
             is_reflexive_pronoun=False,
-            coreference_prohibited=None,
             modifiers=(),
             appositives=(),
             predicatives=(),
@@ -233,7 +232,6 @@ class Mention:
         :type entity_type:             str
         :type is_relative_pronoun:     bool
         :type is_reflexive_pronoun:    bool
-        :type coreference_prohibited:  list
         :type modifiers:               iterable of (hashable) spans
         :type appositives:             iterable of (hashable) spans
         :type predicatives:            iterable of (hashable) spans
@@ -287,7 +285,6 @@ class Mention:
             'entity_type={self.entity_type!r}, ' \
             'is_relative_pronoun={self.is_relative_pronoun!r}, ' \
             'is_reflexive_pronoun={self.is_reflexive_pronoun!r}, ' \
-            'coreference_prohibited={self.coreference_prohibited!r}, ' \
             'modifiers={self.modifiers!r}, ' \
             'appositives={self.appositives!r}, ' \
             'predicatives={self.predicatives!r}, ' \
