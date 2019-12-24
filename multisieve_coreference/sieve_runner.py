@@ -28,7 +28,7 @@ class SieveRunner:
             if match is not None:
                 logger.debug(
                     "Given the first entity, the second was a match:\n"
-                    f"{entity}\n"
-                    f"{match}"
+                    f"{entity!r}\n"
+                    f"{match!r}"
                 )
                 self.entities.merge(match, entity)
