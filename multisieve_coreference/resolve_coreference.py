@@ -351,14 +351,14 @@ def apply_strict_head_match(
     for antecedent in candidates:
         if check_entity_head_match_this_entity(antecedent) and \
            (sieve_name == '7' or check_word_inclusion_this_entity(antecedent)):
-            pairs = [
-                (antecedent_mention, mention)
+            args = [
+                (antecedent_mention, mention, offset2string)
                 for antecedent_mention in antecedent
                 for mention in mentions
                 if check_not_i_within_i(antecedent_mention, mention)
             ]
-            if pairs and (sieve_name == '6' or
-               any(map(check_compatible_modifiers_only, pairs))):
+            if args and (sieve_name == '6' or
+               any(it.starmap(check_compatible_modifiers_only, args))):
                 return antecedent
 
 
