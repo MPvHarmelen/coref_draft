@@ -737,7 +737,7 @@ def process_coreference(
 
 def add_naf_header(nafobj, begintime):
 
-    endtime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+    endtime = time.strftime(c.TIMESTAMP_FORMAT)
     lp = Clp(
         name="vua-multisieve-coreference",
         version=get_distribution(__name__.split('.')[0]).version,
@@ -776,7 +776,7 @@ def main(argv=None):
     logging.basicConfig(level=cmdl_args.pop('level'))
 
     # timestamp begintime
-    begintime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+    begintime = time.strftime(c.TIMESTAMP_FORMAT)
 
     logger.info("Reading...")
     nafobj = KafNafParser(sys.stdin)
