@@ -5,28 +5,31 @@ The first argument must always be the candidate antecedent, while the second
 argument must be the Mention/Entity occurring later.
 
 Not all constraints are necessarily available at both the Mention _and_ the
-Entity level. Moreover, some constraints take an Entity as antecedent and a
+Entity level. Moreover, some constraints may take an Entity as antecedent and a
 Mention that occurs later, or visa versa.
 """
 
 
-def check_entity_head_match(antecedent, mention, offset2string):
+def check_entity_head_match(antecedent, entity, offset2string):
     """
     Entity head match
 
-    The `mention.head_word` matches _any_ head word of mentions in the
-    `antecedent` entity.
+    The head word of _any_ mention in `entity` (exactly) matches the head word
+    of _any_ mentions in the `antecedent` entity.
 
-    :param antecedent:  candidate antecedent Entity
-    :param mention:     Mention under considerations
+    :param antecedent:      candidate antecedent Entity
+    :param entity:          Entity under considerations
     :param offset2string:   {offset: surface_string} dictionary
     """
-    head_word = offset2string[mention.head_offset]
-    antecedent_head_words = map(
-        offset2string.get,
-        antecedent.mention_attr('head_offset')
-    )
-    return head_word in antecedent_head_words
+    antecedent_head_words = {
+        offset2string[offset]
+        for offset in antecedent.mention_attr('head_offset')
+    }
+    entity_head_words = {
+        offset2string[offset]
+        for offset in entity.mention_attr('head_offset')
+    }
+    return bool(entity_head_words & antecedent_head_words)
 
 
 def check_word_inclusion(antecedent, entity, offset2string):
@@ -60,10 +63,29 @@ def check_compatible_modifiers_only(
     are nouns or adjectives. (Thus `main_modifiers` instead of `modifiers`.)
 
     Documentation string adapted from Lee et al. (2013)
+
+    This description can either be interpreted as:
+
+    > Every constituent that modifies `mention` should occur as modifying
+    > constituent of `antecedent_mention`.
+
+    or as:
+
+    > All the tokens that appear as modifiers of `mention` should also appear
+    > as modifiers of `antecedent_mention`.
+
+    This code interprets it the **2nd** way.
     """
-    main_mods = {offset2string[mod] for mod in mention.main_modifiers}
+    main_mods = {
+        offset2string[m]
+        for mods in mention.main_modifiers
+        for m in mods
+    }
     antecedent_main_mods = {
-        offset2string[mod] for mod in antecedent_mention.main_modifiers}
+        offset2string[m]
+        for mods in antecedent_mention.main_modifiers
+        for m in mods
+    }
     return main_mods <= antecedent_main_mods
 
 
