@@ -4,7 +4,7 @@ import subprocess
 from KafNafParserPy import KafNafParser
 
 
-def run_and_compare(infile, outfile, correctoutfile):
+def run_and_compare(infile, outfile, correctoutfile, cmdl_args=[]):
     """
     Runs the system with `infile` as input and `outfile` as output and then
     compares the result to `correctoutfile`.
@@ -20,12 +20,20 @@ def run_and_compare(infile, outfile, correctoutfile):
         - hostname
 
     """
-    with open(infile) as fd, open(outfile, 'w') as out:
-        subprocess.check_call(
-            [sys.executable, '-m', 'multisieve_coreference'],
-            stdin=fd,
-            stdout=out
-        )
+    with open(infile) as fd, open(outfile, 'w+') as out:
+        try:
+            subprocess.run(
+                [sys.executable, '-m', 'multisieve_coreference'] + cmdl_args,
+                stdin=fd,
+                stdout=out,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            out.seek(0)
+            raise AssertionError(
+                f"stderr output of the process:\n\n{e.stderr.decode()}\n\n"
+                f"stdout output of the process:\n\n{out.read()}") from e
 
     with open(outfile) as out, open(correctoutfile) as correct:
         # Check something happened and that the result can be parsed

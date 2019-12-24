@@ -19,6 +19,7 @@ setup(
     package_data={'multisieve_coreference': ['resources/*/*']},
     install_requires=[
         "KafNafParserPy>=1.88",
+        "PyYAML>=5.2",
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

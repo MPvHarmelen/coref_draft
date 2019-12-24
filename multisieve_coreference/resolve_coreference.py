@@ -1,9 +1,11 @@
 import sys
 import logging
+import logging.config
 import time
 import itertools as it
 from pkg_resources import get_distribution
 
+import yaml
 from KafNafParserPy import KafNafParser, Clp
 
 from . import constants as c
@@ -748,11 +750,17 @@ def add_naf_header(nafobj, begintime):
 
 def main(argv=None):
     # args and options left for later
-    from argparse import ArgumentParser
+    from argparse import ArgumentParser, FileType
 
     parser = ArgumentParser()
     parser.add_argument('-l', '--level', help="Logging level", type=str.upper,
                         default='WARNING')
+    parser.add_argument(
+        '--log-config',
+        help="YAML-file to read logging configuration from."
+        " Overrides the `level`, if passed.",
+        type=FileType('r')
+    )
     parser.add_argument(
         '-s',
         '--include-singletons',
@@ -773,7 +781,17 @@ def main(argv=None):
         default=c.LANGUAGE
     )
     cmdl_args = vars(parser.parse_args(argv))
-    logging.basicConfig(level=cmdl_args.pop('level'))
+
+    # Logging configuration
+    basic_level = cmdl_args.pop('level')
+    config_file = cmdl_args.pop('log_config', None)
+
+    if config_file is not None:
+        logging.config.dictConfig(
+            yaml.safe_load(config_file)
+        )
+    else:
+        logging.basicConfig(level=basic_level)
 
     # timestamp begintime
     begintime = time.strftime(c.TIMESTAMP_FORMAT)
