@@ -1,0 +1,18 @@
+version: 1
+formatters:
+  default:
+    format: '%(levelname)s:%(name)s:%(msg)s'
+handlers:
+  stderr:
+    class: logging.StreamHandler
+    level: DEBUG
+    stream: ext://sys.stderr
+    formatter: default
+loggers:
+  multisieve_coreference.sieve_runner:
+    level: DEBUG
+  multisieve_coreference.resolve_coreference:
+    level: INFO
+root:
+  level: INFO
+  handlers: [stderr]

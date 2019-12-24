@@ -1,4 +1,7 @@
+import logging
 from functools import partial
+
+logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
 class SieveRunner:
@@ -23,4 +26,9 @@ class SieveRunner:
                 **kwargs
             )
             if match is not None:
+                logger.debug(
+                    "Given the first entity, the second was a match:\n"
+                    f"{entity}\n"
+                    f"{match}"
+                )
                 self.entities.merge(match, entity)
