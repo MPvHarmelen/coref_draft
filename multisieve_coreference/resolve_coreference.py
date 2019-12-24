@@ -694,9 +694,7 @@ def resolve_coreference(nafin,
             )
         )
 
-    logger.info("Sieve 10")
-
-    logger.info("\tResolve relative pronoun coreferences")
+    logger.info("Sieve 10: Resolve relative pronoun coreferences")
     sieve_runner.run(resolve_pronoun_coreference, max_sentence_distance=3)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
