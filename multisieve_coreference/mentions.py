@@ -326,12 +326,13 @@ class Mention:
         head_pos = get_pos_of_term(nafobj, constituent_info.head_id)
 
         # modifiers and appositives:
-        modifiers, appositives = [], []
+        modifiers, main_modifiers, appositives = [], [], []
 
         relaxed_span = list(span_offsets)
         for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             modifiers.append(mod_span)
+            main_modifiers.append(get_main_modifiers(nafobj, mod_in_tids))
             for offset in mod_span:
                 if offset > head_offset and offset in relaxed_span:
                     relaxed_span.remove(offset)
@@ -371,10 +372,7 @@ class Mention:
             ],
             non_stopwords=tuple(
                 get_non_stopwords(nafobj, stopwords, span_ids)),
-            main_modifiers=[
-                tuple(get_main_modifiers(nafobj, mods))
-                for mods in modifiers
-            ],
+            main_modifiers=[tuple(mods) for mods in main_modifiers],
             sentence_number=get_sentence_number(
                 nafobj, constituent_info.head_id),
             **extra_kwargs
