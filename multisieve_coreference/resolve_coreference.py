@@ -175,7 +175,7 @@ def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
     :return:    first matching candidate
     '''
     if any(entity.mention_attr('is_relative_pronoun')):
-        head_offsets = entity.mention_attr('head_offsets')
+        head_offsets = entity.mention_attr('head_offset')
         for candidate in candidates:
             # If any of the `head_offsets` of this entity appear in the
             # `modifiers` of the candidate
