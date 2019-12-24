@@ -625,6 +625,7 @@ def resolve_coreference(nafin,
     sieve_runner.run(
         match_some_span,
         get_span=lambda m: m.span,
+        entity_filter=is_nominal,
         offset2string=offset2string)
 
     if logger.getEffectiveLevel() <= logging.DEBUG:
