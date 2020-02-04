@@ -59,4 +59,4 @@ def run_and_compare(infile, outfile, correctoutfile, cmdl_args=[]):
             endTimestamp=our_header_data.get_endTimestamp(),
             hostname=our_header_data.get_hostname(),
         )
-        assert out.read() == correct
+        assert correct == out.read()
