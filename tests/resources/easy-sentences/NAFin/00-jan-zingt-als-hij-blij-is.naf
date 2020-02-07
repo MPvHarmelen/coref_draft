@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NAF xml:lang="nl" version="3.0">
+  <nafHeader>
+    <linguisticProcessors layer="terms">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:27UTC" beginTimestamp="2019-04-15T12:33:27UTC" endTimestamp="2019-04-15T12:33:27UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="constituents">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:27UTC" beginTimestamp="2019-04-15T12:33:27UTC" endTimestamp="2019-04-15T12:33:27UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="deps">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:27UTC" beginTimestamp="2019-04-15T12:33:27UTC" endTimestamp="2019-04-15T12:33:27UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="entities">
+      <lp name="ixa-pipe-nerc-nl-6-class-clusters-sonar" beginTimestamp="2019-04-15T12:33:28+0000" endTimestamp="2019-04-15T12:33:34+0000" version="1.5.4-ca02c931bc0b200ccdb8b5795a7552e4cc0d4802" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+  </nafHeader>
+  <raw><![CDATA[Jan zingt als hij blij is.]]></raw>
+  <text>
+    <wf id="w1" offset="0" length="3" sent="1" para="1">Jan</wf>
+    <wf id="w2" offset="4" length="5" sent="1" para="1">zingt</wf>
+    <wf id="w3" offset="10" length="3" sent="1" para="1">als</wf>
+    <wf id="w4" offset="14" length="3" sent="1" para="1">hij</wf>
+    <wf id="w5" offset="18" length="4" sent="1" para="1">blij</wf>
+    <wf id="w6" offset="23" length="2" sent="1" para="1">is</wf>
+    <wf id="w7" offset="26" length="1" sent="1" para="1">.</wf>
+  </text>
+  <terms>
+    <!--Jan-->
+    <term id="t_0" type="open" lemma="Jan" pos="name" morphofeat="N(eigen,ev,basis,zijd,stan)">
+      <span>
+        <target id="w1" />
+      </span>
+    </term>
+    <!--zingt-->
+    <term id="t_1" type="open" lemma="zingen" pos="verb" morphofeat="WW(pv,tgw,met-t)">
+      <span>
+        <target id="w2" />
+      </span>
+    </term>
+    <!--als-->
+    <term id="t_2" type="open" lemma="als" pos="comp" morphofeat="VG(onder)">
+      <span>
+        <target id="w3" />
+      </span>
+    </term>
+    <!--hij-->
+    <term id="t_3" type="close" lemma="hij" pos="pron" morphofeat="VNW(pers,pron,nomin,vol,3,ev,masc)">
+      <span>
+        <target id="w4" />
+      </span>
+    </term>
+    <!--blij-->
+    <term id="t_4" type="open" lemma="blij" pos="adj" morphofeat="ADJ(vrij,basis,zonder)">
+      <span>
+        <target id="w5" />
+      </span>
+    </term>
+    <!--is-->
+    <term id="t_5" type="open" lemma="zijn" pos="verb" morphofeat="WW(pv,tgw,ev)">
+      <span>
+        <target id="w6" />
+      </span>
+    </term>
+    <!--.-->
+    <term id="t_6" type="open" lemma="." pos="punct" morphofeat="LET()">
+      <span>
+        <target id="w7" />
+      </span>
+    </term>
+  </terms>
+  <deps>
+    <!--hd/su(zingt, Jan)-->
+    <dep from="t_1" to="t_0" rfunc="hd/su" />
+    <!--hd/mod(zingt, als)-->
+    <dep from="t_1" to="t_2" rfunc="hd/mod" />
+    <!--cmp/body(als, is)-->
+    <dep from="t_2" to="t_5" rfunc="cmp/body" />
+    <!--hd/su(is, hij)-->
+    <dep from="t_5" to="t_3" rfunc="hd/su" />
+    <!--hd/predc(is, blij)-->
+    <dep from="t_5" to="t_4" rfunc="hd/predc" />
+    <!--- / -(zingt, .)-->
+    <dep from="t_1" to="t_6" rfunc="-- / --" />
+  </deps>
+  <entities>
+    <entity id="e1" type="PER">
+      <references>
+        <!--Jan-->
+        <span>
+          <target id="t_0" />
+        </span>
+      </references>
+    </entity>
+  </entities>
+  <constituency>
+    <tree>
+      <!--Non-terminals-->
+      <nt id="nter0" label="top" />
+      <nt id="nter1" label="smain" />
+      <nt id="nter2" label="name" />
+      <nt id="nter3" label="verb" />
+      <nt id="nter4" label="cp" />
+      <nt id="nter5" label="comp" />
+      <nt id="nter6" label="ssub" />
+      <nt id="nter7" label="pron" />
+      <nt id="nter8" label="adj" />
+      <nt id="nter9" label="verb" />
+      <nt id="nter10" label="punct" />
+      <!--Terminals-->
+      <!--Jan-->
+      <t id="ter0">
+        <span>
+          <target id="t_0" />
+        </span>
+      </t>
+      <!--zingt-->
+      <t id="ter1">
+        <span>
+          <target id="t_1" />
+        </span>
+      </t>
+      <!--als-->
+      <t id="ter2">
+        <span>
+          <target id="t_2" />
+        </span>
+      </t>
+      <!--hij-->
+      <t id="ter3">
+        <span>
+          <target id="t_3" />
+        </span>
+      </t>
+      <!--blij-->
+      <t id="ter4">
+        <span>
+          <target id="t_4" />
+        </span>
+      </t>
+      <!--is-->
+      <t id="ter5">
+        <span>
+          <target id="t_5" />
+        </span>
+      </t>
+      <!--.-->
+      <t id="ter6">
+        <span>
+          <target id="t_6" />
+        </span>
+      </t>
+      <!--Tree edges-->
+      <edge id="tre0" from="nter1" to="nter0" />
+      <edge id="tre1" from="nter2" to="nter1" />
+      <edge id="tre2" from="ter0" to="nter2" />
+      <edge id="tre3" from="nter3" to="nter1" head="yes" />
+      <edge id="tre4" from="ter1" to="nter3" />
+      <edge id="tre5" from="nter4" to="nter1" />
+      <edge id="tre6" from="nter5" to="nter4" />
+      <edge id="tre7" from="ter2" to="nter5" />
+      <edge id="tre8" from="nter6" to="nter4" />
+      <edge id="tre9" from="nter7" to="nter6" />
+      <edge id="tre10" from="ter3" to="nter7" />
+      <edge id="tre11" from="nter8" to="nter6" />
+      <edge id="tre12" from="ter4" to="nter8" />
+      <edge id="tre13" from="nter9" to="nter6" head="yes" />
+      <edge id="tre14" from="ter5" to="nter9" />
+      <edge id="tre15" from="nter10" to="nter0" />
+      <edge id="tre16" from="ter6" to="nter10" />
+    </tree>
+  </constituency>
+</NAF>

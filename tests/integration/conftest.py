@@ -26,7 +26,11 @@ def easy_correct_out_dir(resources_dir):
 
 
 EASY_EXPECTED_FAILURES = {
+    '09-hij-sloeg-hem.naf',
+    '24-een-vrouw-geeft-zich-soms-aan-ons.naf',
+    '50-wie-zal-er-bij-je-blijven-om-je-pijntjes-weg-te-wrijven.naf',
     '52-wie-zal-de-stilte-breken-die-als-ijs-rondom-je-staat.naf',
+    '53-wie-zal-er-bij-je-waken-op-de-avond-voor-je-dood.naf',
 }
 
 

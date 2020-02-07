@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NAF xml:lang="nl" version="3.0">
+  <nafHeader>
+    <linguisticProcessors layer="terms">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:55UTC" beginTimestamp="2019-04-15T12:33:55UTC" endTimestamp="2019-04-15T12:33:55UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="constituents">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:55UTC" beginTimestamp="2019-04-15T12:33:55UTC" endTimestamp="2019-04-15T12:33:55UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="deps">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:33:55UTC" beginTimestamp="2019-04-15T12:33:55UTC" endTimestamp="2019-04-15T12:33:55UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="entities">
+      <lp name="ixa-pipe-nerc-nl-6-class-clusters-sonar" beginTimestamp="2019-04-15T12:33:56+0000" endTimestamp="2019-04-15T12:34:02+0000" version="1.5.4-ca02c931bc0b200ccdb8b5795a7552e4cc0d4802" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+  </nafHeader>
+  <raw><![CDATA[Martin schreeuwt wanneer hij boos is.]]></raw>
+  <text>
+    <wf id="w1" offset="0" length="6" sent="1" para="1">Martin</wf>
+    <wf id="w2" offset="7" length="9" sent="1" para="1">schreeuwt</wf>
+    <wf id="w3" offset="17" length="7" sent="1" para="1">wanneer</wf>
+    <wf id="w4" offset="25" length="3" sent="1" para="1">hij</wf>
+    <wf id="w5" offset="29" length="4" sent="1" para="1">boos</wf>
+    <wf id="w6" offset="34" length="2" sent="1" para="1">is</wf>
+    <wf id="w7" offset="37" length="1" sent="1" para="1">.</wf>
+  </text>
+  <terms>
+    <!--Martin-->
+    <term id="t_0" type="open" lemma="Martin" pos="name" morphofeat="N(eigen,ev,basis,zijd,stan)">
+      <span>
+        <target id="w1" />
+      </span>
+    </term>
+    <!--schreeuwt-->
+    <term id="t_1" type="open" lemma="schreeuwen" pos="verb" morphofeat="WW(pv,tgw,met-t)">
+      <span>
+        <target id="w2" />
+      </span>
+    </term>
+    <!--wanneer-->
+    <term id="t_2" type="open" lemma="wanneer" pos="adv" morphofeat="BW()">
+      <span>
+        <target id="w3" />
+      </span>
+    </term>
+    <!--hij-->
+    <term id="t_3" type="close" lemma="hij" pos="pron" morphofeat="VNW(pers,pron,nomin,vol,3,ev,masc)">
+      <span>
+        <target id="w4" />
+      </span>
+    </term>
+    <!--boos-->
+    <term id="t_4" type="open" lemma="boos" pos="adj" morphofeat="ADJ(vrij,basis,zonder)">
+      <span>
+        <target id="w5" />
+      </span>
+    </term>
+    <!--is-->
+    <term id="t_5" type="open" lemma="zijn" pos="verb" morphofeat="WW(pv,tgw,ev)">
+      <span>
+        <target id="w6" />
+      </span>
+    </term>
+    <!--.-->
+    <term id="t_6" type="open" lemma="." pos="punct" morphofeat="LET()">
+      <span>
+        <target id="w7" />
+      </span>
+    </term>
+  </terms>
+  <deps>
+    <!--hd/su(schreeuwt, Martin)-->
+    <dep from="t_1" to="t_0" rfunc="hd/su" />
+    <!--hd/vc(schreeuwt, wanneer)-->
+    <dep from="t_1" to="t_2" rfunc="hd/vc" />
+    <!--whd/body(wanneer, is)-->
+    <dep from="t_2" to="t_5" rfunc="whd/body" />
+    <!--hd/mod(is, wanneer)-->
+    <dep from="t_5" to="t_2" rfunc="hd/mod" />
+    <!--hd/su(is, hij)-->
+    <dep from="t_5" to="t_3" rfunc="hd/su" />
+    <!--hd/predc(is, boos)-->
+    <dep from="t_5" to="t_4" rfunc="hd/predc" />
+    <!--- / -(schreeuwt, .)-->
+    <dep from="t_1" to="t_6" rfunc="-- / --" />
+  </deps>
+  <entities>
+    <entity id="e1" type="PER">
+      <references>
+        <!--Martin-->
+        <span>
+          <target id="t_0" />
+        </span>
+      </references>
+    </entity>
+  </entities>
+  <constituency>
+    <tree>
+      <!--Non-terminals-->
+      <nt id="nter0" label="top" />
+      <nt id="nter1" label="smain" />
+      <nt id="nter2" label="name" />
+      <nt id="nter3" label="verb" />
+      <nt id="nter4" label="whsub" />
+      <nt id="nter5" label="adv" />
+      <nt id="nter6" label="ssub" />
+      <nt id="nter7" label="pron" />
+      <nt id="nter8" label="adj" />
+      <nt id="nter9" label="verb" />
+      <nt id="nter10" label="punct" />
+      <!--Terminals-->
+      <!--Martin-->
+      <t id="ter0">
+        <span>
+          <target id="t_0" />
+        </span>
+      </t>
+      <!--schreeuwt-->
+      <t id="ter1">
+        <span>
+          <target id="t_1" />
+        </span>
+      </t>
+      <!--wanneer-->
+      <t id="ter2">
+        <span>
+          <target id="t_2" />
+        </span>
+      </t>
+      <!--hij-->
+      <t id="ter3">
+        <span>
+          <target id="t_3" />
+        </span>
+      </t>
+      <!--boos-->
+      <t id="ter4">
+        <span>
+          <target id="t_4" />
+        </span>
+      </t>
+      <!--is-->
+      <t id="ter5">
+        <span>
+          <target id="t_5" />
+        </span>
+      </t>
+      <!--.-->
+      <t id="ter6">
+        <span>
+          <target id="t_6" />
+        </span>
+      </t>
+      <!--Tree edges-->
+      <edge id="tre0" from="nter1" to="nter0" />
+      <edge id="tre1" from="nter2" to="nter1" />
+      <edge id="tre2" from="ter0" to="nter2" />
+      <edge id="tre3" from="nter3" to="nter1" head="yes" />
+      <edge id="tre4" from="ter1" to="nter3" />
+      <edge id="tre5" from="nter4" to="nter1" />
+      <edge id="tre6" from="nter5" to="nter4" />
+      <edge id="tre7" from="ter2" to="nter5" />
+      <edge id="tre8" from="nter6" to="nter4" />
+      <edge id="tre9" from="nter7" to="nter6" />
+      <edge id="tre10" from="ter3" to="nter7" />
+      <edge id="tre11" from="nter8" to="nter6" />
+      <edge id="tre12" from="ter4" to="nter8" />
+      <edge id="tre13" from="nter9" to="nter6" head="yes" />
+      <edge id="tre14" from="ter5" to="nter9" />
+      <edge id="tre15" from="nter10" to="nter0" />
+      <edge id="tre16" from="ter6" to="nter10" />
+    </tree>
+  </constituency>
+</NAF>

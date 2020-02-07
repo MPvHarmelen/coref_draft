@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<NAF xml:lang="nl" version="3.0">
+  <nafHeader>
+    <linguisticProcessors layer="terms">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:39UTC" beginTimestamp="2019-04-15T12:36:39UTC" endTimestamp="2019-04-15T12:36:39UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="constituents">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:39UTC" beginTimestamp="2019-04-15T12:36:39UTC" endTimestamp="2019-04-15T12:36:39UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="deps">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:39UTC" beginTimestamp="2019-04-15T12:36:39UTC" endTimestamp="2019-04-15T12:36:39UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="entities">
+      <lp name="ixa-pipe-nerc-nl-6-class-clusters-sonar" beginTimestamp="2019-04-15T12:36:40+0000" endTimestamp="2019-04-15T12:36:46+0000" version="1.5.4-ca02c931bc0b200ccdb8b5795a7552e4cc0d4802" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="coreferences">
+      <lp name="vua-multisieve-coreference" version="{version}" timestamp="{timestamp}" beginTimestamp="{beginTimestamp}" endTimestamp="{endTimestamp}" hostname="{hostname}"/>
+    </linguisticProcessors>
+  </nafHeader>
+  <raw>Een vrouw speelt dat ze beveelt.</raw>
+  <text>
+    <wf id="w1" offset="0" length="3" sent="1" para="1">Een</wf>
+    <wf id="w2" offset="4" length="5" sent="1" para="1">vrouw</wf>
+    <wf id="w3" offset="10" length="6" sent="1" para="1">speelt</wf>
+    <wf id="w4" offset="17" length="3" sent="1" para="1">dat</wf>
+    <wf id="w5" offset="21" length="2" sent="1" para="1">ze</wf>
+    <wf id="w6" offset="24" length="7" sent="1" para="1">beveelt</wf>
+    <wf id="w7" offset="32" length="1" sent="1" para="1">.</wf>
+  </text>
+  <terms>
+    <!--Een-->
+    <term id="t_0" type="close" lemma="een" pos="det" morphofeat="LID(onbep,stan,agr)">
+      <span>
+        <target id="w1"/>
+      </span>
+    </term>
+    <!--vrouw-->
+    <term id="t_1" type="open" lemma="vrouw" pos="noun" morphofeat="N(soort,ev,basis,zijd,stan)">
+      <span>
+        <target id="w2"/>
+      </span>
+    </term>
+    <!--speelt-->
+    <term id="t_2" type="open" lemma="spelen" pos="verb" morphofeat="WW(pv,tgw,met-t)">
+      <span>
+        <target id="w3"/>
+      </span>
+    </term>
+    <!--dat-->
+    <term id="t_3" type="open" lemma="dat" pos="comp" morphofeat="VG(onder)">
+      <span>
+        <target id="w4"/>
+      </span>
+    </term>
+    <!--ze-->
+    <term id="t_4" type="close" lemma="ze" pos="pron" morphofeat="VNW(pers,pron,stan,red,3,ev,fem)">
+      <span>
+        <target id="w5"/>
+      </span>
+    </term>
+    <!--beveelt-->
+    <term id="t_5" type="open" lemma="bevelen" pos="verb" morphofeat="WW(pv,tgw,met-t)">
+      <span>
+        <target id="w6"/>
+      </span>
+    </term>
+    <!--.-->
+    <term id="t_6" type="open" lemma="." pos="punct" morphofeat="LET()">
+      <span>
+        <target id="w7"/>
+      </span>
+    </term>
+  </terms>
+  <deps>
+    <!--hd/su(speelt, vrouw)-->
+    <dep from="t_2" to="t_1" rfunc="hd/su"/>
+    <!--hd/det(vrouw, Een)-->
+    <dep from="t_1" to="t_0" rfunc="hd/det"/>
+    <!--hd/vc(speelt, dat)-->
+    <dep from="t_2" to="t_3" rfunc="hd/vc"/>
+    <!--cmp/body(dat, beveelt)-->
+    <dep from="t_3" to="t_5" rfunc="cmp/body"/>
+    <!--hd/su(beveelt, ze)-->
+    <dep from="t_5" to="t_4" rfunc="hd/su"/>
+    <!--- / -(speelt, .)-->
+    <dep from="t_2" to="t_6" rfunc="-- / --"/>
+  </deps>
+  <constituency>
+    <tree>
+      <!--Non-terminals-->
+      <nt id="nter0" label="top"/>
+      <nt id="nter1" label="smain"/>
+      <nt id="nter2" label="np"/>
+      <nt id="nter3" label="det"/>
+      <nt id="nter4" label="noun"/>
+      <nt id="nter5" label="verb"/>
+      <nt id="nter6" label="cp"/>
+      <nt id="nter7" label="comp"/>
+      <nt id="nter8" label="ssub"/>
+      <nt id="nter9" label="pron"/>
+      <nt id="nter10" label="verb"/>
+      <nt id="nter11" label="punct"/>
+      <!--Terminals-->
+      <!--Een-->
+      <t id="ter0">
+        <span>
+          <target id="t_0"/>
+        </span>
+      </t>
+      <!--vrouw-->
+      <t id="ter1">
+        <span>
+          <target id="t_1"/>
+        </span>
+      </t>
+      <!--speelt-->
+      <t id="ter2">
+        <span>
+          <target id="t_2"/>
+        </span>
+      </t>
+      <!--dat-->
+      <t id="ter3">
+        <span>
+          <target id="t_3"/>
+        </span>
+      </t>
+      <!--ze-->
+      <t id="ter4">
+        <span>
+          <target id="t_4"/>
+        </span>
+      </t>
+      <!--beveelt-->
+      <t id="ter5">
+        <span>
+          <target id="t_5"/>
+        </span>
+      </t>
+      <!--.-->
+      <t id="ter6">
+        <span>
+          <target id="t_6"/>
+        </span>
+      </t>
+      <!--Tree edges-->
+      <edge id="tre0" from="nter1" to="nter0"/>
+      <edge id="tre1" from="nter2" to="nter1"/>
+      <edge id="tre2" from="nter3" to="nter2"/>
+      <edge id="tre3" from="ter0" to="nter3"/>
+      <edge id="tre4" from="nter4" to="nter2" head="yes"/>
+      <edge id="tre5" from="ter1" to="nter4"/>
+      <edge id="tre6" from="nter5" to="nter1" head="yes"/>
+      <edge id="tre7" from="ter2" to="nter5"/>
+      <edge id="tre8" from="nter6" to="nter1"/>
+      <edge id="tre9" from="nter7" to="nter6"/>
+      <edge id="tre10" from="ter3" to="nter7"/>
+      <edge id="tre11" from="nter8" to="nter6"/>
+      <edge id="tre12" from="nter9" to="nter8"/>
+      <edge id="tre13" from="ter4" to="nter9"/>
+      <edge id="tre14" from="nter10" to="nter8" head="yes"/>
+      <edge id="tre15" from="ter5" to="nter10"/>
+      <edge id="tre16" from="nter11" to="nter0"/>
+      <edge id="tre17" from="ter6" to="nter11"/>
+    </tree>
+  </constituency>
+  <coreferences>
+    <coref id="co1" type="entity">
+      <span>
+        <target id="t_0"/>
+        <target id="t_1" head="yes"/>
+      </span>
+      <span>
+        <target id="t_4" head="yes"/>
+      </span>
+    </coref>
+  </coreferences>
+</NAF>

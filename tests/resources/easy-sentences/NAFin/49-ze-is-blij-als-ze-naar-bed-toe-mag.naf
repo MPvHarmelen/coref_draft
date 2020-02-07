@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NAF xml:lang="nl" version="3.0">
+  <nafHeader>
+    <linguisticProcessors layer="terms">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:41:23UTC" beginTimestamp="2019-04-15T12:41:23UTC" endTimestamp="2019-04-15T12:41:23UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="constituents">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:41:23UTC" beginTimestamp="2019-04-15T12:41:23UTC" endTimestamp="2019-04-15T12:41:23UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="deps">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:41:23UTC" beginTimestamp="2019-04-15T12:41:23UTC" endTimestamp="2019-04-15T12:41:23UTC" version="0.3_2017-03-18" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+    <linguisticProcessors layer="entities">
+      <lp name="ixa-pipe-nerc-nl-6-class-clusters-sonar" beginTimestamp="2019-04-15T12:41:23+0000" endTimestamp="2019-04-15T12:41:30+0000" version="1.5.4-ca02c931bc0b200ccdb8b5795a7552e4cc0d4802" hostname="a58e7f38f835" />
+    </linguisticProcessors>
+  </nafHeader>
+  <raw><![CDATA[Ze is blij als ze naar bed toe mag.]]></raw>
+  <text>
+    <wf id="w1" offset="0" length="2" sent="1" para="1">Ze</wf>
+    <wf id="w2" offset="3" length="2" sent="1" para="1">is</wf>
+    <wf id="w3" offset="6" length="4" sent="1" para="1">blij</wf>
+    <wf id="w4" offset="11" length="3" sent="1" para="1">als</wf>
+    <wf id="w5" offset="15" length="2" sent="1" para="1">ze</wf>
+    <wf id="w6" offset="18" length="4" sent="1" para="1">naar</wf>
+    <wf id="w7" offset="23" length="3" sent="1" para="1">bed</wf>
+    <wf id="w8" offset="27" length="3" sent="1" para="1">toe</wf>
+    <wf id="w9" offset="31" length="3" sent="1" para="1">mag</wf>
+    <wf id="w10" offset="35" length="1" sent="1" para="1">.</wf>
+  </text>
+  <terms>
+    <!--Ze-->
+    <term id="t_0" type="close" lemma="ze" pos="pron" morphofeat="VNW(pers,pron,stan,red,3,ev,fem)">
+      <span>
+        <target id="w1" />
+      </span>
+    </term>
+    <!--is-->
+    <term id="t_1" type="open" lemma="zijn" pos="verb" morphofeat="WW(pv,tgw,ev)">
+      <span>
+        <target id="w2" />
+      </span>
+    </term>
+    <!--blij-->
+    <term id="t_2" type="open" lemma="blij" pos="adj" morphofeat="ADJ(vrij,basis,zonder)">
+      <span>
+        <target id="w3" />
+      </span>
+    </term>
+    <!--als-->
+    <term id="t_3" type="open" lemma="als" pos="comp" morphofeat="VG(onder)">
+      <span>
+        <target id="w4" />
+      </span>
+    </term>
+    <!--ze-->
+    <term id="t_4" type="close" lemma="ze" pos="pron" morphofeat="VNW(pers,pron,stan,red,3,ev,fem)">
+      <span>
+        <target id="w5" />
+      </span>
+    </term>
+    <!--naar-->
+    <term id="t_5" type="close" lemma="naar" pos="prep" morphofeat="VZ(init)">
+      <span>
+        <target id="w6" />
+      </span>
+    </term>
+    <!--bed-->
+    <term id="t_6" type="open" lemma="bed" pos="noun" morphofeat="N(soort,ev,basis,onz,stan)">
+      <span>
+        <target id="w7" />
+      </span>
+    </term>
+    <!--toe-->
+    <term id="t_7" type="open" lemma="toe" pos="part" morphofeat="VZ(fin)">
+      <span>
+        <target id="w8" />
+      </span>
+    </term>
+    <!--mag-->
+    <term id="t_8" type="open" lemma="mogen" pos="verb" morphofeat="WW(pv,tgw,ev)">
+      <span>
+        <target id="w9" />
+      </span>
+    </term>
+    <!--.-->
+    <term id="t_9" type="open" lemma="." pos="punct" morphofeat="LET()">
+      <span>
+        <target id="w10" />
+      </span>
+    </term>
+  </terms>
+  <deps>
+    <!--hd/su(is, Ze)-->
+    <dep from="t_1" to="t_0" rfunc="hd/su" />
+    <!--hd/predc(is, blij)-->
+    <dep from="t_1" to="t_2" rfunc="hd/predc" />
+    <!--hd/mod(is, als)-->
+    <dep from="t_1" to="t_3" rfunc="hd/mod" />
+    <!--cmp/body(als, mag)-->
+    <dep from="t_3" to="t_8" rfunc="cmp/body" />
+    <!--hd/su(mag, ze)-->
+    <dep from="t_8" to="t_4" rfunc="hd/su" />
+    <!--hd/ld(mag, naar)-->
+    <dep from="t_8" to="t_5" rfunc="hd/ld" />
+    <!--hd/obj1(naar, bed)-->
+    <dep from="t_5" to="t_6" rfunc="hd/obj1" />
+    <!--hd/hdf(naar, toe)-->
+    <dep from="t_5" to="t_7" rfunc="hd/hdf" />
+    <!--- / -(is, .)-->
+    <dep from="t_1" to="t_9" rfunc="-- / --" />
+  </deps>
+  <constituency>
+    <tree>
+      <!--Non-terminals-->
+      <nt id="nter0" label="top" />
+      <nt id="nter1" label="smain" />
+      <nt id="nter2" label="pron" />
+      <nt id="nter3" label="verb" />
+      <nt id="nter4" label="adj" />
+      <nt id="nter5" label="cp" />
+      <nt id="nter6" label="comp" />
+      <nt id="nter7" label="ssub" />
+      <nt id="nter8" label="pron" />
+      <nt id="nter9" label="pp" />
+      <nt id="nter10" label="prep" />
+      <nt id="nter11" label="noun" />
+      <nt id="nter12" label="part" />
+      <nt id="nter13" label="verb" />
+      <nt id="nter14" label="punct" />
+      <!--Terminals-->
+      <!--Ze-->
+      <t id="ter0">
+        <span>
+          <target id="t_0" />
+        </span>
+      </t>
+      <!--is-->
+      <t id="ter1">
+        <span>
+          <target id="t_1" />
+        </span>
+      </t>
+      <!--blij-->
+      <t id="ter2">
+        <span>
+          <target id="t_2" />
+        </span>
+      </t>
+      <!--als-->
+      <t id="ter3">
+        <span>
+          <target id="t_3" />
+        </span>
+      </t>
+      <!--ze-->
+      <t id="ter4">
+        <span>
+          <target id="t_4" />
+        </span>
+      </t>
+      <!--naar-->
+      <t id="ter5">
+        <span>
+          <target id="t_5" />
+        </span>
+      </t>
+      <!--bed-->
+      <t id="ter6">
+        <span>
+          <target id="t_6" />
+        </span>
+      </t>
+      <!--toe-->
+      <t id="ter7">
+        <span>
+          <target id="t_7" />
+        </span>
+      </t>
+      <!--mag-->
+      <t id="ter8">
+        <span>
+          <target id="t_8" />
+        </span>
+      </t>
+      <!--.-->
+      <t id="ter9">
+        <span>
+          <target id="t_9" />
+        </span>
+      </t>
+      <!--Tree edges-->
+      <edge id="tre0" from="nter1" to="nter0" />
+      <edge id="tre1" from="nter2" to="nter1" />
+      <edge id="tre2" from="ter0" to="nter2" />
+      <edge id="tre3" from="nter3" to="nter1" head="yes" />
+      <edge id="tre4" from="ter1" to="nter3" />
+      <edge id="tre5" from="nter4" to="nter1" />
+      <edge id="tre6" from="ter2" to="nter4" />
+      <edge id="tre7" from="nter5" to="nter1" />
+      <edge id="tre8" from="nter6" to="nter5" />
+      <edge id="tre9" from="ter3" to="nter6" />
+      <edge id="tre10" from="nter7" to="nter5" />
+      <edge id="tre11" from="nter8" to="nter7" />
+      <edge id="tre12" from="ter4" to="nter8" />
+      <edge id="tre13" from="nter9" to="nter7" />
+      <edge id="tre14" from="nter10" to="nter9" head="yes" />
+      <edge id="tre15" from="ter5" to="nter10" />
+      <edge id="tre16" from="nter11" to="nter9" />
+      <edge id="tre17" from="ter6" to="nter11" />
+      <edge id="tre18" from="nter12" to="nter9" />
+      <edge id="tre19" from="ter7" to="nter12" />
+      <edge id="tre20" from="nter13" to="nter7" head="yes" />
+      <edge id="tre21" from="ter8" to="nter13" />
+      <edge id="tre22" from="nter14" to="nter0" />
+      <edge id="tre23" from="ter9" to="nter14" />
+    </tree>
+  </constituency>
+</NAF>

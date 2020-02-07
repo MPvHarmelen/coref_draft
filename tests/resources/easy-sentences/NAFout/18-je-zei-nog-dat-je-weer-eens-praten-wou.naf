@@ -1,0 +1,233 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<NAF xml:lang="nl" version="3.0">
+  <nafHeader>
+    <linguisticProcessors layer="terms">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:11UTC" beginTimestamp="2019-04-15T12:36:11UTC" endTimestamp="2019-04-15T12:36:11UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="constituents">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:11UTC" beginTimestamp="2019-04-15T12:36:11UTC" endTimestamp="2019-04-15T12:36:11UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="deps">
+      <lp name="Morphosyntactic parser based on Alpino" timestamp="2019-04-15T12:36:11UTC" beginTimestamp="2019-04-15T12:36:11UTC" endTimestamp="2019-04-15T12:36:11UTC" version="0.3_2017-03-18" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="entities">
+      <lp name="ixa-pipe-nerc-nl-6-class-clusters-sonar" beginTimestamp="2019-04-15T12:36:11+0000" endTimestamp="2019-04-15T12:36:19+0000" version="1.5.4-ca02c931bc0b200ccdb8b5795a7552e4cc0d4802" hostname="a58e7f38f835"/>
+    </linguisticProcessors>
+    <linguisticProcessors layer="coreferences">
+      <lp name="vua-multisieve-coreference" version="{version}" timestamp="{timestamp}" beginTimestamp="{beginTimestamp}" endTimestamp="{endTimestamp}" hostname="{hostname}"/>
+    </linguisticProcessors>
+  </nafHeader>
+  <raw>Je zei nog dat je weer eens praten wou.</raw>
+  <text>
+    <wf id="w1" offset="0" length="2" sent="1" para="1">Je</wf>
+    <wf id="w2" offset="3" length="3" sent="1" para="1">zei</wf>
+    <wf id="w3" offset="7" length="3" sent="1" para="1">nog</wf>
+    <wf id="w4" offset="11" length="3" sent="1" para="1">dat</wf>
+    <wf id="w5" offset="15" length="2" sent="1" para="1">je</wf>
+    <wf id="w6" offset="18" length="4" sent="1" para="1">weer</wf>
+    <wf id="w7" offset="23" length="4" sent="1" para="1">eens</wf>
+    <wf id="w8" offset="28" length="6" sent="1" para="1">praten</wf>
+    <wf id="w9" offset="35" length="3" sent="1" para="1">wou</wf>
+    <wf id="w10" offset="39" length="1" sent="1" para="1">.</wf>
+  </text>
+  <terms>
+    <!--Je-->
+    <term id="t_0" type="close" lemma="je" pos="pron" morphofeat="VNW(pers,pron,nomin,red,2v,ev)">
+      <span>
+        <target id="w1"/>
+      </span>
+    </term>
+    <!--zei-->
+    <term id="t_1" type="open" lemma="zeggen" pos="verb" morphofeat="WW(pv,verl,ev)">
+      <span>
+        <target id="w2"/>
+      </span>
+    </term>
+    <!--nog-->
+    <term id="t_2" type="open" lemma="nog" pos="adv" morphofeat="BW()">
+      <span>
+        <target id="w3"/>
+      </span>
+    </term>
+    <!--dat-->
+    <term id="t_3" type="open" lemma="dat" pos="comp" morphofeat="VG(onder)">
+      <span>
+        <target id="w4"/>
+      </span>
+    </term>
+    <!--je-->
+    <term id="t_4" type="close" lemma="je" pos="pron" morphofeat="VNW(pers,pron,nomin,red,2v,ev)">
+      <span>
+        <target id="w5"/>
+      </span>
+    </term>
+    <!--weer-->
+    <term id="t_5" type="open" lemma="weer" pos="adv" morphofeat="BW()">
+      <span>
+        <target id="w6"/>
+      </span>
+    </term>
+    <!--eens-->
+    <term id="t_6" type="open" lemma="eens" pos="adv" morphofeat="BW()">
+      <span>
+        <target id="w7"/>
+      </span>
+    </term>
+    <!--praten-->
+    <term id="t_7" type="open" lemma="praten" pos="verb" morphofeat="WW(inf,vrij,zonder)">
+      <span>
+        <target id="w8"/>
+      </span>
+    </term>
+    <!--wou-->
+    <term id="t_8" type="open" lemma="willen" pos="verb" morphofeat="WW(pv,verl,ev)">
+      <span>
+        <target id="w9"/>
+      </span>
+    </term>
+    <!--.-->
+    <term id="t_9" type="open" lemma="." pos="punct" morphofeat="LET()">
+      <span>
+        <target id="w10"/>
+      </span>
+    </term>
+  </terms>
+  <deps>
+    <!--hd/su(zei, Je)-->
+    <dep from="t_1" to="t_0" rfunc="hd/su"/>
+    <!--hd/mod(zei, nog)-->
+    <dep from="t_1" to="t_2" rfunc="hd/mod"/>
+    <!--hd/vc(zei, dat)-->
+    <dep from="t_1" to="t_3" rfunc="hd/vc"/>
+    <!--cmp/body(dat, wou)-->
+    <dep from="t_3" to="t_8" rfunc="cmp/body"/>
+    <!--hd/su(wou, je)-->
+    <dep from="t_8" to="t_4" rfunc="hd/su"/>
+    <!--hd/vc(wou, praten)-->
+    <dep from="t_8" to="t_7" rfunc="hd/vc"/>
+    <!--hd/su(praten, je)-->
+    <dep from="t_7" to="t_4" rfunc="hd/su"/>
+    <!--hd/mod(praten, weer)-->
+    <dep from="t_7" to="t_5" rfunc="hd/mod"/>
+    <!--hd/mod(praten, eens)-->
+    <dep from="t_7" to="t_6" rfunc="hd/mod"/>
+    <!--- / -(zei, .)-->
+    <dep from="t_1" to="t_9" rfunc="-- / --"/>
+  </deps>
+  <constituency>
+    <tree>
+      <!--Non-terminals-->
+      <nt id="nter0" label="top"/>
+      <nt id="nter1" label="smain"/>
+      <nt id="nter2" label="pron"/>
+      <nt id="nter3" label="verb"/>
+      <nt id="nter4" label="adv"/>
+      <nt id="nter5" label="cp"/>
+      <nt id="nter6" label="comp"/>
+      <nt id="nter7" label="ssub"/>
+      <nt id="nter8" label="pron"/>
+      <nt id="nter9" label="inf"/>
+      <nt id="nter10" label="adv"/>
+      <nt id="nter11" label="adv"/>
+      <nt id="nter12" label="verb"/>
+      <nt id="nter13" label="verb"/>
+      <nt id="nter14" label="punct"/>
+      <!--Terminals-->
+      <!--Je-->
+      <t id="ter0">
+        <span>
+          <target id="t_0"/>
+        </span>
+      </t>
+      <!--zei-->
+      <t id="ter1">
+        <span>
+          <target id="t_1"/>
+        </span>
+      </t>
+      <!--nog-->
+      <t id="ter2">
+        <span>
+          <target id="t_2"/>
+        </span>
+      </t>
+      <!--dat-->
+      <t id="ter3">
+        <span>
+          <target id="t_3"/>
+        </span>
+      </t>
+      <!--je-->
+      <t id="ter4">
+        <span>
+          <target id="t_4"/>
+        </span>
+      </t>
+      <!--weer-->
+      <t id="ter5">
+        <span>
+          <target id="t_5"/>
+        </span>
+      </t>
+      <!--eens-->
+      <t id="ter6">
+        <span>
+          <target id="t_6"/>
+        </span>
+      </t>
+      <!--praten-->
+      <t id="ter7">
+        <span>
+          <target id="t_7"/>
+        </span>
+      </t>
+      <!--wou-->
+      <t id="ter8">
+        <span>
+          <target id="t_8"/>
+        </span>
+      </t>
+      <!--.-->
+      <t id="ter9">
+        <span>
+          <target id="t_9"/>
+        </span>
+      </t>
+      <!--Tree edges-->
+      <edge id="tre0" from="nter1" to="nter0"/>
+      <edge id="tre1" from="nter2" to="nter1"/>
+      <edge id="tre2" from="ter0" to="nter2"/>
+      <edge id="tre3" from="nter3" to="nter1" head="yes"/>
+      <edge id="tre4" from="ter1" to="nter3"/>
+      <edge id="tre5" from="nter4" to="nter1"/>
+      <edge id="tre6" from="ter2" to="nter4"/>
+      <edge id="tre7" from="nter5" to="nter1"/>
+      <edge id="tre8" from="nter6" to="nter5"/>
+      <edge id="tre9" from="ter3" to="nter6"/>
+      <edge id="tre10" from="nter7" to="nter5"/>
+      <edge id="tre11" from="nter8" to="nter7"/>
+      <edge id="tre12" from="ter4" to="nter8"/>
+      <edge id="tre13" from="nter9" to="nter7"/>
+      <edge id="tre14" from="nter10" to="nter9"/>
+      <edge id="tre15" from="ter5" to="nter10"/>
+      <edge id="tre16" from="nter11" to="nter9"/>
+      <edge id="tre17" from="ter6" to="nter11"/>
+      <edge id="tre18" from="nter12" to="nter9" head="yes"/>
+      <edge id="tre19" from="ter7" to="nter12"/>
+      <edge id="tre20" from="nter13" to="nter7" head="yes"/>
+      <edge id="tre21" from="ter8" to="nter13"/>
+      <edge id="tre22" from="nter14" to="nter0"/>
+      <edge id="tre23" from="ter9" to="nter14"/>
+    </tree>
+  </constituency>
+  <coreferences>
+    <coref id="co1" type="entity">
+      <span>
+        <target id="t_0" head="yes"/>
+      </span>
+      <span>
+        <target id="t_4" head="yes"/>
+      </span>
+    </coref>
+  </coreferences>
+</NAF>
