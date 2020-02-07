@@ -6,11 +6,12 @@ import time
 import logging
 from pkg_resources import get_distribution
 
+import yaml
 from KafNafParserPy import KafNafParser, Clp
-from .dump import add_coreference_to_naf
 
 from . import constants as c
 from .resolve_coreference import resolve_coreference
+from .dump import add_coreference_to_naf
 
 
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
@@ -26,12 +27,12 @@ def process_coreference(
 
     Main entry point of multisieve-coreference if you have a NAF-object.
 
-    Note that  header and coreference information is added in-place.
+    Note that header and coreference information is added in-place.
     """
     # timestamp begin time
     begintime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
 
-    coref_classes, mentions = resolve_coreference(
+    entities = resolve_coreference(
         nafin,
         fill_gaps=fill_gaps,
         include_singletons=include_singletons,
@@ -39,7 +40,7 @@ def process_coreference(
     )
 
     logger.info("Adding coreference information to NAF...")
-    add_coreference_to_naf(nafin, coref_classes, mentions)
+    add_coreference_to_naf(nafin, entities)
 
     # timestamp end time
     endtime = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
@@ -74,11 +75,17 @@ def parse_args(argv=None):
     :param argv:    list of strings to use for parsing, or None for sys.argv
     :param return:  {argument: value} dictionary of parsed arguments
     """
-    from argparse import ArgumentParser
+    from argparse import ArgumentParser, FileType
 
     parser = ArgumentParser()
     parser.add_argument('-l', '--level', help="Logging level", type=str.upper,
                         default='WARNING')
+    parser.add_argument(
+        '--log-config',
+        help="YAML-file to read logging configuration from."
+        " Overrides the `level`, if passed.",
+        type=FileType('r')
+    )
     parser.add_argument(
         '-s',
         '--include-singletons',
@@ -99,7 +106,17 @@ def parse_args(argv=None):
         default=c.LANGUAGE
     )
     cmdl_args = vars(parser.parse_args(argv))
-    logging.basicConfig(level=cmdl_args.pop('level'))
+
+    # Logging configuration
+    basic_level = cmdl_args.pop('level')
+    config_file = cmdl_args.pop('log_config', None)
+
+    if config_file is not None:
+        logging.config.dictConfig(
+            yaml.safe_load(config_file)
+        )
+    else:
+        logging.basicConfig(level=basic_level)
 
     return cmdl_args
 

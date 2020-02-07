@@ -8,6 +8,14 @@ def test_main_example(example_naf_file, temp_file, example_naf_output):
     run_and_compare(example_naf_file, temp_file, example_naf_output)
 
 
+def test_log_config(example_naf_file, temp_file, example_naf_output,
+                    log_config_file):
+    run_and_compare(
+        example_naf_file, temp_file, example_naf_output,
+        cmdl_args=['--log-config', str(log_config_file)],
+    )
+
+
 def test_example_without_fill(example_naf_object, caplog):
     caplog.set_level('DEBUG', 'multisieve_coreference.dump')
     process_coreference(example_naf_object, fill_gaps=False)

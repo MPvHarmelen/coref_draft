@@ -505,11 +505,14 @@ def get_reduced_list_of_quotations(toremove, found_quotations):
     return reduced_quotations
 
 
-def identify_direct_quotations(nafobj, mentions, constituency_trees):
+def identify_direct_quotations(nafobj, entities, constituency_trees):
     '''
-    Function that identifies direct quotations in naf
-    :param nafobj: input naf object
-    :return:
+    Identify direct quotations in naf and link them to their corresponding
+    entities.
+
+    :param nafobj:      input naf object
+    :param entities:    Entities to look for
+    :return:            a list of quotations
     '''
 
     nafquotations = get_quotation_spans(nafobj)
@@ -535,36 +538,36 @@ def identify_direct_quotations(nafobj, mentions, constituency_trees):
     quotations = []
     for qid, nafquotation in enumerate(finalnafquotations):
         myquote = create_coref_quotation_from_quotation_naf(
-            nafobj, nafquotation, mentions, qid)
+            nafobj, nafquotation, entities, qid)
         quotations.append(myquote)
 
     return quotations
 
 
-def link_span_ids_to_mentions(span, mentions):
+def find_entity_with_span(span, entities):
     '''
-    Find out whether `span` corresponds to a mention candidate and, if so,
-    which one
-    :param span: list of span ids
-    :param mentions: object containing all candidate mentions
-    :return:
+    Find out whether `span` corresponds to an entity and, if so, which one.
+
+    First try to find the first entity that has a span that matches exactly,
+    otherwise find the first entity who's span is a super- or subset of `span`
+
+    :param span:        span ids to match against
+    :param entities:    entities to consider
+    :return:            the matching entity, if found
     '''
+    span = set(span)
+    for entity in entities:
+        if entity.flat_mention_attr('span') == span:
+            return entity
 
-    for key, mention in mentions.items():
-        if set(span) == set(mention.span):
-            return key
-
-    for key, mention in mentions.items():
-        if set(span).issubset(set(mention.span)) or set(span).issuperset(
-           mention.span):
-            return key
-
-    # import traceback
-    # print(traceback.extract_stack(limit=2)[-1][2] + " - span: " + str(span))
+    for entity in entities:
+        entity_span = entity.flat_mention_attr('span')
+        if span < entity_span or span > entity_span:
+            return entity
 
 
 def create_coref_quotation_from_quotation_naf(
-        nafobj, nafquotation, mentions, quote_id):
+        nafobj, nafquotation, entities, quote_id):
     '''
     Function that turns naf quotation object into quotation object to be passed
     on to multisieve
@@ -587,16 +590,16 @@ def create_coref_quotation_from_quotation_naf(
     myQuote.end_offset = endoffset
 
     if len(nafquotation.source) > 0:
-        source_mention_id = link_span_ids_to_mentions(
-            nafquotation.source, mentions)
-        myQuote.source = source_mention_id
+        source_entity = find_entity_with_span(
+            nafquotation.source, entities)
+        myQuote.source = source_entity
     if len(nafquotation.addressee) > 0:
-        addressee_mention_id = link_span_ids_to_mentions(
-            nafquotation.addressee, mentions)
-        myQuote.addressee = addressee_mention_id
+        addressee_entity = find_entity_with_span(
+            nafquotation.addressee, entities)
+        myQuote.addressee = addressee_entity
     if len(nafquotation.topic) > 0:
-        topic_mention_id = link_span_ids_to_mentions(
-            nafquotation.topic, mentions)
-        myQuote.topic = topic_mention_id
+        topic_entity = find_entity_with_span(
+            nafquotation.topic, entities)
+        myQuote.topic = topic_entity
 
     return myQuote

@@ -30,6 +30,9 @@ class Entity:
     def __iter__(self):
         return iter(self.mentions)
 
+    def __len__(self):
+        return len(self.mentions)
+
     def __contains__(self, mention):
         return mention in self.mentions
 
@@ -66,12 +69,39 @@ class Entity:
         ]
         if not all_answers:
             raise AttributeError(
-                f"None of the mentions have the attribute {attr!r}")
+                "None of the mentions have a non-None value for the attribute"
+                f" {attr!r}")
         return all_answers
+
+    def non_unique_non_none_mention_attr(self, attr):
+        """
+        Get a list of mention attribute values, quietly leaving out None values
+
+        Crudely:
+            ```
+            [
+                getattr(mention, attr)
+                for mention in self
+                if getattr(mention, attr) is not None
+            ]
+            ```
+
+        Raise AttributeError if none of the mentions contained in the entity
+        have the requested attribute.
+
+        If at least one mention has the requested attribute, quietly leave out
+        the mentions that don't.
+        """
+        return [
+            ans
+            for ans in self.non_unique_mention_attr(attr)
+            if ans is not None
+        ]
 
     def mention_attr(self, attr):
         """
-        Get the set of the values returned by `self.non_unique_mention_attr`
+        Get the set of the values returned by
+        `self.non_unique_non_none_mention_attr`
 
         Crudely: `{getattr(mention, attr) for mention in self}`
 
@@ -81,11 +111,12 @@ class Entity:
         If at least one mention has the requested attribute, quietly leave out
         the mentions that don't.
         """
-        return set(self.non_unique_mention_attr(attr))
+        return set(self.non_unique_non_none_mention_attr(attr))
 
     def flat_mention_attr(self, attr):
         """
-        Get the union of the values returned by `self.non_unique_mention_attr`
+        Get the union of the values returned by
+        `self.non_unique_non_none_mention_attr`
 
         Crudely: `{elem for itr in self.mention_attr(att) for elem in itr}`
 
@@ -99,6 +130,6 @@ class Entity:
         """
         return {
             elem
-            for itr in self.non_unique_mention_attr(attr)
+            for itr in self.non_unique_non_none_mention_attr(attr)
             for elem in itr
         }

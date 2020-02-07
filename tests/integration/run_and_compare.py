@@ -7,20 +7,23 @@ from KafNafParserPy import KafNafParser
 from multisieve_coreference import main
 
 
-def run_with_subprocess(input_file, output_file):
+def run_with_subprocess(input_file, output_file, cmdl_args=None):
+    cmdl = [sys.executable, '-m', 'multisieve_coreference']
+    if cmdl_args is not None:
+        cmdl += cmdl_args
     subprocess.check_call(
-        [sys.executable, '-m', 'multisieve_coreference'],
+        cmdl,
         stdin=input_file,
         stdout=output_file
     )
 
 
-def run_without_subprocess(input_file, output_file):
-    main(input_file, output_file)
+def run_without_subprocess(input_file, output_file, **kwargs):
+    main(input_file, output_file, **kwargs)
 
 
 def run_and_compare(in_filename, out_filename, correct_out_filename,
-                    use_subprocess=True):
+                    use_subprocess=True, **kwargs):
     """
     Runs the system with `in_filename` as input and `out_filename` as output
     and then compares the result to `correct_out_filename`.
@@ -38,9 +41,9 @@ def run_and_compare(in_filename, out_filename, correct_out_filename,
     """
     with open(in_filename) as fd, open(out_filename, 'wb') as out:
         if use_subprocess:
-            run_with_subprocess(fd, out)
+            run_with_subprocess(fd, out, **kwargs)
         else:
-            run_without_subprocess(fd, out)
+            run_without_subprocess(fd, out, **kwargs)
 
     with open(out_filename) as out, open(correct_out_filename) as correct:
         # Check something happened and that the result can be parsed
@@ -66,7 +69,7 @@ def run_and_compare(in_filename, out_filename, correct_out_filename,
             endTimestamp=our_header_data.get_endTimestamp(),
             hostname=our_header_data.get_hostname(),
         )
-        assert out.read() == correct
+        assert correct == out.read()
 
 
 def run_integration(filename, in_dir, correct_out_dir, temp_file, **kwargs):

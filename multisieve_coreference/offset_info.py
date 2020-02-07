@@ -10,8 +10,11 @@ def get_offset2string_dict(nafobj):
     return offset2string
 
 
-def get_string_from_offsets(id_span, offset2string):
-    return ' '.join(offset2string.get(mid) for mid in id_span)
+def get_strings_from_offsets(id_span, offset2string):
+    """
+    Convert an iterable of offsets to a list of strings.
+    """
+    return [offset2string.get(mid) for mid in id_span]
 
 
 def get_all_offsets(nafobj):

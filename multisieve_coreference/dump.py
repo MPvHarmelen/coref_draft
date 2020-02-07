@@ -8,18 +8,13 @@ from .offset_info import get_offset_to_term_id_dict
 logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 
 
-def add_coreference_to_naf(nafobj, corefclasses, mentions):
+def add_coreference_to_naf(nafobj, entities):
 
     start_count = get_starting_count(nafobj)
-    coref_according_to_offset = get_ordered_coreference_chains(
-        corefclasses,
-        mentions
-    )
 
     offset2termid = get_offset_to_term_id_dict(nafobj)
 
-    for mids in coref_according_to_offset:
-        mids = set(mids)
+    for entity in entities:
         nafCoref = Ccoreference()
         cid = 'co' + str(start_count)
         start_count += 1
@@ -30,12 +25,12 @@ def add_coreference_to_naf(nafobj, corefclasses, mentions):
                 offset2termid[mention.head_offset],
                 map(offset2termid.get, mention.span)
             )
-            for mention in map(mentions.get, mids)
+            for mention in entity
         )
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug("Mentions:\n")
-            for mid in mids:
-                logger.debug("{}: {}".format(mid, mentions.get(mid)))
+            for mention in entity:
+                logger.debug("{}".format(mention))
         for head_id, term_id_span in data:
             if logger.getEffectiveLevel() <= logging.DEBUG:
                 term_id_span = list(term_id_span)
@@ -65,28 +60,6 @@ def create_span(term_id_span, head_id):
         else:
             mySpan.add_target_id(term)
     return mySpan
-
-
-def get_ordered_coreference_chains(corefclasses, mentions):
-    '''
-    Function that creates new coreference dictionary with index of first
-    mention as key (for ordering)
-
-    :param corefclasses: identified coreference classes
-    :return: dictionary of coreference classes with new indeces
-    '''
-
-    coref_dict = {}
-
-    for mids in corefclasses.values():
-        first_index = float('inf')
-        for mid in mids:
-            mention = mentions[mid]
-            if mention.head_offset < first_index:
-                first_index = mention.head_offset
-        coref_dict[first_index] = mids
-
-    return [coref_dict[k] for k in sorted(coref_dict)]
 
 
 def get_starting_count(nafobj):

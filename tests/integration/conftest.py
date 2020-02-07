@@ -1,7 +1,7 @@
 import os
 import pytest
 
-pytest.register_assert_rewrite('run_and_compare')
+pytest.register_assert_rewrite('integration.run_and_compare')
 
 
 @pytest.fixture
@@ -12,20 +12,17 @@ def temp_file():
 
 @pytest.fixture
 def example_naf_output(resources_dir):
-    return os.path.join(
-        resources_dir,
-        'example-out.naf'
-    )
+    return resources_dir / 'example-out.naf'
 
 
 @pytest.fixture
 def easy_in_dir(resources_dir):
-    return os.path.join(resources_dir, 'easy-sentences/NAFin')
+    return resources_dir / 'easy-sentences/NAFin'
 
 
 @pytest.fixture
 def easy_correct_out_dir(resources_dir):
-    return os.path.join(resources_dir, 'easy-sentences/NAFout')
+    return resources_dir / 'easy-sentences/NAFout'
 
 
 EASY_EXPECTED_FAILURES = {

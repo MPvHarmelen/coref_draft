@@ -195,22 +195,21 @@ class Mention:
             entity_type=None,
             is_relative_pronoun=False,
             is_reflexive_pronoun=False,
-            coreference_prohibited=None,
             modifiers=(),
             appositives=(),
             predicatives=(),
             non_stopwords=(),
             main_modifiers=(),
-            sentence_number=(),
+            sentence_number=None,
             ):
         '''
         Constructor of the mention
         #TODO: revise so that provides information needed for some sieve;
         #STEP 1: sieve 3 needs option to remove post-head modifiers
 
-        :type span:                    tuple
-        :type relaxed_span:            tuple
-        :type full_head:               tuple
+        :type span:                    (hashable) span, i.e. tuple
+        :type relaxed_span:            (hashable) span, i.e. tuple
+        :type full_head:               (hashable) span, i.e. tuple
         :type head_offset:             int
         :type begin_offset:            int
         :type end_offset:              int
@@ -221,17 +220,16 @@ class Mention:
         :type entity_type:             str
         :type is_relative_pronoun:     bool
         :type is_reflexive_pronoun:    bool
-        :type coreference_prohibited:  list
-        :type modifiers:               tuple
-        :type appositives:             tuple
-        :type predicatives:            tuple
-        :type non_stopwords:           tuple
-        :type main_modifiers:          tuple
+        :type modifiers:               iterable of (hashable) spans
+        :type appositives:             iterable of (hashable) spans
+        :type predicatives:            iterable of (hashable) spans
+        :type non_stopwords:           tuple of offsets
+        :type main_modifiers:          iterable of (hashable) spans
         :type sentence_number:         int
         '''
 
         self.id = id   # confirmed
-        self.span = tuple(span)
+        self.span = span
 
         self.full_head = full_head
         self.relaxed_span = relaxed_span
@@ -245,9 +243,6 @@ class Mention:
         self.sentence_number = sentence_number
 
         self.non_stopwords = non_stopwords
-
-        self.coreference_prohibited = [] if coreference_prohibited is None \
-            else list(coreference_prohibited)
 
         self.modifiers = modifiers
         self.main_modifiers = main_modifiers
@@ -278,7 +273,6 @@ class Mention:
             'entity_type={self.entity_type!r}, ' \
             'is_relative_pronoun={self.is_relative_pronoun!r}, ' \
             'is_reflexive_pronoun={self.is_reflexive_pronoun!r}, ' \
-            'coreference_prohibited={self.coreference_prohibited!r}, ' \
             'modifiers={self.modifiers!r}, ' \
             'appositives={self.appositives!r}, ' \
             'predicatives={self.predicatives!r}, ' \
@@ -287,14 +281,11 @@ class Mention:
             'sentence_number={self.sentence_number!r}, ' \
             ')'.format(self=self)
 
-    def fill_gaps(self, full_content, allow_adding=lambda _: True):
+    def fill_gaps(self, full_content):
         """
         Find and fill gaps in the span of this mention.
 
         :param full_content:  list of things in spans for the whole document
-        :param allow_adding:  (offset) -> bool function deciding whether a
-                              missing term may be added or the gap should be
-                              left as is.
         """
         if len(self.span) >= 2:
             start = full_content.index(self.span[0])
@@ -323,22 +314,23 @@ class Mention:
         head_pos = get_pos_of_term(nafobj, constituent_info.head_id)
 
         # modifiers and appositives:
-        modifiers, appositives = [], []
+        modifiers, main_modifiers, appositives = [], [], []
 
         relaxed_span = list(span_offsets)
         for mod_in_tids in constituent_info.modifiers:
             mod_span = convert_term_ids_to_offsets(nafobj, mod_in_tids)
             modifiers.append(mod_span)
-            for mid in mod_span:
-                if mid > head_offset and mid in relaxed_span:
-                    relaxed_span.remove(mid)
+            main_modifiers.append(get_main_modifiers(nafobj, mod_in_tids))
+            for offset in mod_span:
+                if offset > head_offset and offset in relaxed_span:
+                    relaxed_span.remove(offset)
 
         for app_in_tids in constituent_info.appositives:
             app_span = convert_term_ids_to_offsets(nafobj, app_in_tids)
             appositives.append(app_span)
-            for mid in app_span:
-                if mid > head_offset and mid in relaxed_span:
-                    relaxed_span.remove(mid)
+            for offset in app_span:
+                if offset > head_offset and offset in relaxed_span:
+                    relaxed_span.remove(offset)
 
         extra_kwargs = {}
         if head_pos in ['pron', 'noun', 'name']:
@@ -352,22 +344,23 @@ class Mention:
         extra_kwargs.update(kwargs)
 
         mention = cls(
-            span=span_offsets,
-            relaxed_span=relaxed_span,
-            full_head=convert_term_ids_to_offsets(
-                nafobj, constituent_info.multiword),
+            span=tuple(span_offsets),
+            relaxed_span=tuple(relaxed_span),
+            full_head=tuple(convert_term_ids_to_offsets(
+                nafobj, constituent_info.multiword)),
             head_offset=head_offset,
             begin_offset=begin_offset,
             end_offset=end_offset,
             head_pos=head_pos,
-            modifiers=modifiers,
-            appositives=appositives,
+            modifiers=[tuple(m) for m in modifiers],
+            appositives=[tuple(a) for a in appositives],
             predicatives=[
-                convert_term_ids_to_offsets(nafobj, pred_ids)
+                tuple(convert_term_ids_to_offsets(nafobj, pred_ids))
                 for pred_ids in constituent_info.predicatives
             ],
-            non_stopwords=get_non_stopwords(nafobj, stopwords, span_ids),
-            main_modifiers=get_main_modifiers(nafobj, span_ids),
+            non_stopwords=tuple(
+                get_non_stopwords(nafobj, stopwords, span_ids)),
+            main_modifiers=[tuple(mods) for mods in main_modifiers],
             sentence_number=get_sentence_number(
                 nafobj, constituent_info.head_id),
             **extra_kwargs

@@ -1,0 +1,13 @@
+version: 1
+formatters:
+  default:
+    format: '%(levelname)s:%(name)s:%(msg)s'
+handlers:
+  stderr:
+    class: logging.StreamHandler
+    level: DEBUG
+    stream: ext://sys.stderr
+    formatter: default
+root:
+  level: INFO
+  handlers: [stderr]
