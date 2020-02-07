@@ -1,0 +1,1845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.5.dev4+g1709915.d20200207" />
+<title>multisieve_coreference.resolve_coreference API documentation</title>
+<meta name="description" content="Definition of sieves and `resolve_coreference`, containing the main algorithm." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multisieve_coreference.resolve_coreference</code></h1>
+</header>
+<section id="section-intro">
+<p>Definition of sieves and <a title="multisieve_coreference.resolve_coreference.resolve_coreference" href="#multisieve_coreference.resolve_coreference.resolve_coreference"><code>resolve_coreference()</code></a>, containing the main algorithm.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L0-L722" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Definition of sieves and `resolve_coreference`, containing the main algorithm.
+&#34;&#34;&#34;
+import logging
+import logging.config
+import itertools as it
+
+from . import constants as c
+from .mentions import get_mentions
+from .entities import Entities
+from .sieve_runner import SieveRunner
+from .filters import is_named_entity, is_nominal, is_proper_noun, is_pronoun
+from .constraints import (
+    check_entity_head_match,
+    check_word_inclusion,
+    check_compatible_modifiers_only,
+    check_not_i_within_i,
+)
+
+from .constituency_trees import ConstituencyTrees
+from .offset_info import (
+    get_all_offsets,
+    get_offset2string_dict,
+    get_strings_from_offsets
+)
+from .naf_info import identify_direct_quotations
+
+logger = logging.getLogger(None if __name__ == &#39;__main__&#39; else __name__)
+
+
+def match_some_span(entity, candidates, mark_disjoint, get_span, offset2string,
+                    entity_filter=lambda e: True):
+    &#39;&#39;&#39;
+    Merge entities that contain mentions with (full) string match.
+
+    :param get_span:        (mention -&gt; span) function to get the span to use
+    :param offset2string:   {offset: string} dictionary to use
+    :param entity_filter:   filter to choose which entities this sieve should
+                            act upon
+    &#39;&#39;&#39;
+    # FIXME: now only surface strings, we may want to look at lemma matches
+    #        as well
+    # FIXME: this code calls `get_strings_from_offsets` (at least) twice for
+    #        every mention: once (the first time) when it is `mention` (in
+    #        `entity`), and again every time that it is `candidate_mention` (in
+    #        `candidate`). (Attempt at faster algorithm commented below.)
+
+    # For every `entity`, we should break the `for mention` loop at the first
+    # `candidate` with a matching `candidate_mention`.
+    if not entity_filter(entity):
+        return
+
+    for mention in entity:
+        mention_string = get_strings_from_offsets(
+            get_span(mention), offset2string)
+        for candidate in filter(entity_filter, candidates):
+            for candidate_mention in candidate:
+                candidate_string = get_strings_from_offsets(
+                    get_span(mention), offset2string)
+                if candidate_string == mention_string:
+                    # Candidates should be kept, because they appear
+                    # earlier. (Lee et al. 2013)
+                    return candidate
+
+    # Attempt at faster algorithm (I will only finish this when this function
+    # seems to take a lot of time).
+    # earlier_strings = {}
+    # for mention in entity:
+    #     mention_string = get_strings_from_offsets(
+    #         get_span(mention), offset2string)
+    #     if mention_string in earlier_strings:
+    #         possibly_candidate = earlier_strings[mention_string]
+    #         if possibly_candidate in entities.get_candidates(entity):
+    #             return possibly_candidate
+    #         else:
+    #             # ????
+    #             ...
+    #     else:
+    #         earlier_strings[mention_string] = entity
+
+
+def speaker_identification(entity, candidates, mark_disjoint, quotations):
+    &#39;&#39;&#39;
+    Apply the first sieve; assigning coreference or prohibiting coreference
+    based on direct speech.
+
+    The algorithm for this function is quoted below from Lee et al. (2013),
+    with check marks indicating whether the rules are actually implemented:
+
+    &gt; - [X] &lt;I&gt;s assigned to the same speaker are coreferent.
+    &gt; - [ ] &lt;you&gt;s with the same speaker are coreferent.
+    &gt; - [X] The speaker and &lt;I&gt;s in her text are coreferent.
+    &gt; (...)
+    &gt; - [ ] The speaker and a mention which is not &lt;I&gt; in the speaker&#39;s
+    &gt;       utterance cannot be coreferent.
+    &gt; - [ ] Two &lt;I&gt;s (or two &lt;you&gt;s, or two &lt;we&gt;s) assigned to different
+    &gt;       speakers cannot be coreferent.
+    &gt; - [ ] Two different person pronouns by the same speaker cannot be
+    &gt;       coreferent.
+    &gt; - [ ] Nominal mentions cannot be coreferent with &lt;I&gt;, &lt;you&gt;, or &lt;we&gt; in
+    &gt;       the same turn or quotation.
+    &gt; - [ ] In conversations, &lt;you&gt; can corefer only with the previous
+    &gt;       speaker.
+    &gt; (...)
+    &gt; We define &lt;I&gt; as _I_, _my_, _me_, or _mine_, &lt;we&gt; as first person
+    &gt; plural pronouns, and &lt;you&gt; as second person pronouns.
+
+    The quote entities are kept, while the ones corresponding to pronouns in
+    the are discarded when merged.
+
+    :param quotations:  list of quotation objects
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    entity_span = entity.flat_mention_attr(&#39;span&#39;)
+    for quote in quotations:
+        if entity_span.issubset(set(quote.span)):
+            source = quote.source
+            addressee = quote.addressee
+            topic = quote.topic
+            if &#39;pron&#39; in entity.mention_attr(&#39;head_pos&#39;):
+                person = entity.mention_attr(&#39;person&#39;)
+                if &#39;1&#39; in person:
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if source:
+                        return source
+                elif &#39;2&#39; in person:
+                    if source:
+                        mark_disjoint(source)
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        return addressee
+                elif &#39;3&#39; in person:
+                    if source:
+                        mark_disjoint(source)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if topic:
+                        # Why should every third person pronoun refer to
+                        # the `topic` of the quote?
+                        # There can be multiple genders and/or
+                        # multiplicities in the pronouns, and therefore
+                        # they shouldn&#39;t all refer to the same topic??
+                        return topic
+            elif source:
+                mark_disjoint(source)
+                # TODO once vocative check installed; also prohibit linking
+                # names to speaker
+
+
+def identify_some_structures(
+        entity, candidates, mark_disjoint, structure_name):
+    &#34;&#34;&#34;
+    Assigns coreference for some structures in place
+
+    :param structure_name:  name of the Mention attribute that is an iterable
+                            of (hashable) spans.
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    structures = entity.flat_mention_attr(structure_name)
+    for candidate in candidates:
+        if any(mention.span in structures for mention in candidate):
+            return candidate
+
+
+def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Identifies relative pronouns and assigns them to the class of the noun
+    they&#39;re modifying
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    if any(entity.mention_attr(&#39;is_relative_pronoun&#39;)):
+        head_offsets = entity.mention_attr(&#39;head_offset&#39;)
+        for candidate in candidates:
+            # If any of the `head_offsets` of this entity appear in the
+            # `modifiers` of the candidate
+            if head_offsets &amp; candidate.flat_mention_attr(&#39;modifiers&#39;):
+                return candidate
+
+
+def resolve_reflexive_pronoun_structures(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Merge two entities containing mentions for which all of the following hold:
+     - they are in the same sentence
+     - they aren&#39;t contained in each other
+     - other is before mention
+
+    But this algorithm is wrong for Dutch (thinks Martin):
+
+     - it&#39;s far too eager:
+        it does not check whether the antecedent is the subject.
+     - it&#39;s too strict:
+        &#34;[zich] wassen deed [hij] elke dag&#34;
+        is a counter-example for the last rule
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    for mention in entity:
+        if mention.is_reflexive_pronoun:
+            sent_nr = mention.sentence_number
+            for candidate in candidates:
+                for cand_mention in candidate:
+                    if cand_mention.sentence_number == sent_nr and \
+                       mention.head_offset not in cand_mention.span and \
+                       cand_mention.head_offset &lt; mention.head_offset:
+                        # We&#39;ve found what we want!
+                        return candidate
+
+
+def identify_acronyms_or_alternative_names(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Identifies structures that add alternative name
+
+    This function, does **not** do any acronym detection.
+    It does merge two named entities if one modifies the other.
+
+    According to Lee et al. (2013), this should adhere to the following
+    algorithm:
+
+    &gt; both mentions are tagged as NNP and one of them is an acronym of the
+    &gt; other (e.g., [Agence France Presse] ... [AFP]). Our acronym detection
+    &gt; algorithm marks a mention as an acronym of another if its text equals the
+    &gt; sequence of upper case characters in the other mention. The algorithm is
+    &gt; simple, but our error analysis suggests it nonetheless does not lead to
+    &gt; errors.
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    # FIXME: input specific
+    correct_types = {
+        &#39;PER&#39;,  # person
+        &#39;ORG&#39;,  # organisation
+        &#39;LOC&#39;,  # location
+        &#39;MISC&#39;  # miscellaneous
+    }
+    # modifiers is of type `list(tuple(offset))`
+    # If this entity is a named one
+    if correct_types.intersection(entity.mention_attr(&#39;entity_type&#39;)):
+        for candidate in candidates:
+            etypes = candidate.mention_attr(&#39;entity_type&#39;)
+            if correct_types.intersection(etypes):
+                e_modifies_c = entity.mention_attr(&#39;span&#39;).intersection(
+                    candidate.flat_mention_attr(&#39;modifiers&#39;)
+                )
+                c_modifies_e = candidate.mention_attr(&#39;span&#39;).intersection(
+                    entity.flat_mention_attr(&#39;modifiers&#39;)
+                )
+                if e_modifies_c or c_modifies_e:
+                    return candidate
+
+
+def apply_precise_constructs(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Function that moderates the precise constructs (calling one after the
+    other)
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    # return the first match, or None
+    return \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, &#39;appositives&#39;) or \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, &#39;predicatives&#39;) or \
+        resolve_relative_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        identify_acronyms_or_alternative_names(
+            entity, candidates, mark_disjoint) or \
+        resolve_reflexive_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        None
+    # f. Demonym Israel, Israeli (later)
+
+
+def apply_strict_head_match(
+        entity, candidates, mark_disjoint, offset2string, sieve_name):
+    &#34;&#34;&#34;
+    Pass 5 - Strict Head Match.
+
+    Linking a mention to an antecedent based on the naive matching of their
+    head words generates many spurious links because it completely ignores
+    possibly incompatible modifiers (Elsner and Charniak 2010). For example,
+    _Yale University_ and _Harvard University_ have similar head words, but
+    they are obviously different entities. To address this issue, this pass
+    implements several constraints that must all be matched in order to yield a
+    link (constraints marked by an X are actually implemented):
+
+     - [X] Not a pronoun (This constraint is not from Lee et al. (2013))
+
+     - [X] Entity head match - the mention head word matches any head word of
+           mentions in the antecedent entity. Note that this feature is
+           actually more relaxed than naive head matching in a pair of mentions
+           because here it is satisfied when the mention&#39;s head matches the
+           head of any mention in the candidate entity.
+
+     - [X] Word inclusion - all the non-stop words in the current entity to be
+           solved are included in the set of non-stop words in the antecedent
+           entity. This heuristic exploits the discourse property that states
+           that it is uncommon to introduce novel information in later mentions
+           (Fox 1993). Typically, mentions of the same entity become shorter
+           and less informative as the narrative progresses.
+           !! Disabled iff `sieve` is `&#39;7&#39;` !!
+
+
+     - [X] Compatible modifiers only - the mention&#39;s modifiers are all included
+           in the modifiers of the antecedent candidate. This feature models
+           the same discourse property as the previous feature, but it focuses
+           on the two individual mentions to be linked, rather than their
+           corresponding entities. For this feature we only use modifiers that
+           are nouns or adjectives.
+           !! Disabled iff `sieve` is `&#39;6&#39;` !!
+
+     - [X] Not i-within-i - the two mentions are not in an i-within-i
+           construct, that is, one cannot be a child NP in the other&#39;s NP
+           constituent (Chomsky 1981). See `check_not_i_within_i` for how it is
+           implemented here.
+
+    Documentation string adapted from Lee et al. (2013).
+
+    :param offset2string:   {offset: string} dictionary to use
+    :param sieve_name:      name of the sieve as a string
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    # FIXME: lots of things are calculated repeatedly and forgotten again.
+
+    # For any mention in this entity that isn&#39;t a pronoun
+    mentions = [m for m in entity if not is_pronoun(m)]
+    if not mentions:
+        return
+
+    # Make the loop more readable by currying.
+    def check_entity_head_match_this_entity(antecedent):
+        return check_entity_head_match(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
+
+    def check_word_inclusion_this_entity(antecedent):
+        return check_word_inclusion(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
+
+    for antecedent in candidates:
+        if check_entity_head_match_this_entity(antecedent) and \
+           (sieve_name == &#39;7&#39; or check_word_inclusion_this_entity(antecedent)):
+            args = [
+                (antecedent_mention, mention, offset2string)
+                for antecedent_mention in antecedent
+                for mention in mentions
+                if check_not_i_within_i(antecedent_mention, mention)
+            ]
+            if args and (sieve_name == &#39;6&#39; or
+               any(it.starmap(check_compatible_modifiers_only, args))):
+                return antecedent
+
+
+def get_numbers(mention, offset2string):
+    &#34;&#34;&#34;
+    Get the set of numbers in this mention (as per `str.isdigit`).
+
+    A word containing only digits is considered a number.
+
+    :param mention:         mention to get numbers of
+    :param offset2string:   {offset: string} dictionary to use
+    &#34;&#34;&#34;
+    return {
+        word
+        for word in get_strings_from_offsets(mention.span, offset2string)
+        if word.isdigit()
+    }
+
+
+def apply_proper_head_word_match(
+        entity, candidates, mark_disjoint, offset2string):
+    &#34;&#34;&#34;
+    Pass 8 - Proper Head Word Match. This sieve marks two mentions headed by
+    proper nouns as coreferent if they have the same head word and satisfy the
+    following constraints (constraints marked by X are implemented):
+
+     - [X] Not i-within-i
+     - [ ] No location mismatches - the modifiers of two mentions cannot
+           contain different location named entities, other proper nouns, or
+           spatial modifiers. For example, [Lebanon] and [southern Lebanon] are
+           not coreferent.
+     - [X] No numeric mismatches - the second mention cannot have a number that
+           does not appear in the antecedent, e.g., [people] and
+           [around 200 people] (in that order) are not coreferent.
+
+    This documentation string is adapted from Lee et al. (2013)
+
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    if not is_proper_noun(entity):
+        return
+
+    # FIXME: Location mismatches?!
+    for mention in entity:
+        mention_head = get_strings_from_offsets(
+            mention.full_head, offset2string)
+        mention_numbers = get_numbers(mention, offset2string)
+
+        for antecedent in candidates:
+            # Proper nouns only
+            antecedent_mentions = filter(is_proper_noun, antecedent)
+            # &#34;Not i-within-i&#34;
+            antecedent_mentions = (
+                antecedent_mention
+                for antecedent_mention in antecedent_mentions
+                if check_not_i_within_i(antecedent_mention, mention)
+            )
+            for antecedent_mention in antecedent_mentions:
+                antecedent_head = get_strings_from_offsets(
+                    antecedent_mention.full_head, offset2string)
+                # &#34;if they have the same head word&#34;
+                if mention_head == antecedent_head:
+                    # &#34;No numeric mismatches&#34;, i.e.:
+                    #   the second mention cannot have a number that does not
+                    #   appear in the antecedent
+                    antecedent_numbers = get_numbers(
+                        antecedent_mention, offset2string)
+                    if antecedent_numbers &gt;= mention_numbers:
+                        return antecedent
+
+
+def apply_relaxed_head_match(entity, candidates, mark_disjoint, offset2string):
+    &#34;&#34;&#34;
+    Pass 9 - Relaxed Head Match.
+
+    This pass relaxes the entity head match heuristic by allowing the mention
+    head to match any word in the antecedent entity. For example, this
+    heuristic matches the mention Sanders to an entity containing the mentions
+    {Sauls, the judge, Circuit Judge N. Sanders Sauls}. To maintain high
+    precision, this pass requires that both mention and antecedent be labelled
+    as named entities and the types coincide. Furthermore, this pass
+    implements a conjunction of the given features with word inclusion and not
+    i-within-i. This pass yields less than 0.4 point improvement in most
+    metrics.
+
+    Quoted from Lee et al. (2013)
+
+    Things marked by an X are implemented:
+
+     - [X] mention head must match any word in the antecedent entity
+     - [ ] ~~both mention and antecedent be labelled as named entities~~
+           this filter is not implemented within the sieve, but at a slightly
+           higher level (TODO: Maybe it should be implemented here)
+     - [X] the types coincide
+     - [X] not i-within-i
+     - [X] word inclusion
+
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    if not is_named_entity(entity):
+        return
+
+    for antecedent in filter(is_named_entity, candidates):
+        antecedent_entity_type = antecedent.mention_attr(&#39;entity_type&#39;)
+        antecedent_words = set(get_strings_from_offsets(
+            antecedent.flat_mention_attr(&#39;span&#39;), offset2string))
+        for mention in entity:
+            mention_head = set(get_strings_from_offsets(
+                mention.full_head, offset2string))
+            # entity centric way of interpreting &#34;the types coincide&#34;
+            if mention.entity_type in antecedent_entity_type and \
+               mention_head &lt;= antecedent_words and \
+               check_not_i_within_i(antecedent, entity) and \
+               check_word_inclusion(antecedent, entity):
+                return antecedent
+
+
+def resolve_pronoun_coreference(
+        entity, candidates, mark_disjoint, max_sentence_distance):
+    &#34;&#34;&#34;
+    We implement pronominal coreference resolution using an approach standard
+    for many decades: enforcing agreement constraints between the coreferent
+    mentions. We use the following attributes for these constraints (actually
+    implemented constraints are marked with X):
+
+     - [X] Number - we assign number attributes based on:
+         - [X] a static list for pronouns;
+         - [ ] NER labels: mentions marked as a named entity are considered
+               singular with the exception of organizations, which can be both
+               singular and plural;
+         - [ ] part of speech tags: NN*S tags are plural and all other NN* tags
+               are singular; and
+         - [ ] a static dictionary from Bergsma and Lin (2006).
+
+     - [X] Gender - we assign gender attributes from static lexicons from
+           Bergsma and Lin (2006), and Ji and Lin (2009).
+
+     - [X] Person - we assign person attributes only to pronouns.
+         - [ ] We do not enforce this constraint when linking two pronouns,
+               however, if one appears within quotes. This is a simple
+               heuristic for speaker detection (e.g., I and she point to the
+               same person in “[I] voted my conscience,” [she] said).
+
+     - [ ] Animacy - we set animacy attributes using:
+         - [ ] a static list for pronouns;
+         - [ ] NER labels (e.g., PERSON is animate whereas LOCATION is not);
+         - [ ] a dictionary bootstrapped from the Web (Ji and Lin 2009).
+
+     - [X] NER label - from the Stanford NER.
+     - [X] Pronoun distance - sentence distance between a pronoun and its
+           antecedent cannot be larger than 3.
+
+    When we cannot extract an attribute, we set the corresponding value to
+    unknown and treat it as a wildcard—that is, it can match any other value.
+    As expected, pronominal coreference resolution has a big impact on
+
+    The above is quoted from Lee et al. (2013).
+
+    !! NB !! The extraction of features is mostly implemented in `mention.py`.
+             Most of the features are already reported by Alpino.
+
+    :param max_sentence_distance:   maximum allowed sentence distance between
+                                    coreferent pronouns
+    :return:                        first matching candidate
+    &#34;&#34;&#34;
+    # we only deal with unresolved pronouns here
+    if {&#39;pron&#39;} == entity.mention_attr(&#39;head_pos&#39;):
+        # Sentence distance
+        sentence_number = entity.mention_attr(&#39;sentence_number&#39;)
+        max_sent_nr = max(sentence_number) + max_sentence_distance
+        min_sent_nr = min(sentence_number) - max_sentence_distance
+        # Number
+        number = entity.mention_attr(&#39;number&#39;)
+        # Gender
+        gender = entity.mention_attr(&#39;gender&#39;)
+        # Person
+        person = entity.mention_attr(&#39;person&#39;)
+        # Named entity label
+        label = entity.mention_attr(&#39;entity_type&#39;)
+        for candidate in candidates:
+            # Entity centric sentence distance
+            close_enough = any(
+                min_sent_nr &lt;= n &lt;= max_sent_nr
+                for n in candidate.mention_attr(&#39;sentence_number&#39;))
+            if close_enough:
+                cnd_number = entity.mention_attr(&#39;number&#39;)
+                cnd_gender = entity.mention_attr(&#39;gender&#39;)
+                cnd_person = entity.mention_attr(&#39;person&#39;)
+                cnd_label = entity.mention_attr(&#39;entity_type&#39;)
+                if (not cnd_number or not number or cnd_number &amp; number) and \
+                   (not cnd_gender or not gender or cnd_gender &amp; gender) and \
+                   (not cnd_person or not person or cnd_person &amp; person) and \
+                   (not cnd_label or not label or cnd_label &amp; label):
+                    return candidate
+
+
+def remove_singleton_entities(entities):
+    &#34;&#34;&#34;
+    Remove singleton Entity objects in-place from the given `entities`.
+    &#34;&#34;&#34;
+    for entity in entities:
+        if len(entity) &lt; 2:
+            entities.remove(entity)
+
+
+def post_process(nafobj, entities, fill_gaps=c.FILL_GAPS_IN_OUTPUT,
+                 include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT):
+    # Fill gaps in the used mentions
+    if fill_gaps:
+        all_offsets = get_all_offsets(nafobj)
+        for mention in it.chain.from_iterable(entities):
+            mention.fill_gaps(all_offsets)
+
+    if not include_singletons:
+        remove_singleton_entities(entities)
+
+
+def resolve_coreference(nafin,
+                        fill_gaps=c.FILL_GAPS_IN_OUTPUT,
+                        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
+                        language=c.LANGUAGE,
+                        term_filter=c.TERM_FILTER):
+
+    logger.info(&#34;Initializing...&#34;)
+    logger.debug(&#34;create_offset_dicts&#34;)
+    offset2string = get_offset2string_dict(nafin)
+
+    logger.info(&#34;Finding mentions...&#34;)
+    constituency_trees = ConstituencyTrees.from_naf(nafin, term_filter)
+    mentions = get_mentions(nafin, constituency_trees, language)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        from .util import view_mentions
+        logger.debug(
+            &#34;Mentions: {}&#34;.format(
+                view_mentions(nafin, mentions)
+            )
+        )
+
+    # Order matters (a lot), but `mentions` is an OrderedDict (hopefully :)
+    entities = Entities.from_mentions(mentions.values())
+    sieve_runner = SieveRunner(entities)
+
+    logger.info(&#34;Finding quotations...&#34;)
+    quotations = identify_direct_quotations(
+        nafin, entities, constituency_trees)
+    del constituency_trees
+
+    logger.info(&#34;Sieve 1: Speaker Identification&#34;)
+    sieve_runner.run(speaker_identification, quotations=quotations)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        from .util import view_entities
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 2: Exact Match&#34;)
+    sieve_runner.run(
+        match_some_span,
+        get_span=lambda m: m.span,
+        entity_filter=is_nominal,
+        offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 3: Relaxed String Match&#34;)
+
+    sieve_runner.run(
+        match_some_span,
+        get_span=lambda m: m.relaxed_span,
+        entity_filter=is_nominal,
+        offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 4: Precise constructs&#34;)
+    sieve_runner.run(apply_precise_constructs)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 5-7: Strict Head Match&#34;)
+    for sieve_name in [&#39;5&#39;, &#39;6&#39;, &#39;7&#39;]:
+        sieve_runner.run(
+            apply_strict_head_match,
+            offset2string=offset2string,
+            sieve_name=sieve_name
+        )
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 8: Proper Head Word Match&#34;)
+    sieve_runner.run(apply_proper_head_word_match, offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 9: Relaxed Head Match&#34;)
+    sieve_runner.run(apply_relaxed_head_match, offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 10: Resolve relative pronoun coreferences&#34;)
+    sieve_runner.run(resolve_pronoun_coreference, max_sentence_distance=3)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Post processing...&#34;)
+    post_process(
+        nafin,
+        entities,
+        fill_gaps=fill_gaps,
+        include_singletons=include_singletons
+    )
+
+    return entities
+
+
+if __name__ == &#39;__main__&#39;:
+    # Left here for legacy reasons.
+    from warnings import warn
+    warn(
+        &#34;Using multisieve_coreference.resolve_coreference as entry-point is&#34;
+        &#34; deprecated. Use `python -m multisieve_coreference` or&#34;
+        &#34;multisieve_coreference.main instead.&#34;)
+    from .main import main, parse_args
+    main(**parse_args())</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multisieve_coreference.resolve_coreference.apply_precise_constructs"><code class="name flex">
+<span>def <span class="ident">apply_precise_constructs</span></span>(<span>entity, candidates, mark_disjoint)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Function that moderates the precise constructs (calling one after the
+other)</p>
+<p>:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L256-L275" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def apply_precise_constructs(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Function that moderates the precise constructs (calling one after the
+    other)
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    # return the first match, or None
+    return \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, &#39;appositives&#39;) or \
+        identify_some_structures(
+            entity, candidates, mark_disjoint, &#39;predicatives&#39;) or \
+        resolve_relative_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        identify_acronyms_or_alternative_names(
+            entity, candidates, mark_disjoint) or \
+        resolve_reflexive_pronoun_structures(
+            entity, candidates, mark_disjoint) or \
+        None</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.apply_proper_head_word_match"><code class="name flex">
+<span>def <span class="ident">apply_proper_head_word_match</span></span>(<span>entity, candidates, mark_disjoint, offset2string)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pass 8 - Proper Head Word Match. This sieve marks two mentions headed by
+proper nouns as coreferent if they have the same head word and satisfy the
+following constraints (constraints marked by X are implemented):</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> Not i-within-i</li>
+<li class="task-list-item"><input type="checkbox" disabled/> No location mismatches - the modifiers of two mentions cannot
+contain different location named entities, other proper nouns, or
+spatial modifiers. For example, [Lebanon] and [southern Lebanon] are
+not coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> No numeric mismatches - the second mention cannot have a number that
+does not appear in the antecedent, e.g., [people] and
+[around 200 people] (in that order) are not coreferent.</li>
+</ul>
+<p>This documentation string is adapted from Lee et al. (2013)</p>
+<p>:param offset2string:
+{offset: string} dictionary to use
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L378-L428" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def apply_proper_head_word_match(
+        entity, candidates, mark_disjoint, offset2string):
+    &#34;&#34;&#34;
+    Pass 8 - Proper Head Word Match. This sieve marks two mentions headed by
+    proper nouns as coreferent if they have the same head word and satisfy the
+    following constraints (constraints marked by X are implemented):
+
+     - [X] Not i-within-i
+     - [ ] No location mismatches - the modifiers of two mentions cannot
+           contain different location named entities, other proper nouns, or
+           spatial modifiers. For example, [Lebanon] and [southern Lebanon] are
+           not coreferent.
+     - [X] No numeric mismatches - the second mention cannot have a number that
+           does not appear in the antecedent, e.g., [people] and
+           [around 200 people] (in that order) are not coreferent.
+
+    This documentation string is adapted from Lee et al. (2013)
+
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    if not is_proper_noun(entity):
+        return
+
+    # FIXME: Location mismatches?!
+    for mention in entity:
+        mention_head = get_strings_from_offsets(
+            mention.full_head, offset2string)
+        mention_numbers = get_numbers(mention, offset2string)
+
+        for antecedent in candidates:
+            # Proper nouns only
+            antecedent_mentions = filter(is_proper_noun, antecedent)
+            # &#34;Not i-within-i&#34;
+            antecedent_mentions = (
+                antecedent_mention
+                for antecedent_mention in antecedent_mentions
+                if check_not_i_within_i(antecedent_mention, mention)
+            )
+            for antecedent_mention in antecedent_mentions:
+                antecedent_head = get_strings_from_offsets(
+                    antecedent_mention.full_head, offset2string)
+                # &#34;if they have the same head word&#34;
+                if mention_head == antecedent_head:
+                    # &#34;No numeric mismatches&#34;, i.e.:
+                    #   the second mention cannot have a number that does not
+                    #   appear in the antecedent
+                    antecedent_numbers = get_numbers(
+                        antecedent_mention, offset2string)
+                    if antecedent_numbers &gt;= mention_numbers:
+                        return antecedent</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.apply_relaxed_head_match"><code class="name flex">
+<span>def <span class="ident">apply_relaxed_head_match</span></span>(<span>entity, candidates, mark_disjoint, offset2string)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pass 9 - Relaxed Head Match.</p>
+<p>This pass relaxes the entity head match heuristic by allowing the mention
+head to match any word in the antecedent entity. For example, this
+heuristic matches the mention Sanders to an entity containing the mentions
+{Sauls, the judge, Circuit Judge N. Sanders Sauls}. To maintain high
+precision, this pass requires that both mention and antecedent be labelled
+as named entities and the types coincide. Furthermore, this pass
+implements a conjunction of the given features with word inclusion and not
+i-within-i. This pass yields less than 0.4 point improvement in most
+metrics.</p>
+<p>Quoted from Lee et al. (2013)</p>
+<p>Things marked by an X are implemented:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> mention head must match any word in the antecedent entity</li>
+<li class="task-list-item"><input type="checkbox" disabled/> <del>both mention and antecedent be labelled as named entities</del>
+this filter is not implemented within the sieve, but at a slightly
+higher level (TODO: Maybe it should be implemented here)</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> the types coincide</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> not i-within-i</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> word inclusion</li>
+</ul>
+<p>:param offset2string:
+{offset: string} dictionary to use
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L431-L475" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def apply_relaxed_head_match(entity, candidates, mark_disjoint, offset2string):
+    &#34;&#34;&#34;
+    Pass 9 - Relaxed Head Match.
+
+    This pass relaxes the entity head match heuristic by allowing the mention
+    head to match any word in the antecedent entity. For example, this
+    heuristic matches the mention Sanders to an entity containing the mentions
+    {Sauls, the judge, Circuit Judge N. Sanders Sauls}. To maintain high
+    precision, this pass requires that both mention and antecedent be labelled
+    as named entities and the types coincide. Furthermore, this pass
+    implements a conjunction of the given features with word inclusion and not
+    i-within-i. This pass yields less than 0.4 point improvement in most
+    metrics.
+
+    Quoted from Lee et al. (2013)
+
+    Things marked by an X are implemented:
+
+     - [X] mention head must match any word in the antecedent entity
+     - [ ] ~~both mention and antecedent be labelled as named entities~~
+           this filter is not implemented within the sieve, but at a slightly
+           higher level (TODO: Maybe it should be implemented here)
+     - [X] the types coincide
+     - [X] not i-within-i
+     - [X] word inclusion
+
+    :param offset2string:   {offset: string} dictionary to use
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    if not is_named_entity(entity):
+        return
+
+    for antecedent in filter(is_named_entity, candidates):
+        antecedent_entity_type = antecedent.mention_attr(&#39;entity_type&#39;)
+        antecedent_words = set(get_strings_from_offsets(
+            antecedent.flat_mention_attr(&#39;span&#39;), offset2string))
+        for mention in entity:
+            mention_head = set(get_strings_from_offsets(
+                mention.full_head, offset2string))
+            # entity centric way of interpreting &#34;the types coincide&#34;
+            if mention.entity_type in antecedent_entity_type and \
+               mention_head &lt;= antecedent_words and \
+               check_not_i_within_i(antecedent, entity) and \
+               check_word_inclusion(antecedent, entity):
+                return antecedent</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.apply_strict_head_match"><code class="name flex">
+<span>def <span class="ident">apply_strict_head_match</span></span>(<span>entity, candidates, mark_disjoint, offset2string, sieve_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pass 5 - Strict Head Match.</p>
+<p>Linking a mention to an antecedent based on the naive matching of their
+head words generates many spurious links because it completely ignores
+possibly incompatible modifiers (Elsner and Charniak 2010). For example,
+<em>Yale University</em> and <em>Harvard University</em> have similar head words, but
+they are obviously different entities. To address this issue, this pass
+implements several constraints that must all be matched in order to yield a
+link (constraints marked by an X are actually implemented):</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Not a pronoun (This constraint is not from Lee et al. (2013))</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Entity head match - the mention head word matches any head word of
+mentions in the antecedent entity. Note that this feature is
+actually more relaxed than naive head matching in a pair of mentions
+because here it is satisfied when the mention's head matches the
+head of any mention in the candidate entity.</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Word inclusion - all the non-stop words in the current entity to be
+solved are included in the set of non-stop words in the antecedent
+entity. This heuristic exploits the discourse property that states
+that it is uncommon to introduce novel information in later mentions
+(Fox 1993). Typically, mentions of the same entity become shorter
+and less informative as the narrative progresses.
+!! Disabled iff <code>sieve</code> is <code>'7'</code> !!</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Compatible modifiers only - the mention's modifiers are all included
+in the modifiers of the antecedent candidate. This feature models
+the same discourse property as the previous feature, but it focuses
+on the two individual mentions to be linked, rather than their
+corresponding entities. For this feature we only use modifiers that
+are nouns or adjectives.
+!! Disabled iff <code>sieve</code> is <code>'6'</code> !!</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Not i-within-i - the two mentions are not in an i-within-i
+construct, that is, one cannot be a child NP in the other's NP
+constituent (Chomsky 1981). See <code>check_not_i_within_i</code> for how it is
+implemented here.</p>
+</li>
+</ul>
+<p>Documentation string adapted from Lee et al. (2013).</p>
+<p>:param offset2string:
+{offset: string} dictionary to use
+:param sieve_name:
+name of the sieve as a string
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L279-L359" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def apply_strict_head_match(
+        entity, candidates, mark_disjoint, offset2string, sieve_name):
+    &#34;&#34;&#34;
+    Pass 5 - Strict Head Match.
+
+    Linking a mention to an antecedent based on the naive matching of their
+    head words generates many spurious links because it completely ignores
+    possibly incompatible modifiers (Elsner and Charniak 2010). For example,
+    _Yale University_ and _Harvard University_ have similar head words, but
+    they are obviously different entities. To address this issue, this pass
+    implements several constraints that must all be matched in order to yield a
+    link (constraints marked by an X are actually implemented):
+
+     - [X] Not a pronoun (This constraint is not from Lee et al. (2013))
+
+     - [X] Entity head match - the mention head word matches any head word of
+           mentions in the antecedent entity. Note that this feature is
+           actually more relaxed than naive head matching in a pair of mentions
+           because here it is satisfied when the mention&#39;s head matches the
+           head of any mention in the candidate entity.
+
+     - [X] Word inclusion - all the non-stop words in the current entity to be
+           solved are included in the set of non-stop words in the antecedent
+           entity. This heuristic exploits the discourse property that states
+           that it is uncommon to introduce novel information in later mentions
+           (Fox 1993). Typically, mentions of the same entity become shorter
+           and less informative as the narrative progresses.
+           !! Disabled iff `sieve` is `&#39;7&#39;` !!
+
+
+     - [X] Compatible modifiers only - the mention&#39;s modifiers are all included
+           in the modifiers of the antecedent candidate. This feature models
+           the same discourse property as the previous feature, but it focuses
+           on the two individual mentions to be linked, rather than their
+           corresponding entities. For this feature we only use modifiers that
+           are nouns or adjectives.
+           !! Disabled iff `sieve` is `&#39;6&#39;` !!
+
+     - [X] Not i-within-i - the two mentions are not in an i-within-i
+           construct, that is, one cannot be a child NP in the other&#39;s NP
+           constituent (Chomsky 1981). See `check_not_i_within_i` for how it is
+           implemented here.
+
+    Documentation string adapted from Lee et al. (2013).
+
+    :param offset2string:   {offset: string} dictionary to use
+    :param sieve_name:      name of the sieve as a string
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    # FIXME: lots of things are calculated repeatedly and forgotten again.
+
+    # For any mention in this entity that isn&#39;t a pronoun
+    mentions = [m for m in entity if not is_pronoun(m)]
+    if not mentions:
+        return
+
+    # Make the loop more readable by currying.
+    def check_entity_head_match_this_entity(antecedent):
+        return check_entity_head_match(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
+
+    def check_word_inclusion_this_entity(antecedent):
+        return check_word_inclusion(
+            antecedent,
+            entity=entity,
+            offset2string=offset2string)
+
+    for antecedent in candidates:
+        if check_entity_head_match_this_entity(antecedent) and \
+           (sieve_name == &#39;7&#39; or check_word_inclusion_this_entity(antecedent)):
+            args = [
+                (antecedent_mention, mention, offset2string)
+                for antecedent_mention in antecedent
+                for mention in mentions
+                if check_not_i_within_i(antecedent_mention, mention)
+            ]
+            if args and (sieve_name == &#39;6&#39; or
+               any(it.starmap(check_compatible_modifiers_only, args))):
+                return antecedent</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.get_numbers"><code class="name flex">
+<span>def <span class="ident">get_numbers</span></span>(<span>mention, offset2string)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the set of numbers in this mention (as per <code>str.isdigit</code>).</p>
+<p>A word containing only digits is considered a number.</p>
+<p>:param mention:
+mention to get numbers of
+:param offset2string:
+{offset: string} dictionary to use</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L362-L375" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_numbers(mention, offset2string):
+    &#34;&#34;&#34;
+    Get the set of numbers in this mention (as per `str.isdigit`).
+
+    A word containing only digits is considered a number.
+
+    :param mention:         mention to get numbers of
+    :param offset2string:   {offset: string} dictionary to use
+    &#34;&#34;&#34;
+    return {
+        word
+        for word in get_strings_from_offsets(mention.span, offset2string)
+        if word.isdigit()
+    }</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.identify_acronyms_or_alternative_names"><code class="name flex">
+<span>def <span class="ident">identify_acronyms_or_alternative_names</span></span>(<span>entity, candidates, mark_disjoint)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Identifies structures that add alternative name</p>
+<p>This function, does <strong>not</strong> do any acronym detection.
+It does merge two named entities if one modifies the other.</p>
+<p>According to Lee et al. (2013), this should adhere to the following
+algorithm:</p>
+<blockquote>
+<p>both mentions are tagged as NNP and one of them is an acronym of the
+other (e.g., [Agence France Presse] &hellip; [AFP]). Our acronym detection
+algorithm marks a mention as an acronym of another if its text equals the
+sequence of upper case characters in the other mention. The algorithm is
+simple, but our error analysis suggests it nonetheless does not lead to
+errors.</p>
+</blockquote>
+<p>:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L214-L253" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_acronyms_or_alternative_names(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Identifies structures that add alternative name
+
+    This function, does **not** do any acronym detection.
+    It does merge two named entities if one modifies the other.
+
+    According to Lee et al. (2013), this should adhere to the following
+    algorithm:
+
+    &gt; both mentions are tagged as NNP and one of them is an acronym of the
+    &gt; other (e.g., [Agence France Presse] ... [AFP]). Our acronym detection
+    &gt; algorithm marks a mention as an acronym of another if its text equals the
+    &gt; sequence of upper case characters in the other mention. The algorithm is
+    &gt; simple, but our error analysis suggests it nonetheless does not lead to
+    &gt; errors.
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    # FIXME: input specific
+    correct_types = {
+        &#39;PER&#39;,  # person
+        &#39;ORG&#39;,  # organisation
+        &#39;LOC&#39;,  # location
+        &#39;MISC&#39;  # miscellaneous
+    }
+    # modifiers is of type `list(tuple(offset))`
+    # If this entity is a named one
+    if correct_types.intersection(entity.mention_attr(&#39;entity_type&#39;)):
+        for candidate in candidates:
+            etypes = candidate.mention_attr(&#39;entity_type&#39;)
+            if correct_types.intersection(etypes):
+                e_modifies_c = entity.mention_attr(&#39;span&#39;).intersection(
+                    candidate.flat_mention_attr(&#39;modifiers&#39;)
+                )
+                c_modifies_e = candidate.mention_attr(&#39;span&#39;).intersection(
+                    entity.flat_mention_attr(&#39;modifiers&#39;)
+                )
+                if e_modifies_c or c_modifies_e:
+                    return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.identify_some_structures"><code class="name flex">
+<span>def <span class="ident">identify_some_structures</span></span>(<span>entity, candidates, mark_disjoint, structure_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Assigns coreference for some structures in place</p>
+<p>:param structure_name:
+name of the Mention attribute that is an iterable
+of (hashable) spans.
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L154-L166" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_some_structures(
+        entity, candidates, mark_disjoint, structure_name):
+    &#34;&#34;&#34;
+    Assigns coreference for some structures in place
+
+    :param structure_name:  name of the Mention attribute that is an iterable
+                            of (hashable) spans.
+    :return:                first matching candidate
+    &#34;&#34;&#34;
+    structures = entity.flat_mention_attr(structure_name)
+    for candidate in candidates:
+        if any(mention.span in structures for mention in candidate):
+            return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.match_some_span"><code class="name flex">
+<span>def <span class="ident">match_some_span</span></span>(<span>entity, candidates, mark_disjoint, get_span, offset2string, entity_filter=&lt;function &lt;lambda&gt;&gt;)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Merge entities that contain mentions with (full) string match.</p>
+<p>:param get_span:
+(mention -&gt; span) function to get the span to use
+:param offset2string:
+{offset: string} dictionary to use
+:param entity_filter:
+filter to choose which entities this sieve should
+act upon</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L31-L63" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def match_some_span(entity, candidates, mark_disjoint, get_span, offset2string,
+                    entity_filter=lambda e: True):
+    &#39;&#39;&#39;
+    Merge entities that contain mentions with (full) string match.
+
+    :param get_span:        (mention -&gt; span) function to get the span to use
+    :param offset2string:   {offset: string} dictionary to use
+    :param entity_filter:   filter to choose which entities this sieve should
+                            act upon
+    &#39;&#39;&#39;
+    # FIXME: now only surface strings, we may want to look at lemma matches
+    #        as well
+    # FIXME: this code calls `get_strings_from_offsets` (at least) twice for
+    #        every mention: once (the first time) when it is `mention` (in
+    #        `entity`), and again every time that it is `candidate_mention` (in
+    #        `candidate`). (Attempt at faster algorithm commented below.)
+
+    # For every `entity`, we should break the `for mention` loop at the first
+    # `candidate` with a matching `candidate_mention`.
+    if not entity_filter(entity):
+        return
+
+    for mention in entity:
+        mention_string = get_strings_from_offsets(
+            get_span(mention), offset2string)
+        for candidate in filter(entity_filter, candidates):
+            for candidate_mention in candidate:
+                candidate_string = get_strings_from_offsets(
+                    get_span(mention), offset2string)
+                if candidate_string == mention_string:
+                    # Candidates should be kept, because they appear
+                    # earlier. (Lee et al. 2013)
+                    return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.post_process"><code class="name flex">
+<span>def <span class="ident">post_process</span></span>(<span>nafobj, entities, fill_gaps=False, include_singletons=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L566-L575" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def post_process(nafobj, entities, fill_gaps=c.FILL_GAPS_IN_OUTPUT,
+                 include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT):
+    # Fill gaps in the used mentions
+    if fill_gaps:
+        all_offsets = get_all_offsets(nafobj)
+        for mention in it.chain.from_iterable(entities):
+            mention.fill_gaps(all_offsets)
+
+    if not include_singletons:
+        remove_singleton_entities(entities)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.remove_singleton_entities"><code class="name flex">
+<span>def <span class="ident">remove_singleton_entities</span></span>(<span>entities)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Remove singleton Entity objects in-place from the given <code>entities</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L557-L563" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def remove_singleton_entities(entities):
+    &#34;&#34;&#34;
+    Remove singleton Entity objects in-place from the given `entities`.
+    &#34;&#34;&#34;
+    for entity in entities:
+        if len(entity) &lt; 2:
+            entities.remove(entity)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.resolve_coreference"><code class="name flex">
+<span>def <span class="ident">resolve_coreference</span></span>(<span>nafin, fill_gaps=False, include_singletons=False, language='nl-NL', term_filter=&lt;function TERM_FILTER&gt;)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L578-L712" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def resolve_coreference(nafin,
+                        fill_gaps=c.FILL_GAPS_IN_OUTPUT,
+                        include_singletons=c.INCLUDE_SINGLETONS_IN_OUTPUT,
+                        language=c.LANGUAGE,
+                        term_filter=c.TERM_FILTER):
+
+    logger.info(&#34;Initializing...&#34;)
+    logger.debug(&#34;create_offset_dicts&#34;)
+    offset2string = get_offset2string_dict(nafin)
+
+    logger.info(&#34;Finding mentions...&#34;)
+    constituency_trees = ConstituencyTrees.from_naf(nafin, term_filter)
+    mentions = get_mentions(nafin, constituency_trees, language)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        from .util import view_mentions
+        logger.debug(
+            &#34;Mentions: {}&#34;.format(
+                view_mentions(nafin, mentions)
+            )
+        )
+
+    # Order matters (a lot), but `mentions` is an OrderedDict (hopefully :)
+    entities = Entities.from_mentions(mentions.values())
+    sieve_runner = SieveRunner(entities)
+
+    logger.info(&#34;Finding quotations...&#34;)
+    quotations = identify_direct_quotations(
+        nafin, entities, constituency_trees)
+    del constituency_trees
+
+    logger.info(&#34;Sieve 1: Speaker Identification&#34;)
+    sieve_runner.run(speaker_identification, quotations=quotations)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        from .util import view_entities
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 2: Exact Match&#34;)
+    sieve_runner.run(
+        match_some_span,
+        get_span=lambda m: m.span,
+        entity_filter=is_nominal,
+        offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 3: Relaxed String Match&#34;)
+
+    sieve_runner.run(
+        match_some_span,
+        get_span=lambda m: m.relaxed_span,
+        entity_filter=is_nominal,
+        offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 4: Precise constructs&#34;)
+    sieve_runner.run(apply_precise_constructs)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 5-7: Strict Head Match&#34;)
+    for sieve_name in [&#39;5&#39;, &#39;6&#39;, &#39;7&#39;]:
+        sieve_runner.run(
+            apply_strict_head_match,
+            offset2string=offset2string,
+            sieve_name=sieve_name
+        )
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 8: Proper Head Word Match&#34;)
+    sieve_runner.run(apply_proper_head_word_match, offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 9: Relaxed Head Match&#34;)
+    sieve_runner.run(apply_relaxed_head_match, offset2string=offset2string)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Sieve 10: Resolve relative pronoun coreferences&#34;)
+    sieve_runner.run(resolve_pronoun_coreference, max_sentence_distance=3)
+
+    if logger.getEffectiveLevel() &lt;= logging.DEBUG:
+        logger.debug(
+            &#34;Entities: {}&#34;.format(
+                view_entities(nafin, entities)
+            )
+        )
+
+    logger.info(&#34;Post processing...&#34;)
+    post_process(
+        nafin,
+        entities,
+        fill_gaps=fill_gaps,
+        include_singletons=include_singletons
+    )
+
+    return entities</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.resolve_pronoun_coreference"><code class="name flex">
+<span>def <span class="ident">resolve_pronoun_coreference</span></span>(<span>entity, candidates, mark_disjoint, max_sentence_distance)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>We implement pronominal coreference resolution using an approach standard
+for many decades: enforcing agreement constraints between the coreferent
+mentions. We use the following attributes for these constraints (actually
+implemented constraints are marked with X):</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Number - we assign number attributes based on:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> a static list for pronouns;</li>
+<li class="task-list-item"><input type="checkbox" disabled/> NER labels: mentions marked as a named entity are considered
+singular with the exception of organizations, which can be both
+singular and plural;</li>
+<li class="task-list-item"><input type="checkbox" disabled/> part of speech tags: NN<em>S tags are plural and all other NN</em> tags
+are singular; and</li>
+<li class="task-list-item"><input type="checkbox" disabled/> a static dictionary from Bergsma and Lin (2006).</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Gender - we assign gender attributes from static lexicons from
+Bergsma and Lin (2006), and Ji and Lin (2009).</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Person - we assign person attributes only to pronouns.</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> We do not enforce this constraint when linking two pronouns,
+however, if one appears within quotes. This is a simple
+heuristic for speaker detection (e.g., I and she point to the
+same person in “[I] voted my conscience,” [she] said).</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Animacy - we set animacy attributes using:</p>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled/> a static list for pronouns;</li>
+<li class="task-list-item"><input type="checkbox" disabled/> NER labels (e.g., PERSON is animate whereas LOCATION is not);</li>
+<li class="task-list-item"><input type="checkbox" disabled/> a dictionary bootstrapped from the Web (Ji and Lin 2009).</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> NER label - from the Stanford NER.</p>
+</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> Pronoun distance - sentence distance between a pronoun and its
+antecedent cannot be larger than 3.</li>
+</ul>
+<p>When we cannot extract an attribute, we set the corresponding value to
+unknown and treat it as a wildcard—that is, it can match any other value.
+As expected, pronominal coreference resolution has a big impact on</p>
+<p>The above is quoted from Lee et al. (2013).</p>
+<p>!! NB !! The extraction of features is mostly implemented in <code>mention.py</code>.
+Most of the features are already reported by Alpino.</p>
+<p>:param max_sentence_distance:
+maximum allowed sentence distance between
+coreferent pronouns
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L478-L554" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def resolve_pronoun_coreference(
+        entity, candidates, mark_disjoint, max_sentence_distance):
+    &#34;&#34;&#34;
+    We implement pronominal coreference resolution using an approach standard
+    for many decades: enforcing agreement constraints between the coreferent
+    mentions. We use the following attributes for these constraints (actually
+    implemented constraints are marked with X):
+
+     - [X] Number - we assign number attributes based on:
+         - [X] a static list for pronouns;
+         - [ ] NER labels: mentions marked as a named entity are considered
+               singular with the exception of organizations, which can be both
+               singular and plural;
+         - [ ] part of speech tags: NN*S tags are plural and all other NN* tags
+               are singular; and
+         - [ ] a static dictionary from Bergsma and Lin (2006).
+
+     - [X] Gender - we assign gender attributes from static lexicons from
+           Bergsma and Lin (2006), and Ji and Lin (2009).
+
+     - [X] Person - we assign person attributes only to pronouns.
+         - [ ] We do not enforce this constraint when linking two pronouns,
+               however, if one appears within quotes. This is a simple
+               heuristic for speaker detection (e.g., I and she point to the
+               same person in “[I] voted my conscience,” [she] said).
+
+     - [ ] Animacy - we set animacy attributes using:
+         - [ ] a static list for pronouns;
+         - [ ] NER labels (e.g., PERSON is animate whereas LOCATION is not);
+         - [ ] a dictionary bootstrapped from the Web (Ji and Lin 2009).
+
+     - [X] NER label - from the Stanford NER.
+     - [X] Pronoun distance - sentence distance between a pronoun and its
+           antecedent cannot be larger than 3.
+
+    When we cannot extract an attribute, we set the corresponding value to
+    unknown and treat it as a wildcard—that is, it can match any other value.
+    As expected, pronominal coreference resolution has a big impact on
+
+    The above is quoted from Lee et al. (2013).
+
+    !! NB !! The extraction of features is mostly implemented in `mention.py`.
+             Most of the features are already reported by Alpino.
+
+    :param max_sentence_distance:   maximum allowed sentence distance between
+                                    coreferent pronouns
+    :return:                        first matching candidate
+    &#34;&#34;&#34;
+    # we only deal with unresolved pronouns here
+    if {&#39;pron&#39;} == entity.mention_attr(&#39;head_pos&#39;):
+        # Sentence distance
+        sentence_number = entity.mention_attr(&#39;sentence_number&#39;)
+        max_sent_nr = max(sentence_number) + max_sentence_distance
+        min_sent_nr = min(sentence_number) - max_sentence_distance
+        # Number
+        number = entity.mention_attr(&#39;number&#39;)
+        # Gender
+        gender = entity.mention_attr(&#39;gender&#39;)
+        # Person
+        person = entity.mention_attr(&#39;person&#39;)
+        # Named entity label
+        label = entity.mention_attr(&#39;entity_type&#39;)
+        for candidate in candidates:
+            # Entity centric sentence distance
+            close_enough = any(
+                min_sent_nr &lt;= n &lt;= max_sent_nr
+                for n in candidate.mention_attr(&#39;sentence_number&#39;))
+            if close_enough:
+                cnd_number = entity.mention_attr(&#39;number&#39;)
+                cnd_gender = entity.mention_attr(&#39;gender&#39;)
+                cnd_person = entity.mention_attr(&#39;person&#39;)
+                cnd_label = entity.mention_attr(&#39;entity_type&#39;)
+                if (not cnd_number or not number or cnd_number &amp; number) and \
+                   (not cnd_gender or not gender or cnd_gender &amp; gender) and \
+                   (not cnd_person or not person or cnd_person &amp; person) and \
+                   (not cnd_label or not label or cnd_label &amp; label):
+                    return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.resolve_reflexive_pronoun_structures"><code class="name flex">
+<span>def <span class="ident">resolve_reflexive_pronoun_structures</span></span>(<span>entity, candidates, mark_disjoint)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Merge two entities containing mentions for which all of the following hold:
+- they are in the same sentence
+- they aren't contained in each other
+- other is before mention</p>
+<p>But this algorithm is wrong for Dutch (thinks Martin):</p>
+<ul>
+<li>it's far too eager:
+it does not check whether the antecedent is the subject.</li>
+<li>it's too strict:
+"[zich] wassen deed [hij] elke dag"
+is a counter-example for the last rule</li>
+</ul>
+<p>:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L185-L211" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def resolve_reflexive_pronoun_structures(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Merge two entities containing mentions for which all of the following hold:
+     - they are in the same sentence
+     - they aren&#39;t contained in each other
+     - other is before mention
+
+    But this algorithm is wrong for Dutch (thinks Martin):
+
+     - it&#39;s far too eager:
+        it does not check whether the antecedent is the subject.
+     - it&#39;s too strict:
+        &#34;[zich] wassen deed [hij] elke dag&#34;
+        is a counter-example for the last rule
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    for mention in entity:
+        if mention.is_reflexive_pronoun:
+            sent_nr = mention.sentence_number
+            for candidate in candidates:
+                for cand_mention in candidate:
+                    if cand_mention.sentence_number == sent_nr and \
+                       mention.head_offset not in cand_mention.span and \
+                       cand_mention.head_offset &lt; mention.head_offset:
+                        # We&#39;ve found what we want!
+                        return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.resolve_relative_pronoun_structures"><code class="name flex">
+<span>def <span class="ident">resolve_relative_pronoun_structures</span></span>(<span>entity, candidates, mark_disjoint)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Identifies relative pronouns and assigns them to the class of the noun
+they're modifying</p>
+<p>:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L169-L182" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def resolve_relative_pronoun_structures(entity, candidates, mark_disjoint):
+    &#39;&#39;&#39;
+    Identifies relative pronouns and assigns them to the class of the noun
+    they&#39;re modifying
+
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    if any(entity.mention_attr(&#39;is_relative_pronoun&#39;)):
+        head_offsets = entity.mention_attr(&#39;head_offset&#39;)
+        for candidate in candidates:
+            # If any of the `head_offsets` of this entity appear in the
+            # `modifiers` of the candidate
+            if head_offsets &amp; candidate.flat_mention_attr(&#39;modifiers&#39;):
+                return candidate</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.resolve_coreference.speaker_identification"><code class="name flex">
+<span>def <span class="ident">speaker_identification</span></span>(<span>entity, candidates, mark_disjoint, quotations)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Apply the first sieve; assigning coreference or prohibiting coreference
+based on direct speech.</p>
+<p>The algorithm for this function is quoted below from Lee et al. (2013),
+with check marks indicating whether the rules are actually implemented:</p>
+<blockquote>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled checked/> <I>s assigned to the same speaker are coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> <you>s with the same speaker are coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled checked/> The speaker and <I>s in her text are coreferent.
+(&hellip;)</li>
+<li class="task-list-item"><input type="checkbox" disabled/> The speaker and a mention which is not <I> in the speaker's
+utterance cannot be coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Two <I>s (or two <you>s, or two <we>s) assigned to different
+speakers cannot be coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Two different person pronouns by the same speaker cannot be
+coreferent.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> Nominal mentions cannot be coreferent with <I>, <you>, or <we> in
+the same turn or quotation.</li>
+<li class="task-list-item"><input type="checkbox" disabled/> In conversations, <you> can corefer only with the previous
+speaker.
+(&hellip;)
+We define <I> as <em>I</em>, <em>my</em>, <em>me</em>, or <em>mine</em>, <we> as first person
+plural pronouns, and <you> as second person pronouns.</li>
+</ul>
+</blockquote>
+<p>The quote entities are kept, while the ones corresponding to pronouns in
+the are discarded when merged.</p>
+<p>:param quotations:
+list of quotation objects
+:return:
+first matching candidate</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/resolve_coreference.py#L82-L149" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def speaker_identification(entity, candidates, mark_disjoint, quotations):
+    &#39;&#39;&#39;
+    Apply the first sieve; assigning coreference or prohibiting coreference
+    based on direct speech.
+
+    The algorithm for this function is quoted below from Lee et al. (2013),
+    with check marks indicating whether the rules are actually implemented:
+
+    &gt; - [X] &lt;I&gt;s assigned to the same speaker are coreferent.
+    &gt; - [ ] &lt;you&gt;s with the same speaker are coreferent.
+    &gt; - [X] The speaker and &lt;I&gt;s in her text are coreferent.
+    &gt; (...)
+    &gt; - [ ] The speaker and a mention which is not &lt;I&gt; in the speaker&#39;s
+    &gt;       utterance cannot be coreferent.
+    &gt; - [ ] Two &lt;I&gt;s (or two &lt;you&gt;s, or two &lt;we&gt;s) assigned to different
+    &gt;       speakers cannot be coreferent.
+    &gt; - [ ] Two different person pronouns by the same speaker cannot be
+    &gt;       coreferent.
+    &gt; - [ ] Nominal mentions cannot be coreferent with &lt;I&gt;, &lt;you&gt;, or &lt;we&gt; in
+    &gt;       the same turn or quotation.
+    &gt; - [ ] In conversations, &lt;you&gt; can corefer only with the previous
+    &gt;       speaker.
+    &gt; (...)
+    &gt; We define &lt;I&gt; as _I_, _my_, _me_, or _mine_, &lt;we&gt; as first person
+    &gt; plural pronouns, and &lt;you&gt; as second person pronouns.
+
+    The quote entities are kept, while the ones corresponding to pronouns in
+    the are discarded when merged.
+
+    :param quotations:  list of quotation objects
+    :return:    first matching candidate
+    &#39;&#39;&#39;
+    entity_span = entity.flat_mention_attr(&#39;span&#39;)
+    for quote in quotations:
+        if entity_span.issubset(set(quote.span)):
+            source = quote.source
+            addressee = quote.addressee
+            topic = quote.topic
+            if &#39;pron&#39; in entity.mention_attr(&#39;head_pos&#39;):
+                person = entity.mention_attr(&#39;person&#39;)
+                if &#39;1&#39; in person:
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if source:
+                        return source
+                elif &#39;2&#39; in person:
+                    if source:
+                        mark_disjoint(source)
+                    if topic:
+                        mark_disjoint(topic)
+                    if addressee:
+                        return addressee
+                elif &#39;3&#39; in person:
+                    if source:
+                        mark_disjoint(source)
+                    if addressee:
+                        mark_disjoint(addressee)
+                    if topic:
+                        # Why should every third person pronoun refer to
+                        # the `topic` of the quote?
+                        # There can be multiple genders and/or
+                        # multiplicities in the pronouns, and therefore
+                        # they shouldn&#39;t all refer to the same topic??
+                        return topic
+            elif source:
+                mark_disjoint(source)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multisieve_coreference" href="index.html">multisieve_coreference</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multisieve_coreference.resolve_coreference.apply_precise_constructs" href="#multisieve_coreference.resolve_coreference.apply_precise_constructs">apply_precise_constructs</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.apply_proper_head_word_match" href="#multisieve_coreference.resolve_coreference.apply_proper_head_word_match">apply_proper_head_word_match</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.apply_relaxed_head_match" href="#multisieve_coreference.resolve_coreference.apply_relaxed_head_match">apply_relaxed_head_match</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.apply_strict_head_match" href="#multisieve_coreference.resolve_coreference.apply_strict_head_match">apply_strict_head_match</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.get_numbers" href="#multisieve_coreference.resolve_coreference.get_numbers">get_numbers</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.identify_acronyms_or_alternative_names" href="#multisieve_coreference.resolve_coreference.identify_acronyms_or_alternative_names">identify_acronyms_or_alternative_names</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.identify_some_structures" href="#multisieve_coreference.resolve_coreference.identify_some_structures">identify_some_structures</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.match_some_span" href="#multisieve_coreference.resolve_coreference.match_some_span">match_some_span</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.post_process" href="#multisieve_coreference.resolve_coreference.post_process">post_process</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.remove_singleton_entities" href="#multisieve_coreference.resolve_coreference.remove_singleton_entities">remove_singleton_entities</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.resolve_coreference" href="#multisieve_coreference.resolve_coreference.resolve_coreference">resolve_coreference</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.resolve_pronoun_coreference" href="#multisieve_coreference.resolve_coreference.resolve_pronoun_coreference">resolve_pronoun_coreference</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.resolve_reflexive_pronoun_structures" href="#multisieve_coreference.resolve_coreference.resolve_reflexive_pronoun_structures">resolve_reflexive_pronoun_structures</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.resolve_relative_pronoun_structures" href="#multisieve_coreference.resolve_coreference.resolve_relative_pronoun_structures">resolve_relative_pronoun_structures</a></code></li>
+<li><code><a title="multisieve_coreference.resolve_coreference.speaker_identification" href="#multisieve_coreference.resolve_coreference.speaker_identification">speaker_identification</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5.dev4+g1709915.d20200207</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.5.dev4+g1709915.d20200207" />
+<title>multisieve_coreference.entities API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multisieve_coreference.entities</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L0-L297" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">import itertools as it
+from collections import Counter
+
+from .entity import Entity
+
+
+class Entities:
+    &#34;&#34;&#34;
+    A sorted collection of Entity objects that:
+
+     - merges two Entity objects when requested to do so
+     - keeps track of which Entity objects are not allowed to be merged
+     - given an Entity and optionally a filter, provides an ordered selection
+       of candidate antecedents. This selection always adheres to the
+       non-coreference constraints.
+
+
+    Note that `entity in entities` only holds when the exact object `entity`
+    is part of `entities`. Thus `copy(entity) in entities` will never hold.
+
+
+    !! NB !!    For keeping track of which Entity objects must not be merged,
+                Entities makes heavy use of Mention ids (because Mention
+                objects themselves are not hashable). If two distinct mentions
+                have the same id, they are assumed to be equal, but will not
+                necessarily end up in the same Entity if they didn&#39;t start
+                there.
+
+
+    ## Implementation details
+
+    To make sure we only have to sort everything once, the order of Entity
+    objects is remembered by saving all Entity objects in a list.
+
+    To have O(1) deletion of Entity objects, their ids are stored in an
+    {id: index} dictionary that keeps track of whether an Entity is still in
+    this Entities object. When an Entity is removed, its index is popped from
+    `_contained_entities` and the Entity is replaced by None in
+    `_all_entities`.
+    &#34;&#34;&#34;
+
+    def __init__(self, entities, disjoint_mentions=(), default_filter=None):
+        &#34;&#34;&#34;
+        :param entities:            a sorted collection of entities
+        :param default_filter:      filter to use for `get_candidates` when
+                                    none is specified
+        :param disjoint_mentions:   a collection of mention-id sets that must
+                                    never be in the same Entity
+        &#34;&#34;&#34;
+        self.overwrite_entities(entities)
+
+        self.default_filter = lambda x: True if default_filter is None \
+            else default_filter
+
+        self.disjoint_mentions = set()
+        for disjoint_set in disjoint_mentions:
+            self.mark_disjoint(disjoint_set)
+
+        if not self.disjointness_constraints_satisfied():
+            raise ValueError(
+                &#34;Initial `entities` voids disjointness constraints specified&#34;
+                &#34; by initial `disjoint_mentions`.&#34;)
+
+    def __repr__(self):
+        return self.__class__.__name__ + f&#39;({list(self)!r}, &#39; \
+            f&#39;{self.disjoint_mentions!r}, {self.default_filter!r})&#39;
+
+    def __str__(self):
+        return self.__class__.__name__ + f&#39;({list(self)!s}, &#39; \
+            f&#39;{self.disjoint_mentions!s}, {self.default_filter!s})&#39;
+
+    def __contains__(self, entity):
+        return self._get_entity_key(entity) in self._contained_entities
+
+    def __len__(self):
+        return len(self._contained_entities)
+
+    def __iter__(self, stop=None):
+        &#34;&#34;&#34;
+        Iterate over all remaining Entity objects.
+
+        :param stop:    index with respect to self._all_entities to stop at
+        &#34;&#34;&#34;
+        return filter(
+            lambda x: x is not None,
+            it.islice(self._all_entities, stop)
+        )
+
+    def _get_entity_key(self, entity):
+        return id(entity)
+
+    def entity_sort_key(self, entity):
+        return self._contained_entities[self._get_entity_key(entity)]
+
+    def entities_before(self, entity):
+        return self.__iter__(
+            stop=self._contained_entities[self._get_entity_key(entity)])
+
+    def overwrite_entities(self, entities):
+        &#34;&#34;&#34;
+        Discard all Entity objects in this Entities object and use the ones
+        from `entities` instead.
+        &#34;&#34;&#34;
+        self._all_entities = list(entities)
+        self._contained_entities = {
+            self._get_entity_key(entity): index
+            for index, entity in enumerate(self._all_entities)
+        }
+
+    def add(self, entity):
+        &#34;&#34;&#34;
+        Add an Entity to the end of this Entities.
+
+        If `entity` is already in Entities, do nothing.
+        &#34;&#34;&#34;
+        if entity not in self:
+            # We want the new length minus one as the index, which is the same
+            # as the old length.
+            self._contained_entities[self._get_entity_key(entity)] = \
+                len(self._all_entities)
+            self._all_entities.append(entity)
+
+    def remove(self, entity):
+        &#34;&#34;&#34;
+        Remove an Entity from this Entities.
+
+        If `entity` was not in Entities, raise KeyError.
+        &#34;&#34;&#34;
+        try:
+            index = self._contained_entities.pop(self._get_entity_key(entity))
+        except KeyError:
+            raise KeyError(repr(entity))
+        self._all_entities[index] = None
+
+    def discard(self, entity):
+        &#34;&#34;&#34;
+        Discard an Entity from this Entities.
+
+        If `entity` was not in Entities, do nothing.
+        &#34;&#34;&#34;
+        if entity in self:
+            self.remove(entity)
+
+    def clear_entities(self):
+        &#34;&#34;&#34;
+        Clear all Entity objects from this Entities.
+        &#34;&#34;&#34;
+        self.overwrite_entities(())
+
+    def clear_disjointness_constraints(self):
+        &#34;&#34;&#34;
+        Clear all disjointness constraints from this Entities.
+        &#34;&#34;&#34;
+        self.disjoint_mentions.clear()
+
+    def clear_all(self):
+        &#34;&#34;&#34;
+        Clear all Entity objects and disjointness constraints.
+        &#34;&#34;&#34;
+        self.clear_entities()
+        self.clear_disjointness_constraints()
+
+    def mark_disjoint(self, one, other):
+        &#34;&#34;&#34;
+        Mark a pair of Entity objects as pairwise disjoint.
+
+        Under the hood, this is done by marking all the following pairs as
+        disjoint:
+            (mention from first Entity, mention from second Entity)
+
+        No attention is paid to whether the Entity objects are actually in
+        this Entities object.
+        &#34;&#34;&#34;
+        ones_mention_ids = one.mention_attr(&#39;id&#39;)
+        others_mention_ids = other.mention_attr(&#39;id&#39;)
+        ids_in_both = ones_mention_ids &amp; others_mention_ids
+        if ids_in_both:
+            raise ValueError(
+                &#34;Marking the these Entity objects disjoint would mark the&#34;
+                &#34; following mention ids as disjoint with themselves, which&#34;
+                &#34; will break most of the functionality of Entities. Mentions&#34;
+                &#34; that would have been marked as disjoint with themselves:&#34;
+                f&#34; {ids_in_both!r}. Entities: {one!r}, {other!r}&#34;
+            )
+        return self.disjoint_mentions.update(
+            frozenset((one_m, other_m))
+            for one_m in ones_mention_ids
+            for other_m in others_mention_ids
+        )
+
+    def disjointness_constraints_satisfied(self, entities=None):
+        &#34;&#34;&#34;
+        Verify whether the disjointness constraints described by
+        `self.disjoint_mentions` hold for the given entities.
+
+        If `entities is None`, all entities in `self` are used.
+
+        In other words: check that no entity contains mentions `a` and `b` s.t.
+        `frozenset(a.id, b.id) in self.disjoint_mentions`.
+
+        Any (m.id, m.id) pair would invalidate any Entities object. So be
+        careful not to mark a mention disjoint with itself!
+        &#34;&#34;&#34;
+        if entities is None:
+            entities = self
+        return all(
+            frozenset(pair) not in self.disjoint_mentions
+            for pair in it.chain.from_iterable(
+                # For every combination of mentions within an entity
+                # (including reflexive combinations)
+                it.product(entity.mention_attr(&#39;id&#39;), repeat=2)
+                for entity in entities
+            ))
+
+    def merge_allowed(self, one, other):
+        &#34;&#34;&#34;
+        Check whether merging two Entity objects would void mention
+        disjointness constraints.
+
+        This is independent of whether each entity internally voids mention
+        disjointness constraints.
+        &#34;&#34;&#34;
+        return all(
+            frozenset((one_m, other_m)) not in self.disjoint_mentions
+            for one_m in one.mention_attr(&#39;id&#39;)
+            for other_m in other.mention_attr(&#39;id&#39;)
+        )
+
+    def merge(self, entity_to_keep, other):
+        &#34;&#34;&#34;
+        Merge two mentions, discarding `other` afterwards.
+
+        The merge is done in place, i.e. the returned Entity is always
+        `entity_to_keep`.
+
+        Do not verify whether the merge would validate disjointness
+        constraints.
+
+        Discard other from `self.entities` and quietly accept Entity objects
+        that aren&#39;t in self.entities.
+
+        If `entity_to_keep` is exactly the same object as `other`, `other` is
+        **not** discarded (because that would also mean discarding
+        `entity_to_keep`).
+
+        !! NB !! if `entity_to_keep` happens not to be in `self.entities`,
+                 it is **not** added automatically.
+        &#34;&#34;&#34;
+        if entity_to_keep not in self:
+            raise ValueError(
+                &#34;I can only keep an Entity if it is already mine, but&#34;
+                f&#34; {entity_to_keep!r} not in {self!r}&#34;)
+        entity_to_keep._merge(other)
+        if entity_to_keep is not other:
+            self.discard(other)
+        return entity_to_keep
+
+    def get_candidates(self, entity, entity_filter=None):
+        &#34;&#34;&#34;
+        Get all Entity objects occurring before `entity` that pass
+        `entity_filter` and would not void mention disjointness constraints if
+        merged with `entity`.
+
+        If `entity_filter` is None, use `self.default_filter`.
+        &#34;&#34;&#34;
+        if entity not in self:
+            raise ValueError(
+                &#34;`entity` must be contained in this Entities to be able to get&#34;
+                f&#34; its candidates. Got: entity={entity!r}, self={self!r}&#34;)
+        if entity_filter is None:
+            entity_filter = self.default_filter
+        return (
+            candidate
+            for candidate in self.entities_before(entity)
+            if entity_filter(candidate)     # This filter first, because..
+            and self.merge_allowed(entity, candidate)   # this one is expensive
+        )
+
+    @classmethod
+    def from_mentions(cls, mentions, **kwargs):
+        &#34;&#34;&#34;
+        Initialise an Entities object with singleton Entity objects from a
+        sorted collection of Mention objects with unique ids.
+        &#34;&#34;&#34;
+        mentions = list(mentions)
+
+        # Verify mention ids
+        ids = Counter(m.id for m in mentions)
+        if len(ids) != len(mentions):
+            raise ValueError(
+                &#34;Some mentions have equal ids. Duplicate ids: &#34; +
+                &#39;, &#39;.join(it.starmap(
+                    &#39;{!r}: {!r}&#39;.format,
+                    it.takewhile(lambda l: l[1] &gt; 1, ids.most_common())
+                ))
+            )
+
+        return cls(entities=(Entity([m]) for m in mentions), **kwargs)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="multisieve_coreference.entities.Entities"><code class="flex name class">
+<span>class <span class="ident">Entities</span></span>
+<span>(</span><span>entities, disjoint_mentions=(), default_filter=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A sorted collection of Entity objects that:</p>
+<ul>
+<li>merges two Entity objects when requested to do so</li>
+<li>keeps track of which Entity objects are not allowed to be merged</li>
+<li>given an Entity and optionally a filter, provides an ordered selection
+of candidate antecedents. This selection always adheres to the
+non-coreference constraints.</li>
+</ul>
+<p>Note that <code>entity in entities</code> only holds when the exact object <code>entity</code>
+is part of <code>entities</code>. Thus <code>copy(entity) in entities</code> will never hold.</p>
+<p>!! NB !!
+For keeping track of which Entity objects must not be merged,
+Entities makes heavy use of Mention ids (because Mention
+objects themselves are not hashable). If two distinct mentions
+have the same id, they are assumed to be equal, but will not
+necessarily end up in the same Entity if they didn't start
+there.</p>
+<h2 id="implementation-details">Implementation details</h2>
+<p>To make sure we only have to sort everything once, the order of Entity
+objects is remembered by saving all Entity objects in a list.</p>
+<p>To have O(1) deletion of Entity objects, their ids are stored in an
+{id: index} dictionary that keeps track of whether an Entity is still in
+this Entities object. When an Entity is removed, its index is popped from
+<code>_contained_entities</code> and the Entity is replaced by None in
+<code>_all_entities</code>.</p>
+<p>:param entities:
+a sorted collection of entities
+:param default_filter:
+filter to use for <code>get_candidates</code> when
+none is specified
+:param disjoint_mentions:
+a collection of mention-id sets that must
+never be in the same Entity</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L7-L298" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">class Entities:
+    &#34;&#34;&#34;
+    A sorted collection of Entity objects that:
+
+     - merges two Entity objects when requested to do so
+     - keeps track of which Entity objects are not allowed to be merged
+     - given an Entity and optionally a filter, provides an ordered selection
+       of candidate antecedents. This selection always adheres to the
+       non-coreference constraints.
+
+
+    Note that `entity in entities` only holds when the exact object `entity`
+    is part of `entities`. Thus `copy(entity) in entities` will never hold.
+
+
+    !! NB !!    For keeping track of which Entity objects must not be merged,
+                Entities makes heavy use of Mention ids (because Mention
+                objects themselves are not hashable). If two distinct mentions
+                have the same id, they are assumed to be equal, but will not
+                necessarily end up in the same Entity if they didn&#39;t start
+                there.
+
+
+    ## Implementation details
+
+    To make sure we only have to sort everything once, the order of Entity
+    objects is remembered by saving all Entity objects in a list.
+
+    To have O(1) deletion of Entity objects, their ids are stored in an
+    {id: index} dictionary that keeps track of whether an Entity is still in
+    this Entities object. When an Entity is removed, its index is popped from
+    `_contained_entities` and the Entity is replaced by None in
+    `_all_entities`.
+    &#34;&#34;&#34;
+
+    def __init__(self, entities, disjoint_mentions=(), default_filter=None):
+        &#34;&#34;&#34;
+        :param entities:            a sorted collection of entities
+        :param default_filter:      filter to use for `get_candidates` when
+                                    none is specified
+        :param disjoint_mentions:   a collection of mention-id sets that must
+                                    never be in the same Entity
+        &#34;&#34;&#34;
+        self.overwrite_entities(entities)
+
+        self.default_filter = lambda x: True if default_filter is None \
+            else default_filter
+
+        self.disjoint_mentions = set()
+        for disjoint_set in disjoint_mentions:
+            self.mark_disjoint(disjoint_set)
+
+        if not self.disjointness_constraints_satisfied():
+            raise ValueError(
+                &#34;Initial `entities` voids disjointness constraints specified&#34;
+                &#34; by initial `disjoint_mentions`.&#34;)
+
+    def __repr__(self):
+        return self.__class__.__name__ + f&#39;({list(self)!r}, &#39; \
+            f&#39;{self.disjoint_mentions!r}, {self.default_filter!r})&#39;
+
+    def __str__(self):
+        return self.__class__.__name__ + f&#39;({list(self)!s}, &#39; \
+            f&#39;{self.disjoint_mentions!s}, {self.default_filter!s})&#39;
+
+    def __contains__(self, entity):
+        return self._get_entity_key(entity) in self._contained_entities
+
+    def __len__(self):
+        return len(self._contained_entities)
+
+    def __iter__(self, stop=None):
+        &#34;&#34;&#34;
+        Iterate over all remaining Entity objects.
+
+        :param stop:    index with respect to self._all_entities to stop at
+        &#34;&#34;&#34;
+        return filter(
+            lambda x: x is not None,
+            it.islice(self._all_entities, stop)
+        )
+
+    def _get_entity_key(self, entity):
+        return id(entity)
+
+    def entity_sort_key(self, entity):
+        return self._contained_entities[self._get_entity_key(entity)]
+
+    def entities_before(self, entity):
+        return self.__iter__(
+            stop=self._contained_entities[self._get_entity_key(entity)])
+
+    def overwrite_entities(self, entities):
+        &#34;&#34;&#34;
+        Discard all Entity objects in this Entities object and use the ones
+        from `entities` instead.
+        &#34;&#34;&#34;
+        self._all_entities = list(entities)
+        self._contained_entities = {
+            self._get_entity_key(entity): index
+            for index, entity in enumerate(self._all_entities)
+        }
+
+    def add(self, entity):
+        &#34;&#34;&#34;
+        Add an Entity to the end of this Entities.
+
+        If `entity` is already in Entities, do nothing.
+        &#34;&#34;&#34;
+        if entity not in self:
+            # We want the new length minus one as the index, which is the same
+            # as the old length.
+            self._contained_entities[self._get_entity_key(entity)] = \
+                len(self._all_entities)
+            self._all_entities.append(entity)
+
+    def remove(self, entity):
+        &#34;&#34;&#34;
+        Remove an Entity from this Entities.
+
+        If `entity` was not in Entities, raise KeyError.
+        &#34;&#34;&#34;
+        try:
+            index = self._contained_entities.pop(self._get_entity_key(entity))
+        except KeyError:
+            raise KeyError(repr(entity))
+        self._all_entities[index] = None
+
+    def discard(self, entity):
+        &#34;&#34;&#34;
+        Discard an Entity from this Entities.
+
+        If `entity` was not in Entities, do nothing.
+        &#34;&#34;&#34;
+        if entity in self:
+            self.remove(entity)
+
+    def clear_entities(self):
+        &#34;&#34;&#34;
+        Clear all Entity objects from this Entities.
+        &#34;&#34;&#34;
+        self.overwrite_entities(())
+
+    def clear_disjointness_constraints(self):
+        &#34;&#34;&#34;
+        Clear all disjointness constraints from this Entities.
+        &#34;&#34;&#34;
+        self.disjoint_mentions.clear()
+
+    def clear_all(self):
+        &#34;&#34;&#34;
+        Clear all Entity objects and disjointness constraints.
+        &#34;&#34;&#34;
+        self.clear_entities()
+        self.clear_disjointness_constraints()
+
+    def mark_disjoint(self, one, other):
+        &#34;&#34;&#34;
+        Mark a pair of Entity objects as pairwise disjoint.
+
+        Under the hood, this is done by marking all the following pairs as
+        disjoint:
+            (mention from first Entity, mention from second Entity)
+
+        No attention is paid to whether the Entity objects are actually in
+        this Entities object.
+        &#34;&#34;&#34;
+        ones_mention_ids = one.mention_attr(&#39;id&#39;)
+        others_mention_ids = other.mention_attr(&#39;id&#39;)
+        ids_in_both = ones_mention_ids &amp; others_mention_ids
+        if ids_in_both:
+            raise ValueError(
+                &#34;Marking the these Entity objects disjoint would mark the&#34;
+                &#34; following mention ids as disjoint with themselves, which&#34;
+                &#34; will break most of the functionality of Entities. Mentions&#34;
+                &#34; that would have been marked as disjoint with themselves:&#34;
+                f&#34; {ids_in_both!r}. Entities: {one!r}, {other!r}&#34;
+            )
+        return self.disjoint_mentions.update(
+            frozenset((one_m, other_m))
+            for one_m in ones_mention_ids
+            for other_m in others_mention_ids
+        )
+
+    def disjointness_constraints_satisfied(self, entities=None):
+        &#34;&#34;&#34;
+        Verify whether the disjointness constraints described by
+        `self.disjoint_mentions` hold for the given entities.
+
+        If `entities is None`, all entities in `self` are used.
+
+        In other words: check that no entity contains mentions `a` and `b` s.t.
+        `frozenset(a.id, b.id) in self.disjoint_mentions`.
+
+        Any (m.id, m.id) pair would invalidate any Entities object. So be
+        careful not to mark a mention disjoint with itself!
+        &#34;&#34;&#34;
+        if entities is None:
+            entities = self
+        return all(
+            frozenset(pair) not in self.disjoint_mentions
+            for pair in it.chain.from_iterable(
+                # For every combination of mentions within an entity
+                # (including reflexive combinations)
+                it.product(entity.mention_attr(&#39;id&#39;), repeat=2)
+                for entity in entities
+            ))
+
+    def merge_allowed(self, one, other):
+        &#34;&#34;&#34;
+        Check whether merging two Entity objects would void mention
+        disjointness constraints.
+
+        This is independent of whether each entity internally voids mention
+        disjointness constraints.
+        &#34;&#34;&#34;
+        return all(
+            frozenset((one_m, other_m)) not in self.disjoint_mentions
+            for one_m in one.mention_attr(&#39;id&#39;)
+            for other_m in other.mention_attr(&#39;id&#39;)
+        )
+
+    def merge(self, entity_to_keep, other):
+        &#34;&#34;&#34;
+        Merge two mentions, discarding `other` afterwards.
+
+        The merge is done in place, i.e. the returned Entity is always
+        `entity_to_keep`.
+
+        Do not verify whether the merge would validate disjointness
+        constraints.
+
+        Discard other from `self.entities` and quietly accept Entity objects
+        that aren&#39;t in self.entities.
+
+        If `entity_to_keep` is exactly the same object as `other`, `other` is
+        **not** discarded (because that would also mean discarding
+        `entity_to_keep`).
+
+        !! NB !! if `entity_to_keep` happens not to be in `self.entities`,
+                 it is **not** added automatically.
+        &#34;&#34;&#34;
+        if entity_to_keep not in self:
+            raise ValueError(
+                &#34;I can only keep an Entity if it is already mine, but&#34;
+                f&#34; {entity_to_keep!r} not in {self!r}&#34;)
+        entity_to_keep._merge(other)
+        if entity_to_keep is not other:
+            self.discard(other)
+        return entity_to_keep
+
+    def get_candidates(self, entity, entity_filter=None):
+        &#34;&#34;&#34;
+        Get all Entity objects occurring before `entity` that pass
+        `entity_filter` and would not void mention disjointness constraints if
+        merged with `entity`.
+
+        If `entity_filter` is None, use `self.default_filter`.
+        &#34;&#34;&#34;
+        if entity not in self:
+            raise ValueError(
+                &#34;`entity` must be contained in this Entities to be able to get&#34;
+                f&#34; its candidates. Got: entity={entity!r}, self={self!r}&#34;)
+        if entity_filter is None:
+            entity_filter = self.default_filter
+        return (
+            candidate
+            for candidate in self.entities_before(entity)
+            if entity_filter(candidate)     # This filter first, because..
+            and self.merge_allowed(entity, candidate)   # this one is expensive
+        )
+
+    @classmethod
+    def from_mentions(cls, mentions, **kwargs):
+        &#34;&#34;&#34;
+        Initialise an Entities object with singleton Entity objects from a
+        sorted collection of Mention objects with unique ids.
+        &#34;&#34;&#34;
+        mentions = list(mentions)
+
+        # Verify mention ids
+        ids = Counter(m.id for m in mentions)
+        if len(ids) != len(mentions):
+            raise ValueError(
+                &#34;Some mentions have equal ids. Duplicate ids: &#34; +
+                &#39;, &#39;.join(it.starmap(
+                    &#39;{!r}: {!r}&#39;.format,
+                    it.takewhile(lambda l: l[1] &gt; 1, ids.most_common())
+                ))
+            )
+
+        return cls(entities=(Entity([m]) for m in mentions), **kwargs)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="multisieve_coreference.entities.Entities.from_mentions"><code class="name flex">
+<span>def <span class="ident">from_mentions</span></span>(<span>mentions, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialise an Entities object with singleton Entity objects from a
+sorted collection of Mention objects with unique ids.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L279-L298" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">@classmethod
+def from_mentions(cls, mentions, **kwargs):
+    &#34;&#34;&#34;
+    Initialise an Entities object with singleton Entity objects from a
+    sorted collection of Mention objects with unique ids.
+    &#34;&#34;&#34;
+    mentions = list(mentions)
+
+    # Verify mention ids
+    ids = Counter(m.id for m in mentions)
+    if len(ids) != len(mentions):
+        raise ValueError(
+            &#34;Some mentions have equal ids. Duplicate ids: &#34; +
+            &#39;, &#39;.join(it.starmap(
+                &#39;{!r}: {!r}&#39;.format,
+                it.takewhile(lambda l: l[1] &gt; 1, ids.most_common())
+            ))
+        )
+
+    return cls(entities=(Entity([m]) for m in mentions), **kwargs)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="multisieve_coreference.entities.Entities.add"><code class="name flex">
+<span>def <span class="ident">add</span></span>(<span>self, entity)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Add an Entity to the end of this Entities.</p>
+<p>If <code>entity</code> is already in Entities, do nothing.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L110-L121" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def add(self, entity):
+    &#34;&#34;&#34;
+    Add an Entity to the end of this Entities.
+
+    If `entity` is already in Entities, do nothing.
+    &#34;&#34;&#34;
+    if entity not in self:
+        # We want the new length minus one as the index, which is the same
+        # as the old length.
+        self._contained_entities[self._get_entity_key(entity)] = \
+            len(self._all_entities)
+        self._all_entities.append(entity)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.clear_all"><code class="name flex">
+<span>def <span class="ident">clear_all</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Clear all Entity objects and disjointness constraints.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L156-L161" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def clear_all(self):
+    &#34;&#34;&#34;
+    Clear all Entity objects and disjointness constraints.
+    &#34;&#34;&#34;
+    self.clear_entities()
+    self.clear_disjointness_constraints()</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.clear_disjointness_constraints"><code class="name flex">
+<span>def <span class="ident">clear_disjointness_constraints</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Clear all disjointness constraints from this Entities.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L150-L154" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def clear_disjointness_constraints(self):
+    &#34;&#34;&#34;
+    Clear all disjointness constraints from this Entities.
+    &#34;&#34;&#34;
+    self.disjoint_mentions.clear()</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.clear_entities"><code class="name flex">
+<span>def <span class="ident">clear_entities</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Clear all Entity objects from this Entities.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L144-L148" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def clear_entities(self):
+    &#34;&#34;&#34;
+    Clear all Entity objects from this Entities.
+    &#34;&#34;&#34;
+    self.overwrite_entities(())</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.discard"><code class="name flex">
+<span>def <span class="ident">discard</span></span>(<span>self, entity)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Discard an Entity from this Entities.</p>
+<p>If <code>entity</code> was not in Entities, do nothing.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L135-L142" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def discard(self, entity):
+    &#34;&#34;&#34;
+    Discard an Entity from this Entities.
+
+    If `entity` was not in Entities, do nothing.
+    &#34;&#34;&#34;
+    if entity in self:
+        self.remove(entity)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.disjointness_constraints_satisfied"><code class="name flex">
+<span>def <span class="ident">disjointness_constraints_satisfied</span></span>(<span>self, entities=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Verify whether the disjointness constraints described by
+<code>self.disjoint_mentions</code> hold for the given entities.</p>
+<p>If <code>entities is None</code>, all entities in <code>self</code> are used.</p>
+<p>In other words: check that no entity contains mentions <code>a</code> and <code>b</code> s.t.
+<code>frozenset(a.id, b.id) in self.disjoint_mentions</code>.</p>
+<p>Any (m.id, m.id) pair would invalidate any Entities object. So be
+careful not to mark a mention disjoint with itself!</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L191-L213" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def disjointness_constraints_satisfied(self, entities=None):
+    &#34;&#34;&#34;
+    Verify whether the disjointness constraints described by
+    `self.disjoint_mentions` hold for the given entities.
+
+    If `entities is None`, all entities in `self` are used.
+
+    In other words: check that no entity contains mentions `a` and `b` s.t.
+    `frozenset(a.id, b.id) in self.disjoint_mentions`.
+
+    Any (m.id, m.id) pair would invalidate any Entities object. So be
+    careful not to mark a mention disjoint with itself!
+    &#34;&#34;&#34;
+    if entities is None:
+        entities = self
+    return all(
+        frozenset(pair) not in self.disjoint_mentions
+        for pair in it.chain.from_iterable(
+            # For every combination of mentions within an entity
+            # (including reflexive combinations)
+            it.product(entity.mention_attr(&#39;id&#39;), repeat=2)
+            for entity in entities
+        ))</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.entities_before"><code class="name flex">
+<span>def <span class="ident">entities_before</span></span>(<span>self, entity)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L95-L97" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def entities_before(self, entity):
+    return self.__iter__(
+        stop=self._contained_entities[self._get_entity_key(entity)])</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.entity_sort_key"><code class="name flex">
+<span>def <span class="ident">entity_sort_key</span></span>(<span>self, entity)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L92-L93" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def entity_sort_key(self, entity):
+    return self._contained_entities[self._get_entity_key(entity)]</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.get_candidates"><code class="name flex">
+<span>def <span class="ident">get_candidates</span></span>(<span>self, entity, entity_filter=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get all Entity objects occurring before <code>entity</code> that pass
+<code>entity_filter</code> and would not void mention disjointness constraints if
+merged with <code>entity</code>.</p>
+<p>If <code>entity_filter</code> is None, use <code>self.default_filter</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L258-L277" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_candidates(self, entity, entity_filter=None):
+    &#34;&#34;&#34;
+    Get all Entity objects occurring before `entity` that pass
+    `entity_filter` and would not void mention disjointness constraints if
+    merged with `entity`.
+
+    If `entity_filter` is None, use `self.default_filter`.
+    &#34;&#34;&#34;
+    if entity not in self:
+        raise ValueError(
+            &#34;`entity` must be contained in this Entities to be able to get&#34;
+            f&#34; its candidates. Got: entity={entity!r}, self={self!r}&#34;)
+    if entity_filter is None:
+        entity_filter = self.default_filter
+    return (
+        candidate
+        for candidate in self.entities_before(entity)
+        if entity_filter(candidate)     # This filter first, because..
+        and self.merge_allowed(entity, candidate)   # this one is expensive
+    )</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.mark_disjoint"><code class="name flex">
+<span>def <span class="ident">mark_disjoint</span></span>(<span>self, one, other)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Mark a pair of Entity objects as pairwise disjoint.</p>
+<p>Under the hood, this is done by marking all the following pairs as
+disjoint:
+(mention from first Entity, mention from second Entity)</p>
+<p>No attention is paid to whether the Entity objects are actually in
+this Entities object.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L163-L189" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def mark_disjoint(self, one, other):
+    &#34;&#34;&#34;
+    Mark a pair of Entity objects as pairwise disjoint.
+
+    Under the hood, this is done by marking all the following pairs as
+    disjoint:
+        (mention from first Entity, mention from second Entity)
+
+    No attention is paid to whether the Entity objects are actually in
+    this Entities object.
+    &#34;&#34;&#34;
+    ones_mention_ids = one.mention_attr(&#39;id&#39;)
+    others_mention_ids = other.mention_attr(&#39;id&#39;)
+    ids_in_both = ones_mention_ids &amp; others_mention_ids
+    if ids_in_both:
+        raise ValueError(
+            &#34;Marking the these Entity objects disjoint would mark the&#34;
+            &#34; following mention ids as disjoint with themselves, which&#34;
+            &#34; will break most of the functionality of Entities. Mentions&#34;
+            &#34; that would have been marked as disjoint with themselves:&#34;
+            f&#34; {ids_in_both!r}. Entities: {one!r}, {other!r}&#34;
+        )
+    return self.disjoint_mentions.update(
+        frozenset((one_m, other_m))
+        for one_m in ones_mention_ids
+        for other_m in others_mention_ids
+    )</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.merge"><code class="name flex">
+<span>def <span class="ident">merge</span></span>(<span>self, entity_to_keep, other)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Merge two mentions, discarding <code>other</code> afterwards.</p>
+<p>The merge is done in place, i.e. the returned Entity is always
+<code>entity_to_keep</code>.</p>
+<p>Do not verify whether the merge would validate disjointness
+constraints.</p>
+<p>Discard other from <code>self.entities</code> and quietly accept Entity objects
+that aren't in self.entities.</p>
+<p>If <code>entity_to_keep</code> is exactly the same object as <code>other</code>, <code>other</code> is
+<strong>not</strong> discarded (because that would also mean discarding
+<code>entity_to_keep</code>).</p>
+<p>!! NB !! if <code>entity_to_keep</code> happens not to be in <code>self.entities</code>,
+it is <strong>not</strong> added automatically.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L229-L256" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def merge(self, entity_to_keep, other):
+    &#34;&#34;&#34;
+    Merge two mentions, discarding `other` afterwards.
+
+    The merge is done in place, i.e. the returned Entity is always
+    `entity_to_keep`.
+
+    Do not verify whether the merge would validate disjointness
+    constraints.
+
+    Discard other from `self.entities` and quietly accept Entity objects
+    that aren&#39;t in self.entities.
+
+    If `entity_to_keep` is exactly the same object as `other`, `other` is
+    **not** discarded (because that would also mean discarding
+    `entity_to_keep`).
+
+    !! NB !! if `entity_to_keep` happens not to be in `self.entities`,
+             it is **not** added automatically.
+    &#34;&#34;&#34;
+    if entity_to_keep not in self:
+        raise ValueError(
+            &#34;I can only keep an Entity if it is already mine, but&#34;
+            f&#34; {entity_to_keep!r} not in {self!r}&#34;)
+    entity_to_keep._merge(other)
+    if entity_to_keep is not other:
+        self.discard(other)
+    return entity_to_keep</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.merge_allowed"><code class="name flex">
+<span>def <span class="ident">merge_allowed</span></span>(<span>self, one, other)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Check whether merging two Entity objects would void mention
+disjointness constraints.</p>
+<p>This is independent of whether each entity internally voids mention
+disjointness constraints.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L215-L227" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def merge_allowed(self, one, other):
+    &#34;&#34;&#34;
+    Check whether merging two Entity objects would void mention
+    disjointness constraints.
+
+    This is independent of whether each entity internally voids mention
+    disjointness constraints.
+    &#34;&#34;&#34;
+    return all(
+        frozenset((one_m, other_m)) not in self.disjoint_mentions
+        for one_m in one.mention_attr(&#39;id&#39;)
+        for other_m in other.mention_attr(&#39;id&#39;)
+    )</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.overwrite_entities"><code class="name flex">
+<span>def <span class="ident">overwrite_entities</span></span>(<span>self, entities)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Discard all Entity objects in this Entities object and use the ones
+from <code>entities</code> instead.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L99-L108" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def overwrite_entities(self, entities):
+    &#34;&#34;&#34;
+    Discard all Entity objects in this Entities object and use the ones
+    from `entities` instead.
+    &#34;&#34;&#34;
+    self._all_entities = list(entities)
+    self._contained_entities = {
+        self._get_entity_key(entity): index
+        for index, entity in enumerate(self._all_entities)
+    }</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.entities.Entities.remove"><code class="name flex">
+<span>def <span class="ident">remove</span></span>(<span>self, entity)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Remove an Entity from this Entities.</p>
+<p>If <code>entity</code> was not in Entities, raise KeyError.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/entities.py#L123-L133" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def remove(self, entity):
+    &#34;&#34;&#34;
+    Remove an Entity from this Entities.
+
+    If `entity` was not in Entities, raise KeyError.
+    &#34;&#34;&#34;
+    try:
+        index = self._contained_entities.pop(self._get_entity_key(entity))
+    except KeyError:
+        raise KeyError(repr(entity))
+    self._all_entities[index] = None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multisieve_coreference" href="index.html">multisieve_coreference</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="multisieve_coreference.entities.Entities" href="#multisieve_coreference.entities.Entities">Entities</a></code></h4>
+<ul class="">
+<li><code><a title="multisieve_coreference.entities.Entities.add" href="#multisieve_coreference.entities.Entities.add">add</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.clear_all" href="#multisieve_coreference.entities.Entities.clear_all">clear_all</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.clear_disjointness_constraints" href="#multisieve_coreference.entities.Entities.clear_disjointness_constraints">clear_disjointness_constraints</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.clear_entities" href="#multisieve_coreference.entities.Entities.clear_entities">clear_entities</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.discard" href="#multisieve_coreference.entities.Entities.discard">discard</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.disjointness_constraints_satisfied" href="#multisieve_coreference.entities.Entities.disjointness_constraints_satisfied">disjointness_constraints_satisfied</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.entities_before" href="#multisieve_coreference.entities.Entities.entities_before">entities_before</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.entity_sort_key" href="#multisieve_coreference.entities.Entities.entity_sort_key">entity_sort_key</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.from_mentions" href="#multisieve_coreference.entities.Entities.from_mentions">from_mentions</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.get_candidates" href="#multisieve_coreference.entities.Entities.get_candidates">get_candidates</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.mark_disjoint" href="#multisieve_coreference.entities.Entities.mark_disjoint">mark_disjoint</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.merge" href="#multisieve_coreference.entities.Entities.merge">merge</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.merge_allowed" href="#multisieve_coreference.entities.Entities.merge_allowed">merge_allowed</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.overwrite_entities" href="#multisieve_coreference.entities.Entities.overwrite_entities">overwrite_entities</a></code></li>
+<li><code><a title="multisieve_coreference.entities.Entities.remove" href="#multisieve_coreference.entities.Entities.remove">remove</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5.dev4+g1709915.d20200207</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

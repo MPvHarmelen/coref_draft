@@ -1,0 +1,1578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.5.dev4+g1709915.d20200207" />
+<title>multisieve_coreference.naf_info API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multisieve_coreference.naf_info</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L0-L604" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">import logging
+from collections import defaultdict
+
+from .offset_info import (
+    convert_term_ids_to_offsets,
+    get_offsets_from_span
+)
+from .quotation import Cquotation
+from .quotation_naf import CquotationNaf
+
+logger = logging.getLogger(None if __name__ == &#39;__main__&#39; else __name__)
+
+
+def get_pos_of_term(nafobj, tid):
+
+    term = nafobj.get_term(tid)
+    return term.get_pos()
+
+
+def get_string_of_span(nafobj, span):
+
+    mstring = &#39;&#39;
+    latest_offset = -1
+    for tid in span:
+        my_term = nafobj.get_term(tid)
+        for wid in my_term.get_span().get_span_ids():
+            my_tok = nafobj.get_token(wid)
+            # add space between tokens
+            if len(mstring) &gt; 0 and int(my_tok.get_offset()) &gt; latest_offset:
+                mstring += &#39; &#39;
+            mstring += my_tok.get_text()
+            latest_offset = int(my_tok.get_offset()) + int(my_tok.get_length())
+    return mstring
+
+
+def get_quotation_spans(nafobj):
+    &#39;&#39;&#39;
+    Function that goes through nafobj and identifies spans of quotations
+    :param nafobj: input naf
+    :return: list of quotation objects with span defined
+    &#39;&#39;&#39;
+
+    # FIXME investigate on development corpus what to do with embedded
+    # quotations; for now we&#39;ll assume a double quotation within a single
+    # quote is an error
+
+    in_double_quotation = False
+    in_single_quotation = False
+    quotations = []
+    for term in nafobj.get_terms():
+        if term.get_lemma() in [&#39;&#34;&#39;, &#39;&amp;amp;amp;amp;quot;&#39;]:
+            if not in_double_quotation:
+                in_double_quotation = True
+                myQuote = CquotationNaf()
+                myQuote.beginquote = term.get_id()
+            else:
+                in_double_quotation = False
+                myQuote.endquote = term.get_id()
+                quotations.append(myQuote)
+            # break off single quotation if double quotation found during this
+            if in_single_quotation:
+                in_single_quotation = False
+        elif in_double_quotation:
+            myQuote.add_span_id(term.get_id())
+
+        if term.get_lemma() == &#34;&#39;&#34;:
+            if not in_single_quotation:
+                in_single_quotation = True
+                myQuoteSingle = CquotationNaf()
+                myQuoteSingle.beginquote = term.get_id()
+            else:
+                in_single_quotation = False
+                myQuoteSingle.endquote = term.get_id()
+                quotations.append(myQuoteSingle)
+        elif in_single_quotation:
+            myQuoteSingle.add_span_id(term.get_id())
+
+    return quotations
+
+
+def find_relevant_spans(deps, outside_ids):
+
+    for dep in deps:
+        if dep[0] in outside_ids and dep[1] in [&#39;nucl/tag&#39;, &#39;dp/dp&#39;]:
+            return dep[0]
+
+    return None
+
+
+def analyze_head_relations(nafobj, head_term, constituency_trees):
+    head2deps = constituency_trees.head2deps
+    get_constituent = constituency_trees.get_constituent
+    dependents = head2deps.get(head_term)
+    speaker = None
+    addressee = None
+    topic = None
+    # FIXME: we want to check the preposition
+    # FIXME: no dependents case does occur; check with bigger corpus
+    if dependents is not None:
+        for dep in dependents:
+            if dep[1] == &#39;hd/su&#39;:
+                speaker = get_constituent(dep[0])
+            elif dep[1] == &#39;hd/obj2&#39;:
+                term = nafobj.get_term(dep[0])
+                if term.get_pos() == &#39;prep&#39;:
+                    if dep[0] in head2deps:
+                        for deprel in head2deps.get(dep[0]):
+                            if deprel[1] == &#39;hd/obj1&#39;:
+                                addressee = get_constituent(deprel[0])
+                else:
+                    addressee = get_constituent(dep[0])
+            elif dep[1] in [&#39;hd/mod&#39;]:
+                term = nafobj.get_term(dep[0])
+                if term.get_pos() == &#39;prep&#39;:
+
+                    if dep[0] in head2deps:
+                        # override addressee by complement if headed by
+                        # preposition
+                        for deprel in head2deps.get(dep[0]):
+                            if deprel[1] == &#39;hd/obj1&#39;:
+                                if term.get_lemma() == &#39;tegen&#39;:
+                                    addressee = get_constituent(deprel[0])
+                                elif term.get_lemma() == &#39;over&#39;:
+                                    topic = get_constituent(deprel[0])
+
+    return speaker, addressee, topic
+
+
+def identify_direct_links_to_sip(nafobj, quotation, constituency_trees):
+    &#39;&#39;&#39;
+    Function that identifies
+    :param head2deps: dictionary linking head to dependents
+    :param quotation: the quotation itself
+    :return: boolean indicating whether source was found
+    &#39;&#39;&#39;
+
+    for tid in quotation.span:
+        deps = constituency_trees.head2deps.get(tid)
+        if deps is not None:
+            # The first element of every tuple
+            depids = set(next(iter(zip(*deps))))
+            # if one of deps falls outside of quote, it can be linked to the
+            # sip
+            span_with_quotes = quotation.span + [
+                quotation.beginquote, quotation.endquote
+            ]
+            my_joint_set = depids.difference(span_with_quotes)
+            if len(my_joint_set) &gt; 0:
+                head_term = find_relevant_spans(deps, my_joint_set)
+                if head_term is not None:
+                    speaker, addressee, topic = analyze_head_relations(
+                        nafobj, head_term, constituency_trees)
+                    if speaker is not None:
+                        speaker_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, speaker)
+                        quotation.source = speaker_in_offsets
+                    if addressee is not None:
+                        addressee_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, addressee)
+                        quotation.addressee = addressee_in_offsets
+                    if topic is not None:
+                        topic_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, topic)
+                        quotation.topic = topic_in_offsets
+
+
+def check_if_quotation_contains_dependent(quotation, constituency_trees):
+    # FIXME: verify on larger set of development corpus whether this behaviour
+    # is correct
+    bad_relations = [
+        &#39;cmp/body&#39;,
+        &#39;hd/predc&#39;,
+        &#39;hd/obj1&#39;,
+        &#39;hd/vc&#39;,
+        &#39;hd/su&#39;,
+        &#39;hd/pc&#39;
+    ]
+    # expected_rels = [
+    #     &#39;hd/app&#39;,
+    #     &#39;tag/nucl&#39;,
+    #     &#39;--/--&#39;,
+    #     &#39;dp/dp&#39;,
+    #     &#39;-- / --&#39;,
+    #     &#39;nucl/sat&#39;
+    # ]
+    for tid in quotation.span:
+        heads = constituency_trees.dep2heads.get(tid)
+        if heads is not None:
+            headids = constituency_trees.get_direct_parents(tid)
+            span_with_quotes = quotation.span + [
+                quotation.beginquote, quotation.endquote]
+            if len(headids.difference(set(span_with_quotes))) &gt; 0:
+                for headid in headids.difference(set(span_with_quotes)):
+                    for headrel in heads:
+                        if headrel[0] == headid:
+                            if headrel[1] in bad_relations:
+                                return False
+                            elif headrel[1] in [&#39;crd/cnj&#39;]:
+                                motherheadrels = constituency_trees.dep2heads \
+                                    .get(headrel[0])
+                                if motherheadrels is not None:
+                                    for mhid in motherheadrels:
+                                        if mhid[1] in bad_relations:
+                                            return False
+                                        # elif not mhid[1] in expected_rels:
+                                        #     print(
+                                        #         tid,
+                                        #         headids.difference(
+                                        #             set(span_with_quotes)),
+                                        #         &#39;has outside head&#39;)
+                                        #     print(motherheadrels)
+                            # FIXME: debugs need to be checked out on bigger
+                            # corpus; set up development mode
+                            # elif not headrel[1] in expected_rels:
+                            #     print(
+                            #         tid,
+                            #         headids.difference(set(span_with_quotes)),
+                            #         &#39;has outside head&#39;)
+                            #     print(heads, quotation.span)
+    return True
+
+
+def get_sentences_of_quotation(nafobj, quotation):
+
+    sentences = set()
+
+    for tid in quotation.span:
+        term = nafobj.get_term(tid)
+        wid = term.get_span().get_span_ids()[0]
+        token = nafobj.get_token(wid)
+        sentence_nr = token.get_sent()
+        # storing them as integers; they need to be sorted later
+        sentences.add(int(sentence_nr))
+    return sentences
+
+
+def get_previous_and_next_sentence(sentences):
+
+    ordered_sentences = sorted(sentences)
+    if len(ordered_sentences) &gt; 0:
+        previous_sentence = ordered_sentences[0] - 1
+        following_sentence = ordered_sentences[-1] + 1
+    else:
+        previous_sentence = 0
+        following_sentence = 0
+
+    return previous_sentence, following_sentence
+
+
+def retrieve_sentence_preceding_sip(nafobj, constituency_trees, terms):
+    source_head = None
+    for tid in terms:
+        myterm = nafobj.get_term(tid)
+        if myterm.get_lemma() == &#39;volgens&#39;:
+            deps = constituency_trees.head2deps.get(tid)
+            if deps is not None:
+                for dep in deps:
+                    if dep[1] == &#39;hd/obj1&#39;:
+                        source_head = dep[0]
+
+    return source_head
+
+
+def retrieve_quotation_following_sip(nafobj, constituency_trees, terms):
+
+    source_head = None
+    for tid in terms:
+        myterm = nafobj.get_term(tid)
+        if myterm.get_lemma() == &#39;aldus&#39;:
+            deps = constituency_trees.head2deps.get(tid)
+            if deps is not None:
+                for dep in deps:
+                    if dep[1] == &#39;hd/obj1&#39;:
+                        source_head = dep[0]
+
+    return source_head
+
+
+def identify_addressee_or_topic_relations(nafobj, constituency_trees, tid,
+                                          quotation):
+
+    # FIXME: language specific function
+    heads = constituency_trees.dep2heads.get(tid)
+    if heads is not None:
+        for headrel in heads:
+            headterm = nafobj.get_term(headrel[0])
+            if headterm.get_lemma() == &#39;tegen&#39; or headrel[1] == &#39;hd/obj2&#39;:
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
+                addressee = convert_term_ids_to_offsets(nafobj, myconstituent)
+                quotation.addressee = addressee
+                return True
+            elif headterm.get_lemma() == &#39;over&#39;:
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
+                topic = convert_term_ids_to_offsets(nafobj, myconstituent)
+                quotation.topic = topic
+                return True
+    return False
+
+
+def get_candidates_not_part_of_addressee_topic(
+        constituency_trees, candidate_names, quotation):
+
+    remaining_candidates = []
+    covered_tids = quotation.addressee + quotation.topic
+    for tid in candidate_names:
+        if tid not in covered_tids:
+            myconstituent = constituency_trees.get_constituent(tid)
+            remaining_candidates.append(myconstituent)
+            covered_tids += myconstituent
+    return remaining_candidates
+
+
+def extract_full_names_or_prons(nafobj, constituents):
+
+    names = []
+    for const in constituents:
+        name = []
+        for tid in const:
+            term = nafobj.get_term(tid)
+            if term.get_pos() == &#39;name&#39;:
+                name.append(tid)
+        if len(name) == 0 and len(const) != 0:
+            names.append(const)
+        else:
+            names.append(name)
+    return names
+
+
+def get_closest(candidates):
+
+    closest = []
+    selected_cand = []
+    for cand in candidates:
+        candnums = create_ordered_number_span(cand)
+        if len(closest) == 0 or candnums[-1] &gt; closest[-1]:
+            closest = candnums
+            selected_cand = cand
+    return selected_cand
+
+
+def identify_primary_candidate(constituency_trees, candidates):
+
+    for cand in candidates:
+        for tid in cand:
+            if tid in constituency_trees.dep2heads:
+                for headrel in constituency_trees.dep2heads:
+                    if headrel[1] == &#39;hd/su&#39;:
+                        return cand
+
+    # if no highest ranking found, return closest candidate
+    return get_closest(candidates)
+
+
+def find_name_or_pronoun(nafobj, constituency_trees, preceding_terms,
+                         quotation):
+
+    # FIXME: not over paragraph borders; if nothing found, sentence after can
+    #        also work
+    candidate_names = []
+    for tid in preceding_terms:
+        term = nafobj.get_term(tid)
+        if term.get_pos() == &#39;name&#39; or term.get_pos() == &#39;pron&#39;:
+            if not identify_addressee_or_topic_relations(
+               nafobj, constituency_trees, tid, quotation):
+                candidate_names.append(term.get_id())
+
+    # change make dictionary with head term to constituent
+    if len(candidate_names) &gt; 0:
+        remaining_candidates = get_candidates_not_part_of_addressee_topic(
+            constituency_trees, candidate_names, quotation)
+        if len(remaining_candidates) &gt; 0:
+            candidates = extract_full_names_or_prons(
+                nafobj, remaining_candidates)
+            if len(candidates) == 1:
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidates[0])
+                quotation.source = candidate_in_offsets
+            else:
+                candidate = identify_primary_candidate(
+                    constituency_trees, candidates)
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidate)
+                quotation.source = candidate_in_offsets
+
+
+def create_ordered_number_span(term_list):
+
+    number_list = []
+    for tid in term_list:
+        if &#39;t_&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t_&#39;))
+            number_list.append(tnumber)
+        elif &#39;t&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t&#39;))
+            number_list.append(tnumber)
+
+    return sorted(number_list)
+
+
+def get_preceding_terms_in_sentence(first_sentence, quotation_span):
+    # FIXME; move to offset based ids earlier; then this hack is not necessary
+    quotation_numbers = create_ordered_number_span(quotation_span)
+    preceeding_terms = []
+    if len(quotation_numbers) &gt; 0:
+        for tid in first_sentence:
+            if &#39;t_&#39; in tid:
+                tnumber = int(tid.lstrip(&#39;t_&#39;))
+                if tnumber &lt; quotation_numbers[0]:
+                    preceeding_terms.append(tid)
+            elif &#39;t&#39; in tid:
+                tnumber = int(tid.lstrip(&#39;t&#39;))
+                if tnumber &lt; quotation_numbers[0]:
+                    preceeding_terms.append(tid)
+    return preceeding_terms
+
+
+def get_following_terms_in_sentence(last_sentence, quotation_span):
+
+    # FIXME; move to offset based ids earlier; then this hack is not necessary
+    quotation_numbers = create_ordered_number_span(quotation_span)
+    following_terms = []
+    for tid in last_sentence:
+        if &#39;t_&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t_&#39;))
+            if tnumber &gt; quotation_numbers[0]:
+                following_terms.append(tid)
+        elif &#39;t&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t&#39;))
+            if tnumber &gt; quotation_numbers[0]:
+                following_terms.append(tid)
+    return following_terms
+
+
+def identify_source_introducing_constructions(
+        nafobj, constituency_trees, quotation, sentence_to_term):
+    &#39;&#39;&#39;
+    Function that identifies structures that introduce sources of direct quotes
+    :param nafobj: the input nafobj
+    :param quotation: the quotation
+    :return: None
+    &#39;&#39;&#39;
+
+    sentences = get_sentences_of_quotation(nafobj, quotation)
+    prev_sent, follow_sent = get_previous_and_next_sentence(sentences)
+    # FIXME: find out using development data whether preceding and following
+    #        sentence should be taken into account or not
+    # preceding_terms = sentence_to_term.get(str(prev_sent)) + \
+    #     sentence_to_term.get(str(prev_sent + 1))
+
+    # start with &#39;aldus&#39; construction; this is more robust
+    following_sentence = sentence_to_term.get(str(follow_sent - 1))
+    source_head = None
+    if following_sentence is not None:
+        following_terms = get_following_terms_in_sentence(
+            following_sentence, quotation.span)
+        source_head = retrieve_quotation_following_sip(
+            nafobj, constituency_trees, following_terms)
+
+    if source_head is None:
+        preceding_terms = get_preceding_terms_in_sentence(
+            sentence_to_term.get(str(prev_sent + 1)), quotation.span)
+        source_head = retrieve_sentence_preceding_sip(
+            nafobj, constituency_trees, preceding_terms)
+
+    if source_head is not None:
+        source_constituent = constituency_trees.get_constituent(source_head)
+        source_in_offsets = convert_term_ids_to_offsets(
+            nafobj, source_constituent)
+        quotation.source = source_in_offsets
+    else:
+        find_name_or_pronoun(
+            nafobj, constituency_trees, preceding_terms, quotation)
+    # 3. check previous sentence for name or pronoun
+
+
+def get_sentence_to_terms(nafobj):
+
+    token2terms = {}
+    for term in nafobj.get_terms():
+        tokens = term.get_span().get_span_ids()
+        for tok in tokens:
+            token2terms[tok] = term.get_id()
+
+    sentence2terms = defaultdict(list)
+    for token in nafobj.get_tokens():
+        sent_nr = token.get_sent()
+        term_id = token2terms.get(token.get_id())
+        sentence2terms[sent_nr].append(term_id)
+
+    return sentence2terms
+
+
+def get_reduced_list_of_quotations(toremove, found_quotations):
+
+    reduced_quotations = []
+    for quote in found_quotations:
+        wrong = False
+        for wrong_quote in toremove:
+            if set(quote.span) == set(wrong_quote.span):
+                wrong = True
+        if not wrong:
+            reduced_quotations.append(quote)
+    return reduced_quotations
+
+
+def identify_direct_quotations(nafobj, entities, constituency_trees):
+    &#39;&#39;&#39;
+    Identify direct quotations in naf and link them to their corresponding
+    entities.
+
+    :param nafobj:      input naf object
+    :param entities:    Entities to look for
+    :return:            a list of quotations
+    &#39;&#39;&#39;
+
+    nafquotations = get_quotation_spans(nafobj)
+    toremove = []
+    for quotation in nafquotations:
+        identify_direct_links_to_sip(nafobj, quotation, constituency_trees)
+        if len(quotation.source) == 0:
+            # this can lead to indication of quotation being attribution rather
+            # than quotation
+            quotation_contains_dependent = \
+                check_if_quotation_contains_dependent(
+                    quotation,
+                    constituency_trees)
+            if quotation_contains_dependent:
+                sentence_to_terms = get_sentence_to_terms(nafobj)
+                identify_source_introducing_constructions(
+                    nafobj, constituency_trees, quotation, sentence_to_terms)
+            else:
+                toremove.append(quotation)
+
+    finalnafquotations = get_reduced_list_of_quotations(
+        toremove, nafquotations)
+    quotations = []
+    for qid, nafquotation in enumerate(finalnafquotations):
+        myquote = create_coref_quotation_from_quotation_naf(
+            nafobj, nafquotation, entities, qid)
+        quotations.append(myquote)
+
+    return quotations
+
+
+def find_entity_with_span(span, entities):
+    &#39;&#39;&#39;
+    Find out whether `span` corresponds to an entity and, if so, which one.
+
+    First try to find the first entity that has a span that matches exactly,
+    otherwise find the first entity who&#39;s span is a super- or subset of `span`
+
+    :param span:        span ids to match against
+    :param entities:    entities to consider
+    :return:            the matching entity, if found
+    &#39;&#39;&#39;
+    span = set(span)
+    for entity in entities:
+        if entity.flat_mention_attr(&#39;span&#39;) == span:
+            return entity
+
+    for entity in entities:
+        entity_span = entity.flat_mention_attr(&#39;span&#39;)
+        if span &lt; entity_span or span &gt; entity_span:
+            return entity
+
+
+def create_coref_quotation_from_quotation_naf(
+        nafobj, nafquotation, entities, quote_id):
+    &#39;&#39;&#39;
+    Function that turns naf quotation object into quotation object to be passed
+    on to multisieve
+    :param nafobj: input naf
+    :param nafquotation: quotation object with naf specific information
+    :param quote_id: identifier for quotation
+    :return:
+    &#39;&#39;&#39;
+
+    myQuote = Cquotation(quote_id)
+
+    quotespan = convert_term_ids_to_offsets(nafobj, nafquotation.span)
+    myQuote.span = quotespan
+
+    quotestring = get_string_of_span(nafobj, nafquotation.span)
+    myQuote.string = quotestring
+
+    beginoffset, endoffset = get_offsets_from_span(nafobj, nafquotation.span)
+    myQuote.begin_offset = beginoffset
+    myQuote.end_offset = endoffset
+
+    if len(nafquotation.source) &gt; 0:
+        source_entity = find_entity_with_span(
+            nafquotation.source, entities)
+        myQuote.source = source_entity
+    if len(nafquotation.addressee) &gt; 0:
+        addressee_entity = find_entity_with_span(
+            nafquotation.addressee, entities)
+        myQuote.addressee = addressee_entity
+    if len(nafquotation.topic) &gt; 0:
+        topic_entity = find_entity_with_span(
+            nafquotation.topic, entities)
+        myQuote.topic = topic_entity
+
+    return myQuote</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multisieve_coreference.naf_info.analyze_head_relations"><code class="name flex">
+<span>def <span class="ident">analyze_head_relations</span></span>(<span>nafobj, head_term, constituency_trees)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L90-L126" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def analyze_head_relations(nafobj, head_term, constituency_trees):
+    head2deps = constituency_trees.head2deps
+    get_constituent = constituency_trees.get_constituent
+    dependents = head2deps.get(head_term)
+    speaker = None
+    addressee = None
+    topic = None
+    # FIXME: we want to check the preposition
+    # FIXME: no dependents case does occur; check with bigger corpus
+    if dependents is not None:
+        for dep in dependents:
+            if dep[1] == &#39;hd/su&#39;:
+                speaker = get_constituent(dep[0])
+            elif dep[1] == &#39;hd/obj2&#39;:
+                term = nafobj.get_term(dep[0])
+                if term.get_pos() == &#39;prep&#39;:
+                    if dep[0] in head2deps:
+                        for deprel in head2deps.get(dep[0]):
+                            if deprel[1] == &#39;hd/obj1&#39;:
+                                addressee = get_constituent(deprel[0])
+                else:
+                    addressee = get_constituent(dep[0])
+            elif dep[1] in [&#39;hd/mod&#39;]:
+                term = nafobj.get_term(dep[0])
+                if term.get_pos() == &#39;prep&#39;:
+
+                    if dep[0] in head2deps:
+                        # override addressee by complement if headed by
+                        # preposition
+                        for deprel in head2deps.get(dep[0]):
+                            if deprel[1] == &#39;hd/obj1&#39;:
+                                if term.get_lemma() == &#39;tegen&#39;:
+                                    addressee = get_constituent(deprel[0])
+                                elif term.get_lemma() == &#39;over&#39;:
+                                    topic = get_constituent(deprel[0])
+
+    return speaker, addressee, topic</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.check_if_quotation_contains_dependent"><code class="name flex">
+<span>def <span class="ident">check_if_quotation_contains_dependent</span></span>(<span>quotation, constituency_trees)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L167-L220" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def check_if_quotation_contains_dependent(quotation, constituency_trees):
+    # FIXME: verify on larger set of development corpus whether this behaviour
+    # is correct
+    bad_relations = [
+        &#39;cmp/body&#39;,
+        &#39;hd/predc&#39;,
+        &#39;hd/obj1&#39;,
+        &#39;hd/vc&#39;,
+        &#39;hd/su&#39;,
+        &#39;hd/pc&#39;
+    ]
+    # expected_rels = [
+    #     &#39;hd/app&#39;,
+    #     &#39;tag/nucl&#39;,
+    #     &#39;--/--&#39;,
+    #     &#39;dp/dp&#39;,
+    #     &#39;-- / --&#39;,
+    #     &#39;nucl/sat&#39;
+    # ]
+    for tid in quotation.span:
+        heads = constituency_trees.dep2heads.get(tid)
+        if heads is not None:
+            headids = constituency_trees.get_direct_parents(tid)
+            span_with_quotes = quotation.span + [
+                quotation.beginquote, quotation.endquote]
+            if len(headids.difference(set(span_with_quotes))) &gt; 0:
+                for headid in headids.difference(set(span_with_quotes)):
+                    for headrel in heads:
+                        if headrel[0] == headid:
+                            if headrel[1] in bad_relations:
+                                return False
+                            elif headrel[1] in [&#39;crd/cnj&#39;]:
+                                motherheadrels = constituency_trees.dep2heads \
+                                    .get(headrel[0])
+                                if motherheadrels is not None:
+                                    for mhid in motherheadrels:
+                                        if mhid[1] in bad_relations:
+                                            return False
+                                        # elif not mhid[1] in expected_rels:
+                                        #     print(
+                                        #         tid,
+                                        #         headids.difference(
+                                        #             set(span_with_quotes)),
+                                        #         &#39;has outside head&#39;)
+                                        #     print(motherheadrels)
+                            # FIXME: debugs need to be checked out on bigger
+                            # corpus; set up development mode
+                            # elif not headrel[1] in expected_rels:
+                            #     print(
+                            #         tid,
+                            #         headids.difference(set(span_with_quotes)),
+                            #         &#39;has outside head&#39;)
+                            #     print(heads, quotation.span)
+    return True</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.create_coref_quotation_from_quotation_naf"><code class="name flex">
+<span>def <span class="ident">create_coref_quotation_from_quotation_naf</span></span>(<span>nafobj, nafquotation, entities, quote_id)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Function that turns naf quotation object into quotation object to be passed
+on to multisieve
+:param nafobj: input naf
+:param nafquotation: quotation object with naf specific information
+:param quote_id: identifier for quotation
+:return:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L569-L605" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def create_coref_quotation_from_quotation_naf(
+        nafobj, nafquotation, entities, quote_id):
+    &#39;&#39;&#39;
+    Function that turns naf quotation object into quotation object to be passed
+    on to multisieve
+    :param nafobj: input naf
+    :param nafquotation: quotation object with naf specific information
+    :param quote_id: identifier for quotation
+    :return:
+    &#39;&#39;&#39;
+
+    myQuote = Cquotation(quote_id)
+
+    quotespan = convert_term_ids_to_offsets(nafobj, nafquotation.span)
+    myQuote.span = quotespan
+
+    quotestring = get_string_of_span(nafobj, nafquotation.span)
+    myQuote.string = quotestring
+
+    beginoffset, endoffset = get_offsets_from_span(nafobj, nafquotation.span)
+    myQuote.begin_offset = beginoffset
+    myQuote.end_offset = endoffset
+
+    if len(nafquotation.source) &gt; 0:
+        source_entity = find_entity_with_span(
+            nafquotation.source, entities)
+        myQuote.source = source_entity
+    if len(nafquotation.addressee) &gt; 0:
+        addressee_entity = find_entity_with_span(
+            nafquotation.addressee, entities)
+        myQuote.addressee = addressee_entity
+    if len(nafquotation.topic) &gt; 0:
+        topic_entity = find_entity_with_span(
+            nafquotation.topic, entities)
+        myQuote.topic = topic_entity
+
+    return myQuote</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.create_ordered_number_span"><code class="name flex">
+<span>def <span class="ident">create_ordered_number_span</span></span>(<span>term_list)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L388-L399" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def create_ordered_number_span(term_list):
+
+    number_list = []
+    for tid in term_list:
+        if &#39;t_&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t_&#39;))
+            number_list.append(tnumber)
+        elif &#39;t&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t&#39;))
+            number_list.append(tnumber)
+
+    return sorted(number_list)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.extract_full_names_or_prons"><code class="name flex">
+<span>def <span class="ident">extract_full_names_or_prons</span></span>(<span>nafobj, constituents)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L315-L328" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def extract_full_names_or_prons(nafobj, constituents):
+
+    names = []
+    for const in constituents:
+        name = []
+        for tid in const:
+            term = nafobj.get_term(tid)
+            if term.get_pos() == &#39;name&#39;:
+                name.append(tid)
+        if len(name) == 0 and len(const) != 0:
+            names.append(const)
+        else:
+            names.append(name)
+    return names</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.find_entity_with_span"><code class="name flex">
+<span>def <span class="ident">find_entity_with_span</span></span>(<span>span, entities)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Find out whether <code>span</code> corresponds to an entity and, if so, which one.</p>
+<p>First try to find the first entity that has a span that matches exactly,
+otherwise find the first entity who's span is a super- or subset of <code>span</code></p>
+<p>:param span:
+span ids to match against
+:param entities:
+entities to consider
+:return:
+the matching entity, if found</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L547-L566" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def find_entity_with_span(span, entities):
+    &#39;&#39;&#39;
+    Find out whether `span` corresponds to an entity and, if so, which one.
+
+    First try to find the first entity that has a span that matches exactly,
+    otherwise find the first entity who&#39;s span is a super- or subset of `span`
+
+    :param span:        span ids to match against
+    :param entities:    entities to consider
+    :return:            the matching entity, if found
+    &#39;&#39;&#39;
+    span = set(span)
+    for entity in entities:
+        if entity.flat_mention_attr(&#39;span&#39;) == span:
+            return entity
+
+    for entity in entities:
+        entity_span = entity.flat_mention_attr(&#39;span&#39;)
+        if span &lt; entity_span or span &gt; entity_span:
+            return entity</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.find_name_or_pronoun"><code class="name flex">
+<span>def <span class="ident">find_name_or_pronoun</span></span>(<span>nafobj, constituency_trees, preceding_terms, quotation)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L356-L385" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def find_name_or_pronoun(nafobj, constituency_trees, preceding_terms,
+                         quotation):
+
+    # FIXME: not over paragraph borders; if nothing found, sentence after can
+    #        also work
+    candidate_names = []
+    for tid in preceding_terms:
+        term = nafobj.get_term(tid)
+        if term.get_pos() == &#39;name&#39; or term.get_pos() == &#39;pron&#39;:
+            if not identify_addressee_or_topic_relations(
+               nafobj, constituency_trees, tid, quotation):
+                candidate_names.append(term.get_id())
+
+    # change make dictionary with head term to constituent
+    if len(candidate_names) &gt; 0:
+        remaining_candidates = get_candidates_not_part_of_addressee_topic(
+            constituency_trees, candidate_names, quotation)
+        if len(remaining_candidates) &gt; 0:
+            candidates = extract_full_names_or_prons(
+                nafobj, remaining_candidates)
+            if len(candidates) == 1:
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidates[0])
+                quotation.source = candidate_in_offsets
+            else:
+                candidate = identify_primary_candidate(
+                    constituency_trees, candidates)
+                candidate_in_offsets = convert_term_ids_to_offsets(
+                    nafobj, candidate)
+                quotation.source = candidate_in_offsets</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.find_relevant_spans"><code class="name flex">
+<span>def <span class="ident">find_relevant_spans</span></span>(<span>deps, outside_ids)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L81-L87" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def find_relevant_spans(deps, outside_ids):
+
+    for dep in deps:
+        if dep[0] in outside_ids and dep[1] in [&#39;nucl/tag&#39;, &#39;dp/dp&#39;]:
+            return dep[0]
+
+    return None</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_candidates_not_part_of_addressee_topic"><code class="name flex">
+<span>def <span class="ident">get_candidates_not_part_of_addressee_topic</span></span>(<span>constituency_trees, candidate_names, quotation)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L302-L312" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_candidates_not_part_of_addressee_topic(
+        constituency_trees, candidate_names, quotation):
+
+    remaining_candidates = []
+    covered_tids = quotation.addressee + quotation.topic
+    for tid in candidate_names:
+        if tid not in covered_tids:
+            myconstituent = constituency_trees.get_constituent(tid)
+            remaining_candidates.append(myconstituent)
+            covered_tids += myconstituent
+    return remaining_candidates</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_closest"><code class="name flex">
+<span>def <span class="ident">get_closest</span></span>(<span>candidates)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L331-L340" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_closest(candidates):
+
+    closest = []
+    selected_cand = []
+    for cand in candidates:
+        candnums = create_ordered_number_span(cand)
+        if len(closest) == 0 or candnums[-1] &gt; closest[-1]:
+            closest = candnums
+            selected_cand = cand
+    return selected_cand</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_following_terms_in_sentence"><code class="name flex">
+<span>def <span class="ident">get_following_terms_in_sentence</span></span>(<span>last_sentence, quotation_span)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L419-L433" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_following_terms_in_sentence(last_sentence, quotation_span):
+
+    # FIXME; move to offset based ids earlier; then this hack is not necessary
+    quotation_numbers = create_ordered_number_span(quotation_span)
+    following_terms = []
+    for tid in last_sentence:
+        if &#39;t_&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t_&#39;))
+            if tnumber &gt; quotation_numbers[0]:
+                following_terms.append(tid)
+        elif &#39;t&#39; in tid:
+            tnumber = int(tid.lstrip(&#39;t&#39;))
+            if tnumber &gt; quotation_numbers[0]:
+                following_terms.append(tid)
+    return following_terms</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_pos_of_term"><code class="name flex">
+<span>def <span class="ident">get_pos_of_term</span></span>(<span>nafobj, tid)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L14-L17" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_pos_of_term(nafobj, tid):
+
+    term = nafobj.get_term(tid)
+    return term.get_pos()</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_preceding_terms_in_sentence"><code class="name flex">
+<span>def <span class="ident">get_preceding_terms_in_sentence</span></span>(<span>first_sentence, quotation_span)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L402-L416" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_preceding_terms_in_sentence(first_sentence, quotation_span):
+    # FIXME; move to offset based ids earlier; then this hack is not necessary
+    quotation_numbers = create_ordered_number_span(quotation_span)
+    preceeding_terms = []
+    if len(quotation_numbers) &gt; 0:
+        for tid in first_sentence:
+            if &#39;t_&#39; in tid:
+                tnumber = int(tid.lstrip(&#39;t_&#39;))
+                if tnumber &lt; quotation_numbers[0]:
+                    preceeding_terms.append(tid)
+            elif &#39;t&#39; in tid:
+                tnumber = int(tid.lstrip(&#39;t&#39;))
+                if tnumber &lt; quotation_numbers[0]:
+                    preceeding_terms.append(tid)
+    return preceeding_terms</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_previous_and_next_sentence"><code class="name flex">
+<span>def <span class="ident">get_previous_and_next_sentence</span></span>(<span>sentences)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L237-L247" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_previous_and_next_sentence(sentences):
+
+    ordered_sentences = sorted(sentences)
+    if len(ordered_sentences) &gt; 0:
+        previous_sentence = ordered_sentences[0] - 1
+        following_sentence = ordered_sentences[-1] + 1
+    else:
+        previous_sentence = 0
+        following_sentence = 0
+
+    return previous_sentence, following_sentence</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_quotation_spans"><code class="name flex">
+<span>def <span class="ident">get_quotation_spans</span></span>(<span>nafobj)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Function that goes through nafobj and identifies spans of quotations
+:param nafobj: input naf
+:return: list of quotation objects with span defined</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L36-L78" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_quotation_spans(nafobj):
+    &#39;&#39;&#39;
+    Function that goes through nafobj and identifies spans of quotations
+    :param nafobj: input naf
+    :return: list of quotation objects with span defined
+    &#39;&#39;&#39;
+
+    # FIXME investigate on development corpus what to do with embedded
+    # quotations; for now we&#39;ll assume a double quotation within a single
+    # quote is an error
+
+    in_double_quotation = False
+    in_single_quotation = False
+    quotations = []
+    for term in nafobj.get_terms():
+        if term.get_lemma() in [&#39;&#34;&#39;, &#39;&amp;amp;amp;amp;quot;&#39;]:
+            if not in_double_quotation:
+                in_double_quotation = True
+                myQuote = CquotationNaf()
+                myQuote.beginquote = term.get_id()
+            else:
+                in_double_quotation = False
+                myQuote.endquote = term.get_id()
+                quotations.append(myQuote)
+            # break off single quotation if double quotation found during this
+            if in_single_quotation:
+                in_single_quotation = False
+        elif in_double_quotation:
+            myQuote.add_span_id(term.get_id())
+
+        if term.get_lemma() == &#34;&#39;&#34;:
+            if not in_single_quotation:
+                in_single_quotation = True
+                myQuoteSingle = CquotationNaf()
+                myQuoteSingle.beginquote = term.get_id()
+            else:
+                in_single_quotation = False
+                myQuoteSingle.endquote = term.get_id()
+                quotations.append(myQuoteSingle)
+        elif in_single_quotation:
+            myQuoteSingle.add_span_id(term.get_id())
+
+    return quotations</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_reduced_list_of_quotations"><code class="name flex">
+<span>def <span class="ident">get_reduced_list_of_quotations</span></span>(<span>toremove, found_quotations)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L495-L505" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_reduced_list_of_quotations(toremove, found_quotations):
+
+    reduced_quotations = []
+    for quote in found_quotations:
+        wrong = False
+        for wrong_quote in toremove:
+            if set(quote.span) == set(wrong_quote.span):
+                wrong = True
+        if not wrong:
+            reduced_quotations.append(quote)
+    return reduced_quotations</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_sentence_to_terms"><code class="name flex">
+<span>def <span class="ident">get_sentence_to_terms</span></span>(<span>nafobj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L478-L492" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_sentence_to_terms(nafobj):
+
+    token2terms = {}
+    for term in nafobj.get_terms():
+        tokens = term.get_span().get_span_ids()
+        for tok in tokens:
+            token2terms[tok] = term.get_id()
+
+    sentence2terms = defaultdict(list)
+    for token in nafobj.get_tokens():
+        sent_nr = token.get_sent()
+        term_id = token2terms.get(token.get_id())
+        sentence2terms[sent_nr].append(term_id)
+
+    return sentence2terms</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_sentences_of_quotation"><code class="name flex">
+<span>def <span class="ident">get_sentences_of_quotation</span></span>(<span>nafobj, quotation)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L223-L234" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_sentences_of_quotation(nafobj, quotation):
+
+    sentences = set()
+
+    for tid in quotation.span:
+        term = nafobj.get_term(tid)
+        wid = term.get_span().get_span_ids()[0]
+        token = nafobj.get_token(wid)
+        sentence_nr = token.get_sent()
+        # storing them as integers; they need to be sorted later
+        sentences.add(int(sentence_nr))
+    return sentences</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.get_string_of_span"><code class="name flex">
+<span>def <span class="ident">get_string_of_span</span></span>(<span>nafobj, span)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L20-L33" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def get_string_of_span(nafobj, span):
+
+    mstring = &#39;&#39;
+    latest_offset = -1
+    for tid in span:
+        my_term = nafobj.get_term(tid)
+        for wid in my_term.get_span().get_span_ids():
+            my_tok = nafobj.get_token(wid)
+            # add space between tokens
+            if len(mstring) &gt; 0 and int(my_tok.get_offset()) &gt; latest_offset:
+                mstring += &#39; &#39;
+            mstring += my_tok.get_text()
+            latest_offset = int(my_tok.get_offset()) + int(my_tok.get_length())
+    return mstring</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.identify_addressee_or_topic_relations"><code class="name flex">
+<span>def <span class="ident">identify_addressee_or_topic_relations</span></span>(<span>nafobj, constituency_trees, tid, quotation)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L279-L299" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_addressee_or_topic_relations(nafobj, constituency_trees, tid,
+                                          quotation):
+
+    # FIXME: language specific function
+    heads = constituency_trees.dep2heads.get(tid)
+    if heads is not None:
+        for headrel in heads:
+            headterm = nafobj.get_term(headrel[0])
+            if headterm.get_lemma() == &#39;tegen&#39; or headrel[1] == &#39;hd/obj2&#39;:
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
+                addressee = convert_term_ids_to_offsets(nafobj, myconstituent)
+                quotation.addressee = addressee
+                return True
+            elif headterm.get_lemma() == &#39;over&#39;:
+                myconstituent = constituency_trees.get_constituent(
+                    headterm.get_id())
+                topic = convert_term_ids_to_offsets(nafobj, myconstituent)
+                quotation.topic = topic
+                return True
+    return False</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.identify_direct_links_to_sip"><code class="name flex">
+<span>def <span class="ident">identify_direct_links_to_sip</span></span>(<span>nafobj, quotation, constituency_trees)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Function that identifies
+:param head2deps: dictionary linking head to dependents
+:param quotation: the quotation itself
+:return: boolean indicating whether source was found</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L129-L164" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_direct_links_to_sip(nafobj, quotation, constituency_trees):
+    &#39;&#39;&#39;
+    Function that identifies
+    :param head2deps: dictionary linking head to dependents
+    :param quotation: the quotation itself
+    :return: boolean indicating whether source was found
+    &#39;&#39;&#39;
+
+    for tid in quotation.span:
+        deps = constituency_trees.head2deps.get(tid)
+        if deps is not None:
+            # The first element of every tuple
+            depids = set(next(iter(zip(*deps))))
+            # if one of deps falls outside of quote, it can be linked to the
+            # sip
+            span_with_quotes = quotation.span + [
+                quotation.beginquote, quotation.endquote
+            ]
+            my_joint_set = depids.difference(span_with_quotes)
+            if len(my_joint_set) &gt; 0:
+                head_term = find_relevant_spans(deps, my_joint_set)
+                if head_term is not None:
+                    speaker, addressee, topic = analyze_head_relations(
+                        nafobj, head_term, constituency_trees)
+                    if speaker is not None:
+                        speaker_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, speaker)
+                        quotation.source = speaker_in_offsets
+                    if addressee is not None:
+                        addressee_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, addressee)
+                        quotation.addressee = addressee_in_offsets
+                    if topic is not None:
+                        topic_in_offsets = convert_term_ids_to_offsets(
+                            nafobj, topic)
+                        quotation.topic = topic_in_offsets</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.identify_direct_quotations"><code class="name flex">
+<span>def <span class="ident">identify_direct_quotations</span></span>(<span>nafobj, entities, constituency_trees)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Identify direct quotations in naf and link them to their corresponding
+entities.</p>
+<p>:param nafobj:
+input naf object
+:param entities:
+Entities to look for
+:return:
+a list of quotations</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L508-L544" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_direct_quotations(nafobj, entities, constituency_trees):
+    &#39;&#39;&#39;
+    Identify direct quotations in naf and link them to their corresponding
+    entities.
+
+    :param nafobj:      input naf object
+    :param entities:    Entities to look for
+    :return:            a list of quotations
+    &#39;&#39;&#39;
+
+    nafquotations = get_quotation_spans(nafobj)
+    toremove = []
+    for quotation in nafquotations:
+        identify_direct_links_to_sip(nafobj, quotation, constituency_trees)
+        if len(quotation.source) == 0:
+            # this can lead to indication of quotation being attribution rather
+            # than quotation
+            quotation_contains_dependent = \
+                check_if_quotation_contains_dependent(
+                    quotation,
+                    constituency_trees)
+            if quotation_contains_dependent:
+                sentence_to_terms = get_sentence_to_terms(nafobj)
+                identify_source_introducing_constructions(
+                    nafobj, constituency_trees, quotation, sentence_to_terms)
+            else:
+                toremove.append(quotation)
+
+    finalnafquotations = get_reduced_list_of_quotations(
+        toremove, nafquotations)
+    quotations = []
+    for qid, nafquotation in enumerate(finalnafquotations):
+        myquote = create_coref_quotation_from_quotation_naf(
+            nafobj, nafquotation, entities, qid)
+        quotations.append(myquote)
+
+    return quotations</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.identify_primary_candidate"><code class="name flex">
+<span>def <span class="ident">identify_primary_candidate</span></span>(<span>constituency_trees, candidates)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L343-L353" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_primary_candidate(constituency_trees, candidates):
+
+    for cand in candidates:
+        for tid in cand:
+            if tid in constituency_trees.dep2heads:
+                for headrel in constituency_trees.dep2heads:
+                    if headrel[1] == &#39;hd/su&#39;:
+                        return cand
+
+    # if no highest ranking found, return closest candidate
+    return get_closest(candidates)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.identify_source_introducing_constructions"><code class="name flex">
+<span>def <span class="ident">identify_source_introducing_constructions</span></span>(<span>nafobj, constituency_trees, quotation, sentence_to_term)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Function that identifies structures that introduce sources of direct quotes
+:param nafobj: the input nafobj
+:param quotation: the quotation
+:return: None</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L436-L474" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def identify_source_introducing_constructions(
+        nafobj, constituency_trees, quotation, sentence_to_term):
+    &#39;&#39;&#39;
+    Function that identifies structures that introduce sources of direct quotes
+    :param nafobj: the input nafobj
+    :param quotation: the quotation
+    :return: None
+    &#39;&#39;&#39;
+
+    sentences = get_sentences_of_quotation(nafobj, quotation)
+    prev_sent, follow_sent = get_previous_and_next_sentence(sentences)
+    # FIXME: find out using development data whether preceding and following
+    #        sentence should be taken into account or not
+    # preceding_terms = sentence_to_term.get(str(prev_sent)) + \
+    #     sentence_to_term.get(str(prev_sent + 1))
+
+    # start with &#39;aldus&#39; construction; this is more robust
+    following_sentence = sentence_to_term.get(str(follow_sent - 1))
+    source_head = None
+    if following_sentence is not None:
+        following_terms = get_following_terms_in_sentence(
+            following_sentence, quotation.span)
+        source_head = retrieve_quotation_following_sip(
+            nafobj, constituency_trees, following_terms)
+
+    if source_head is None:
+        preceding_terms = get_preceding_terms_in_sentence(
+            sentence_to_term.get(str(prev_sent + 1)), quotation.span)
+        source_head = retrieve_sentence_preceding_sip(
+            nafobj, constituency_trees, preceding_terms)
+
+    if source_head is not None:
+        source_constituent = constituency_trees.get_constituent(source_head)
+        source_in_offsets = convert_term_ids_to_offsets(
+            nafobj, source_constituent)
+        quotation.source = source_in_offsets
+    else:
+        find_name_or_pronoun(
+            nafobj, constituency_trees, preceding_terms, quotation)</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.retrieve_quotation_following_sip"><code class="name flex">
+<span>def <span class="ident">retrieve_quotation_following_sip</span></span>(<span>nafobj, constituency_trees, terms)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L264-L276" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def retrieve_quotation_following_sip(nafobj, constituency_trees, terms):
+
+    source_head = None
+    for tid in terms:
+        myterm = nafobj.get_term(tid)
+        if myterm.get_lemma() == &#39;aldus&#39;:
+            deps = constituency_trees.head2deps.get(tid)
+            if deps is not None:
+                for dep in deps:
+                    if dep[1] == &#39;hd/obj1&#39;:
+                        source_head = dep[0]
+
+    return source_head</code></pre>
+</details>
+</dd>
+<dt id="multisieve_coreference.naf_info.retrieve_sentence_preceding_sip"><code class="name flex">
+<span>def <span class="ident">retrieve_sentence_preceding_sip</span></span>(<span>nafobj, constituency_trees, terms)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/MPvHarmelen/coref_draft/blob/fcb5535444fd8ef6a0f9f27c2bcd7e1078a65ace/multisieve_coreference/naf_info.py#L250-L261" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def retrieve_sentence_preceding_sip(nafobj, constituency_trees, terms):
+    source_head = None
+    for tid in terms:
+        myterm = nafobj.get_term(tid)
+        if myterm.get_lemma() == &#39;volgens&#39;:
+            deps = constituency_trees.head2deps.get(tid)
+            if deps is not None:
+                for dep in deps:
+                    if dep[1] == &#39;hd/obj1&#39;:
+                        source_head = dep[0]
+
+    return source_head</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="multisieve_coreference" href="index.html">multisieve_coreference</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multisieve_coreference.naf_info.analyze_head_relations" href="#multisieve_coreference.naf_info.analyze_head_relations">analyze_head_relations</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.check_if_quotation_contains_dependent" href="#multisieve_coreference.naf_info.check_if_quotation_contains_dependent">check_if_quotation_contains_dependent</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.create_coref_quotation_from_quotation_naf" href="#multisieve_coreference.naf_info.create_coref_quotation_from_quotation_naf">create_coref_quotation_from_quotation_naf</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.create_ordered_number_span" href="#multisieve_coreference.naf_info.create_ordered_number_span">create_ordered_number_span</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.extract_full_names_or_prons" href="#multisieve_coreference.naf_info.extract_full_names_or_prons">extract_full_names_or_prons</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.find_entity_with_span" href="#multisieve_coreference.naf_info.find_entity_with_span">find_entity_with_span</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.find_name_or_pronoun" href="#multisieve_coreference.naf_info.find_name_or_pronoun">find_name_or_pronoun</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.find_relevant_spans" href="#multisieve_coreference.naf_info.find_relevant_spans">find_relevant_spans</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_candidates_not_part_of_addressee_topic" href="#multisieve_coreference.naf_info.get_candidates_not_part_of_addressee_topic">get_candidates_not_part_of_addressee_topic</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_closest" href="#multisieve_coreference.naf_info.get_closest">get_closest</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_following_terms_in_sentence" href="#multisieve_coreference.naf_info.get_following_terms_in_sentence">get_following_terms_in_sentence</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_pos_of_term" href="#multisieve_coreference.naf_info.get_pos_of_term">get_pos_of_term</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_preceding_terms_in_sentence" href="#multisieve_coreference.naf_info.get_preceding_terms_in_sentence">get_preceding_terms_in_sentence</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_previous_and_next_sentence" href="#multisieve_coreference.naf_info.get_previous_and_next_sentence">get_previous_and_next_sentence</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_quotation_spans" href="#multisieve_coreference.naf_info.get_quotation_spans">get_quotation_spans</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_reduced_list_of_quotations" href="#multisieve_coreference.naf_info.get_reduced_list_of_quotations">get_reduced_list_of_quotations</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_sentence_to_terms" href="#multisieve_coreference.naf_info.get_sentence_to_terms">get_sentence_to_terms</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_sentences_of_quotation" href="#multisieve_coreference.naf_info.get_sentences_of_quotation">get_sentences_of_quotation</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.get_string_of_span" href="#multisieve_coreference.naf_info.get_string_of_span">get_string_of_span</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.identify_addressee_or_topic_relations" href="#multisieve_coreference.naf_info.identify_addressee_or_topic_relations">identify_addressee_or_topic_relations</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.identify_direct_links_to_sip" href="#multisieve_coreference.naf_info.identify_direct_links_to_sip">identify_direct_links_to_sip</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.identify_direct_quotations" href="#multisieve_coreference.naf_info.identify_direct_quotations">identify_direct_quotations</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.identify_primary_candidate" href="#multisieve_coreference.naf_info.identify_primary_candidate">identify_primary_candidate</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.identify_source_introducing_constructions" href="#multisieve_coreference.naf_info.identify_source_introducing_constructions">identify_source_introducing_constructions</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.retrieve_quotation_following_sip" href="#multisieve_coreference.naf_info.retrieve_quotation_following_sip">retrieve_quotation_following_sip</a></code></li>
+<li><code><a title="multisieve_coreference.naf_info.retrieve_sentence_preceding_sip" href="#multisieve_coreference.naf_info.retrieve_sentence_preceding_sip">retrieve_sentence_preceding_sip</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5.dev4+g1709915.d20200207</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
