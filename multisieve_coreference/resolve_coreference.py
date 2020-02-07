@@ -1,3 +1,6 @@
+"""
+Definition of sieves and `resolve_coreference`, containing the main algorithm.
+"""
 import logging
 import logging.config
 import itertools as it
@@ -84,23 +87,23 @@ def speaker_identification(entity, candidates, mark_disjoint, quotations):
     The algorithm for this function is quoted below from Lee et al. (2013),
     with check marks indicating whether the rules are actually implemented:
 
-        - [X] <I>s assigned to the same speaker are coreferent.
-        - [ ] <you>s with the same speaker are coreferent.
-        - [X] The speaker and <I>s in her text are coreferent.
-        (...)
-        - [ ] The speaker and a mention which is not <I> in the speaker's
-              utterance cannot be coreferent.
-        - [ ] Two <I>s (or two <you>s, or two <we>s) assigned to different
-              speakers cannot be coreferent.
-        - [ ] Two different person pronouns by the same speaker cannot be
-              coreferent.
-        - [ ] Nominal mentions cannot be coreferent with <I>, <you>, or <we> in
-              the same turn or quotation.
-        - [ ] In conversations, <you> can corefer only with the previous
-              speaker.
-        (...)
-        We define <I> as _I_, _my_, _me_, or _mine_, <we> as first person
-        plural pronouns, and <you> as second person pronouns.
+    > - [X] <I>s assigned to the same speaker are coreferent.
+    > - [ ] <you>s with the same speaker are coreferent.
+    > - [X] The speaker and <I>s in her text are coreferent.
+    > (...)
+    > - [ ] The speaker and a mention which is not <I> in the speaker's
+    >       utterance cannot be coreferent.
+    > - [ ] Two <I>s (or two <you>s, or two <we>s) assigned to different
+    >       speakers cannot be coreferent.
+    > - [ ] Two different person pronouns by the same speaker cannot be
+    >       coreferent.
+    > - [ ] Nominal mentions cannot be coreferent with <I>, <you>, or <we> in
+    >       the same turn or quotation.
+    > - [ ] In conversations, <you> can corefer only with the previous
+    >       speaker.
+    > (...)
+    > We define <I> as _I_, _my_, _me_, or _mine_, <we> as first person
+    > plural pronouns, and <you> as second person pronouns.
 
     The quote entities are kept, while the ones corresponding to pronouns in
     the are discarded when merged.
@@ -442,6 +445,7 @@ def apply_relaxed_head_match(entity, candidates, mark_disjoint, offset2string):
     Quoted from Lee et al. (2013)
 
     Things marked by an X are implemented:
+
      - [X] mention head must match any word in the antecedent entity
      - [ ] ~~both mention and antecedent be labelled as named entities~~
            this filter is not implemented within the sieve, but at a slightly

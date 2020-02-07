@@ -2,10 +2,14 @@
 Single Mention or single Entity filters.
 
 All filters are defined on the Mention level, and lifted to the Entity level
-by having `some_filter(entity) := any(some_filter(m) for m in entity)`.
+by having:
+
+    some_filter(entity) := any(some_filter(m) for m in entity)
 """
 from functools import singledispatch
 from .entity import Entity
+
+__pdoc__ = {}
 
 # FIXME: tool specific output
 NOMINAL_POSES = {'name', 'noun'}
@@ -19,7 +23,13 @@ CORRECT_TYPES = {
 
 @singledispatch
 def is_nominal(mention):
+    """True if the mention is nominal."""
     return mention.head_pos in NOMINAL_POSES
+
+
+# Fix some weird pdoc3 quirk
+__pdoc__['is_nominal'] = is_nominal.__doc__
+__pdoc__['func'] = False
 
 
 @singledispatch

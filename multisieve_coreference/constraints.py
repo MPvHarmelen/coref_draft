@@ -102,11 +102,12 @@ def check_not_i_within_i(antecedent_mention, mention):
 
 
     The following expression is equivalent to the one below
-    not_i_within_i = not (
-        (boffset2 <= boffset1 and eoffset1 <= eoffset2)
-        or
-        (boffset1 <= boffset2 and eoffset2 <= eoffset1)
-    )
+
+        not_i_within_i = not (
+            (boffset2 <= boffset1 and eoffset1 <= eoffset2)
+            or
+            (boffset1 <= boffset2 and eoffset2 <= eoffset1)
+        )
 
     This constraint is symmetric.
 

@@ -7,6 +7,8 @@ logger = logging.getLogger(None if __name__ == '__main__' else __name__)
 class SieveRunner:
     """
     Hopefully temporary wrapper class to run a sieve.
+
+    I hope this will be replaced by a proper `Sieve` class some time...
     """
     def __init__(self, entities):
         self.entities = entities
