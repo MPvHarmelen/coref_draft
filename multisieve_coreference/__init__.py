@@ -1,1 +1,1 @@
-from .resolve_coreference import process_coreference
+from .main import parse_args, main, process_coreference

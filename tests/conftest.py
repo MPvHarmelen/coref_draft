@@ -37,8 +37,6 @@ def set_memory_limit(limit=2 * 1024**3):
 
 set_memory_limit()
 
-pytest.register_assert_rewrite('run_and_compare')
-
 
 @pytest.fixture
 def resources_dir():
@@ -50,21 +48,10 @@ def log_config_file(resources_dir):
     return resources_dir / 'log-config-basic.yml'
 
 
-@pytest.fixture
-def temp_file():
-    import tempfile
-    return tempfile.mktemp()
-
-
 # Example file
 @pytest.fixture
 def example_naf_file(resources_dir):
     return resources_dir / 'example-in.naf'
-
-
-@pytest.fixture
-def example_naf_output(resources_dir):
-    return resources_dir / 'example-out.naf'
 
 
 @pytest.fixture
