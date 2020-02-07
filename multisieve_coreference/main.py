@@ -78,26 +78,44 @@ def parse_args(argv=None):
     from argparse import ArgumentParser, FileType
 
     parser = ArgumentParser()
-    parser.add_argument('-l', '--level', help="Logging level", type=str.upper,
-                        default='WARNING')
+    parser.add_argument('-l', '--log-level', help="Logging level",
+                        type=str.upper, default='WARNING')
     parser.add_argument(
         '--log-config',
         help="YAML-file to read logging configuration from."
-        " Overrides the `level`, if passed.",
+        " Overrides the `log-level`, if passed.",
         type=FileType('r')
     )
-    parser.add_argument(
-        '-s',
-        '--include-singletons',
-        help="Whether to include singletons in the output",
-        action='store_true',
-    )
-    parser.add_argument(
-        '-f',
-        '--fill-gaps',
-        help="Whether to fill gaps in mention spans",
-        action='store_true',
-    )
+    if c.INCLUDE_SINGLETONS_IN_OUTPUT:
+        parser.add_argument(
+            '-s',
+            '--remove-singletons',
+            help="Remove singleton mentions from the output",
+            action='store_false',
+            dest='include_singletons',
+        )
+    else:
+        parser.add_argument(
+            '-s',
+            '--include-singletons',
+            help="Include singleton mentions in the output",
+            action='store_true',
+        )
+    if c.FILL_GAPS_IN_OUTPUT:
+        parser.add_argument(
+            '-g',
+            '--keep-gaps',
+            help="Keep gaps in mention spans, i.e. don't fill them.",
+            action='store_false',
+            dest='fill_gaps'
+        )
+    else:
+        parser.add_argument(
+            '-f',
+            '--fill-gaps',
+            help="Whether to fill gaps in mention spans",
+            action='store_true',
+        )
     parser.add_argument(
         '--language',
         help="RFC5646 language tag of language data to use. Currently only"
@@ -108,7 +126,7 @@ def parse_args(argv=None):
     cmdl_args = vars(parser.parse_args(argv))
 
     # Logging configuration
-    basic_level = cmdl_args.pop('level')
+    basic_level = cmdl_args.pop('log_level')
     config_file = cmdl_args.pop('log_config', None)
 
     if config_file is not None:
